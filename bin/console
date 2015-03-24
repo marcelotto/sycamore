@@ -5,3 +5,5 @@ require 'sycamore'
 
 require 'pry'
 Pry.start
+
+include Sycamore # TODO: require 'sycamore/extension'
