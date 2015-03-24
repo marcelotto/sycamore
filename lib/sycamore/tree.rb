@@ -1,8 +1,9 @@
-# A data structure for a mapping of nodes to other {Tree}s,
-#   containing nodes with more {Tree}s ...
-#
-#
 module Sycamore
+
+  # A data structure for a mapping of nodes to other {Tree}s,
+  #   containing nodes with more {Tree}s ...
+  #
+  #
   class Tree
 
     ########################################################################
