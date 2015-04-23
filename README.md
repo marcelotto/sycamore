@@ -2,6 +2,12 @@
 
 Sycamore is an implementation of an unordered [Tree data structure](http://en.wikipedia.org/wiki/Tree_(data_structure)) of immutable values solely based on Ruby Hashes.
 
+A Sycamore tree consists of a set of nodes and a mapping to child trees, i.e. other trees, containing nodes with more Sycamore trees ... 
+
+And from a data point of view, that's all: A Sycamore tree is nothing more than a wrapper around a Ruby Hash map with a special restriction on its value set: the values of the Hash are Sycamore trees. For this specific semantics, Sycamore provides an API. As the keys of a Ruby Hash should be immutable values, there is also the restriction, that the nodes should be immutable values. 
+
+
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -20,6 +26,11 @@ Or install it yourself as:
 
 
 ## Usage
+
+I recommend to try the following code for yourself and play around more with a Ruby REPL, e.g. like [Pry](http://pryrepl.org).
+
+    $ pry -r sycamore
+
 
 
 ## Development
