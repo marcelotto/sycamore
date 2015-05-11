@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+# File: script/console
+pry = 'pry'
+repl = pry
+
+# libs = " -r #{File.expand_path(File.dirname(__FILE__)) + '/../lib/sycamore.rb'}"
+libs = " -r #{File.expand_path(File.dirname(__FILE__)) + '/../lib/sycamore/extension'}"
+
+puts "Loading Sycamore gem..."
+#exec "#{irb} #{libs} --simple-prompt"
+exec "bundle exec #{repl} #{libs}"
+
+#init_console = " -r #{File.expand_path(File.dirname(__FILE__)) + '/init_console.rb'}"
+#exec "pry #{libs} #{init_console}"
