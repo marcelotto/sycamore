@@ -1,5 +1,6 @@
 require 'sycamore/version'
 
+require 'sycamore/cqs'
 require 'sycamore/tree'
 
 ##
