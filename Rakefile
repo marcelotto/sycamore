@@ -10,9 +10,9 @@ end
 begin
   require 'yard'
   YARD::Rake::YardocTask.new do |t|
-    # t.files   = ['lib/**/*.rb', OTHER_PATHS]   # optional
-    # t.options = ['--any', '--extra', '--opts'] # optional
-    # t.stats_options = ['--list-undoc']         # optional
+    t.options = ['--verbose']
+    t.files   = ['lib/**/*.rb', 'doc/**/*.md']
+    t.stats_options = ['--list-undoc']
   end
 rescue LoadError
   puts "Couldn't find YARD"

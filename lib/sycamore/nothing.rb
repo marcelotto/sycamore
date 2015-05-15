@@ -3,26 +3,30 @@ require 'singleton'
 module Sycamore
 
   ############################################################################
-  # The Nothing Tree Singleton
+  # The Nothing Tree Singleton class
   #
   # It is a normal empty Sycamore Tree, that is immutable.
   #
   class NothingTree < Tree
     include Singleton
 
+    # TODO: YARD should be informed about this method definitions.
     command_methods.each do |command_method|
       define_method command_method do |*args|
-        # TODO: Streamline this, with how Ruby reacts with
-        #   an attempt to edit a frozen object:
-        # raise RuntimeError, "can't modify Nothing"
         raise UnhandledNothingAccess
       end
     end
 
-    private def command_return
-      raise NothingAccessPerformed
+    # as Nothing already is "clear", this command method doesn't do any harm
+    #
+    def clear
+      command_return
     end
 
+    # the unique string representation of the Nothing Singleton
+    #
+    # @return [String] '#<Sycamore::Nothing>'
+    #
     def to_s
       '#<Sycamore::Nothing>'
     end
@@ -38,6 +42,11 @@ module Sycamore
     # see http://devblog.avdi.org/2011/05/30/null-objects-and-falsiness/
     ####################################################################
 
+    # trying to emulate a falsey value, by negating to true
+    #
+    # @return [Boolean] true
+    # @see http://devblog.avdi.org/2011/05/30/null-objects-and-falsiness/
+    #
     def !
       true
     end
@@ -48,6 +57,9 @@ module Sycamore
 
   end
 
+  ############################################################################
+  # The Nothing Tree Singleton object
+  #
   Nothing = NothingTree.instance.freeze
 
 end

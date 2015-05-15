@@ -43,6 +43,16 @@ describe Sycamore::Nothing do
       expect_failing { Nothing.add_nodes :foo, :bar }
     end
 
+    describe '#clear' do
+      subject { Nothing.clear }
+      it { is_expected.to be Nothing }
+
+      it 'is the only command method that works' do
+        expect { Nothing.clear }.not_to raise_error
+      end
+
+    end
+
   end
 
 end

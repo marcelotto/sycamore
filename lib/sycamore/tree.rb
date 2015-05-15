@@ -3,20 +3,21 @@ module Sycamore
   ############################################################################
   # Tree factory function
   #
-  # A convenience method for the constructor.
+  # A convenience method for the constructor. So, instead of
   #
-  # @example
-  #     # So, instead of
-  #     Sycamore::Tree.new(...)
-  #     # you can write
-  #     Sycamore::Tree(...)
+  #     Sycamore::Tree.new(...) { ... }
   #
-  # @see For an even more convenient method, see also the unqualified usage with
-  #   the global Tree function.
+  # you can write
+  #
+  #     Sycamore::Tree(...) { ... }
+  #
+  # @see For an even more convenient method, see the unqualified usage with
+  #   the global {Tree} function.
   #
   def self.Tree(*args, &block)
     Sycamore::Tree.new(*args, &block)
   end
+
 
   ############################################################################
   # Tree class
@@ -28,16 +29,21 @@ module Sycamore
   class Tree
 
     ################################################################
-    # CQS metadata                                                 #
+    # CQS                                                          #
     ################################################################
 
+    include CQS
+
+    # @return [Array<Symbol>] all command method names of the Tree class
     def self.command_methods
       %i[add << add_node add_nodes remove_node clear]
     end
 
+    # @return [Array<Symbol>] all query method names of the Tree class
     def self.query_methods
       %i[empty? include? nodes size]
     end
+
 
 
     ################################################################
@@ -53,11 +59,10 @@ module Sycamore
     end
 
 
+
     ################################################################
     # nodes and children in general                                #
     ################################################################
-
-    include CQS
 
     #####################
     #  query interface  #
@@ -94,6 +99,8 @@ module Sycamore
       @map.clear
       command_return
     end
+
+
 
     ########################################
     # Nodes
@@ -146,23 +153,30 @@ module Sycamore
     #####################
 
 
-    ################################################################
-    # Enumerable                                                   #
-    ################################################################
-
-
 
     ################################################################
-    # equality as recursive node equivalence                       #
+    # Tree as an Enumerable                                        #
     ################################################################
 
 
-
     ################################################################
-    # conversion                                                   #
+    # Various Ruby protocols                                       #
     ################################################################
 
+    def freeze
+      @map.freeze
+      super
+    end
 
+
+    ##########################################
+    # equality as recursive node equivalence
+    ##########################################
+
+
+    ##########################################
+    # conversion
+    ##########################################
 
 
   end

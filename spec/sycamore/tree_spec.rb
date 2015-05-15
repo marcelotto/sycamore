@@ -440,9 +440,42 @@ describe Sycamore::Tree do
 
 
 
-  ############################################################################
+  ################################################################
+  # Tree as an Enumerable                                        #
+  ################################################################
+
+
+  ################################################################
+  # Various Ruby protocols                                       #
+  ################################################################
+
+  describe '#freeze' do
+
+    it 'behaves Object#freeze conform' do
+      # stolen from Ruby's tests of set.rb (test_freeze) adapted to RSpec and with Trees
+      # see https://www.omniref.com/ruby/2.2.0/files/test/test_set.rb
+      orig = tree = Sycamore::Tree.new([1, 2, 3])
+      expect(tree).not_to be_frozen
+      tree << 4
+      expect(tree.freeze).to be orig
+      expect(tree).to be_frozen
+      expect { tree << 5 }.to raise_error RuntimeError
+      expect(tree.size).to be 4
+    end
+
+  end
+
+
+
+  ##########################################
   # equality as recursive node equivalence
-  ############################################################################
+  ##########################################
+
+
+  ##########################################
+  # conversion
+  ##########################################
+
 
 
 end
