@@ -1,5 +1,20 @@
 describe Sycamore::Tree do
 
+  # TODO: Create a custom matcher, which aggregates these to one expectation.
+  shared_examples 'added node' do |node|
+    it { is_expected.to be_a Sycamore::Tree }
+    it { is_expected.to_not be_empty }
+    it { is_expected.to include node }
+  end
+
+  # TODO: Create a custom matcher, which aggregates these to one expectation.
+  shared_examples 'added nodes' do |nodes|
+    it { is_expected.to be_a Sycamore::Tree }
+    it { is_expected.to_not be_empty }
+    it { nodes.each { |node| is_expected.to include(node) } }
+  end
+
+
   ############################################################################
   # creation
 
@@ -29,7 +44,27 @@ describe Sycamore::Tree do
       end
     end
 
+    context 'when a single initial scalar value given' do
+      subject { Sycamore::Tree.new 42 }
+      include_examples 'added node', 42
+    end
+
+    context 'when a single Enumerable given' do
+      subject { Sycamore::Tree.new([:foo, :bar, :baz]) }
+      include_examples 'added nodes', [:foo, :bar, :baz]
+    end
+
+    context 'when multiple scalar values given' do
+      subject { Sycamore::Tree.new(:foo, :bar, :baz) }
+      # include_examples 'added nodes', [:foo, :bar, :baz]
+      pending 'Can/should we support multiple argument initializations?'
+    end
+
+    context 'when named argument nodes given?'
+    context 'when named argument ... given'
+
   end
+
 
   ########################################################################
   # Tree factory function
@@ -40,7 +75,7 @@ describe Sycamore::Tree do
       skip 'Can we somehow execute all the following repetitions of #initialize specs automatically?'
     end
 
-    # TODO: Replace these repetitions of #initialize examples with the inclusion of
+    # TODO: Remove/Replace these repetitions of #initialize examples with the inclusion of
     #       a shared example group. But write them a little longer manually, first.
 
     context 'when no initial values or named arguments given' do
@@ -58,7 +93,7 @@ describe Sycamore::Tree do
       end
 
       context "after require 'sycamore/extension'" do
-        before { require 'sycamore/extension' }
+        before(:all) { require 'sycamore/extension' }
         it 'creates a Tree' do
           expect( Tree() ).to be_a Sycamore::Tree
         end
@@ -68,8 +103,10 @@ describe Sycamore::Tree do
 
   end
 
+
+
   ########################################################################
-  # nodes and children                                                   #
+  # nodes and children in general                                        #
   ########################################################################
 
   #####################
@@ -78,10 +115,10 @@ describe Sycamore::Tree do
 
   describe '#empty?' do
     it 'does behave like a query method' do
-      skip 'CQS::Query::Example::Group'
+      skip 'CQS::Query ExampleGroup'
     end
     it 'does behave like a predicate query method?' do
-      skip 'CQS::Predicate::Example::Group?'
+      skip 'CQS::Predicate ExampleGroup?'
     end
 
     it 'does return true, when the Tree has no nodes' do
@@ -91,7 +128,6 @@ describe Sycamore::Tree do
     end
 
     it 'does return false, when the Tree has nodes' do
-      pending '#add_nodes'
       tree_with_nodes = Sycamore::Tree.new.add_nodes(1)
       expect(tree_with_nodes.empty?).to be_falsey
       expect(tree_with_nodes.empty?).to be false
@@ -99,9 +135,136 @@ describe Sycamore::Tree do
 
   end
 
+  describe '#include?' do
+
+    # it 'does behave like a query method' do
+    #   skip 'CQS::Query ExampleGroup'
+    # end
+
+    # it 'does behave like a predicate query method?' do
+    #   skip 'CQS::Predicate ExampleGroup?'
+    # end
+
+    context 'when the requested node is in the node set' do
+      subject(:tree_with_requested_node) { Tree.new.add_node(:foo) }
+      it { is_expected.to include :foo }
+    end
+
+    context 'when the requested node is not in the node set' do
+      subject(:empty_tree) { Tree.new }
+      it { is_expected.to_not include :foo }
+    end
+
+  end
+
+  describe '#size' do
+
+    # it 'does behave like a query method' do
+    #   skip 'CQS::Query ExampleGroup'
+    # end
+
+    # it 'does behave like a predicate query method?' do
+    #   skip 'CQS::Predicate ExampleGroup?'
+    # end
+
+    context 'when empty' do
+      subject { Tree.new.size }
+      it { is_expected.to be 0 }
+    end
+
+    context 'when having one leaf' do
+      subject { Tree.new.add_node(42).size }
+      it { is_expected.to be 1 }
+    end
+
+    context 'when having more leaves' do
+      subject { Tree.new.add_nodes(1, 2, 3).size }
+      it { is_expected.to be 3 }
+    end
+
+  end
+
+
   #####################
   # command interface #
   #####################
+
+  describe '#add' do
+
+    # it 'does behave like a query method' do
+    #   skip 'CQS::Query ExampleGroup'
+    # end
+
+    context 'when a single initial scalar value argument given' do
+      subject { Sycamore::Tree.new.add 42 }
+      include_examples 'added node', 42
+    end
+
+    context 'when a single Enumerable argument given' do
+      subject { Sycamore::Tree.new.add([:foo, :bar, :baz]) }
+      include_examples 'added nodes', [:foo, :bar, :baz]
+    end
+
+    context 'when multiple scalar value arguments given' do
+      subject { Sycamore::Tree.new.add(:foo, :bar, :baz) }
+      # include_examples 'added nodes', [:foo, :bar, :baz]
+      pending 'Can/should we support multiple argument initializations?'
+    end
+
+  end
+
+
+  describe '#<<' do
+
+    it 'delegates all calls to #add' do
+      skip 'Can we somehow execute all the following repetitions of #add specs automatically?'
+    end
+
+    # TODO: Remove/Replace these repetitions of #initialize examples with the inclusion of
+    #       a shared example group. But write them a little longer manually, first.
+
+    context 'when a single initial scalar value argument given' do
+      subject { Sycamore::Tree.new << 42 }
+      include_examples 'added node', 42
+    end
+
+    context 'when a single Enumerable argument given' do
+      subject { Sycamore::Tree.new << [:foo, :bar, :baz] }
+      include_examples 'added nodes', [:foo, :bar, :baz]
+    end
+
+  end
+
+
+  describe '#remove' do
+    pending
+  end
+
+
+  describe '#>>' do
+    it 'delegates all calls to #remove' do
+      skip 'Can we somehow execute all the following repetitions of #remove specs automatically?'
+    end
+  end
+
+
+  describe '#clear' do
+
+    context 'when not empty' do
+      let(:nodes) { [42, :foo] }
+      subject { Sycamore::Tree.new(nodes).clear }
+
+      it { is_expected.to be_empty }
+
+      it 'does remove all nodes' do
+        nodes.each do |node|
+          expect(subject).not_to include(node)
+        end
+      end
+
+    end
+
+  end
 
 
   ########################################
@@ -112,9 +275,137 @@ describe Sycamore::Tree do
   #  query interface  #
   #####################
 
+  describe '#nodes' do
+
+    shared_examples 'result invariants' do
+      it { is_expected.to be_an Enumerable }
+      it { is_expected.to be_an Array ; skip 'Should we expect nodes to return an Array? Why?' }
+    end
+
+    context 'when empty' do
+      subject { Sycamore::Tree.new.nodes }
+      include_examples 'result invariants'
+      it { is_expected.to be_empty }
+    end
+
+    context 'when containing a single leaf node' do
+      subject { Sycamore::Tree.new.add_node(42).nodes }
+      include_examples 'result invariants'
+      it { is_expected.to include(42) }
+      it { is_expected.to contain_exactly 42 }
+    end
+
+    context 'when containing multiple nodes' do
+
+      shared_examples 'node invariants' do
+        include_examples 'result invariants'
+
+        it 'does return the nodes unordered' do
+          expect(nodes.to_set).to eq leaves
+        end
+
+      end
+
+      context 'without children, only leaves' do
+        let(:leaves) { Set[:foo, :bar, :baz] }
+        subject(:nodes) { Sycamore::Tree.new.add_nodes(*leaves).nodes }
+
+        include_examples 'node invariants'
+
+      end
+
+      context 'with children' do
+        pending '#children'
+      end
+
+
+    end
+
+  end
+
+
   #####################
   # command interface #
   #####################
+
+  describe '#add_node' do
+
+    # it 'does behave like a query method' do
+    #   skip 'CQS::Query ExampleGroup'
+    # end
+
+    context 'when a single initial scalar value argument given' do
+      subject { Sycamore::Tree.new.add_node 42 }
+      include_examples 'added node', 42
+    end
+
+  end
+
+
+  describe '#add_nodes' do
+
+    # it 'does behave like a query method' do
+    #   skip 'CQS::Query ExampleGroup'
+    # end
+
+    context 'when a single scalar value argument given' do
+      subject { Sycamore::Tree.new.add_nodes 42 }
+      include_examples 'added node', 42
+    end
+
+    context 'when multiple scalar value arguments given' do
+      subject { Sycamore::Tree.new.add_nodes(:foo, :bar, :baz) }
+      include_examples 'added nodes', [:foo, :bar, :baz]
+    end
+
+    context 'when multiple value arguments with Enumerables given' do
+      # TODO: Do we really need this?
+      it 'raises an error' do
+        expect { Sycamore::Tree.new.add_nodes([1, [2, 3]]) }. to raise_error(ArgumentError, 'NestedNodeSet')
+      end
+    end
+
+    context 'when a single Enumerable given' do
+      subject { Sycamore::Tree.new.add_nodes [:foo, :bar, :baz] }
+      include_examples 'added nodes', [:foo, :bar, :baz]
+    end
+
+  end
+
+
+  describe '#remove_node' do
+
+    context 'when the given node is in this tree' do
+      let(:nodes) { [42, :foo] }
+      subject(:tree) { Sycamore::Tree.new(nodes).remove_node(42) }
+
+      it { is_expected.not_to include 42 }
+      it { is_expected.to include :foo }
+
+      it 'does decrease the size' do
+        expect(tree.size).to be nodes.size - 1
+      end
+    end
+
+    context 'when the given node is not in this tree' do
+      let(:nodes) { [:foo] }
+      subject(:tree) { Sycamore::Tree.new(nodes).remove_node(42) }
+
+      it { is_expected.not_to include 42 }
+      it { is_expected.to include :foo }
+
+      it 'does not decrease the size' do
+        expect(tree.size).to be nodes.size
+      end
+    end
+
+  end
+
+
+  describe '#remove_nodes' do
+    pending
+  end
+
 
 
   ########################################
@@ -124,6 +415,24 @@ describe Sycamore::Tree do
   #####################
   #  query interface  #
   #####################
+
+  # describe '#child' do
+  #
+  #   shared_examples 'not found' do
+  #     it 'does return an Absence'
+  #     it 'does ??? the NothingTree'
+  #   end
+  #
+  #   context 'when given node not found' do
+  #     include_examples 'not found'
+  #   end
+  #
+  #   context 'when given node is a leaf, i.e. has no child tree' do
+  #     include_examples 'not found'
+  #   end
+  #
+  # end
+
 
   #####################
   # command interface #
