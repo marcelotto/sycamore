@@ -1,0 +1,11 @@
+--title "Sycamore"
+--output-dir doc/yard
+--protected
+--private
+--no-private
+--readme README.md
+-
+AUTHORS
+CREDITS
+LICENSE.txt
+VERSION
