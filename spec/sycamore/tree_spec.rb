@@ -123,12 +123,6 @@ describe Sycamore::Tree do
   #####################
 
   describe '#empty?' do
-    it 'does behave like a query method' do
-      skip 'CQS::Query ExampleGroup'
-    end
-    it 'does behave like a predicate query method?' do
-      skip 'CQS::Predicate ExampleGroup?'
-    end
 
     it 'does return true, when the Tree has no nodes' do
       tree_without_nodes = Sycamore::Tree.new
@@ -146,14 +140,6 @@ describe Sycamore::Tree do
 
   describe '#include?' do
 
-    # it 'does behave like a query method' do
-    #   skip 'CQS::Query ExampleGroup'
-    # end
-
-    # it 'does behave like a predicate query method?' do
-    #   skip 'CQS::Predicate ExampleGroup?'
-    # end
-
     context 'when the requested node is in the node set' do
       subject(:tree_with_requested_node) { Tree.new.add_node(:foo) }
       it { is_expected.to include :foo }
@@ -167,14 +153,6 @@ describe Sycamore::Tree do
   end
 
   describe '#size' do
-
-    # it 'does behave like a query method' do
-    #   skip 'CQS::Query ExampleGroup'
-    # end
-
-    # it 'does behave like a predicate query method?' do
-    #   skip 'CQS::Predicate ExampleGroup?'
-    # end
 
     context 'when empty' do
       subject { Tree.new.size }
@@ -199,10 +177,6 @@ describe Sycamore::Tree do
   #####################
 
   describe '#add' do
-
-    # it 'does behave like a query method' do
-    #   skip 'CQS::Query ExampleGroup'
-    # end
 
     context 'when a single initial scalar value argument given' do
       subject { Sycamore::Tree.new.add 42 }
@@ -343,10 +317,6 @@ describe Sycamore::Tree do
 
   describe '#add_node' do
 
-    # it 'does behave like a query method' do
-    #   skip 'CQS::Query ExampleGroup'
-    # end
-
     context 'when a single initial scalar value argument given' do
       subject { Sycamore::Tree.new.add_node 42 }
       include_examples 'added node', 42
@@ -364,10 +334,6 @@ describe Sycamore::Tree do
 
 
   describe '#add_nodes' do
-
-    # it 'does behave like a query method' do
-    #   skip 'CQS::Query ExampleGroup'
-    # end
 
     context 'when a single scalar value argument given' do
       subject { Sycamore::Tree.new.add_nodes 42 }
