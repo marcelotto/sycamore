@@ -20,7 +20,7 @@ end
 
 namespace :demo do
   API = 'examples/api_readme.rb'
-  API_OUT = 'examples/api_readme_out.rb'
+  API_OUT = 'examples/api_readme.out.rb'
 
   desc "Builds the demo in #{API}"
   task :build => API_OUT
