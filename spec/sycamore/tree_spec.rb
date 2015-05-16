@@ -15,16 +15,11 @@ describe Sycamore::Tree do
   end
 
 
-  ############################################################################
-  # creation
+  ################################################################
+  # creation                                                     #
+  ################################################################
 
   describe '#initialize' do
-
-    context 'when no initial values or named arguments given' do
-      subject { Sycamore::Tree.new() }
-      it { is_expected.to be_a Sycamore::Tree }
-      it { is_expected.to be_empty }
-    end
 
     context 'when called via an unqualified Tree.new' do
 
@@ -44,30 +39,44 @@ describe Sycamore::Tree do
       end
     end
 
-    context 'when a single initial scalar value given' do
-      subject { Sycamore::Tree.new 42 }
-      include_examples 'added node', 42
+    context 'when no initial nodes and/or a block given' do
+      subject { Sycamore::Tree.new() }
+      it { is_expected.to be_a Sycamore::Tree }
+      it { is_expected.to be_empty }
     end
 
-    context 'when a single Enumerable given' do
-      subject { Sycamore::Tree.new([:foo, :bar, :baz]) }
-      include_examples 'added nodes', [:foo, :bar, :baz]
-    end
+    context 'when arguments and/or a block given' do
 
-    context 'when multiple scalar values given' do
-      subject { Sycamore::Tree.new(:foo, :bar, :baz) }
-      # include_examples 'added nodes', [:foo, :bar, :baz]
-      pending 'Can/should we support multiple argument initializations?'
-    end
+      # TODO: Remove/Replace these repetitions of #add examples with the inclusion of
+      #       a shared example group. But write them a little longer manually, first.
 
-    context 'when named argument nodes given?'
-    context 'when named argument ... given'
+      context 'when a single initial scalar value given' do
+        subject { Sycamore::Tree.new 42 }
+        include_examples 'added node', 42
+      end
+
+      context 'when a single Enumerable given' do
+        subject { Sycamore::Tree.new([:foo, :bar, :baz]) }
+        include_examples 'added nodes', [:foo, :bar, :baz]
+      end
+
+      context 'when multiple scalar values given' do
+        subject { Sycamore::Tree.new(:foo, :bar, :baz) }
+        # include_examples 'added nodes', [:foo, :bar, :baz]
+        pending 'Can/should we support multiple argument initializations?'
+      end
+
+      context 'when named argument nodes given?'
+      context 'when named argument ... given'
+
+    end
 
   end
 
 
-  ########################################################################
-  # Tree factory function
+  ################################################################
+  # Tree factory function                                        #
+  ################################################################
 
   describe 'Sycamore.Tree()' do
 
@@ -105,9 +114,9 @@ describe Sycamore::Tree do
 
 
 
-  ########################################################################
-  # nodes and children in general                                        #
-  ########################################################################
+  ################################################################
+  # general nodes and children API                               #
+  ################################################################
 
   #####################
   #  query interface  #
@@ -267,9 +276,9 @@ describe Sycamore::Tree do
   end
 
 
-  ########################################
-  # Nodes
-  ########################################
+  ################################################################
+  # Nodes API                                                    #
+  ################################################################
 
   #####################
   #  query interface  #
@@ -318,7 +327,11 @@ describe Sycamore::Tree do
         pending '#children'
       end
 
+    end
 
+    context 'when another depth than the default 0 given' do
+      it 'does merge the nodes of all children down to the given tree depth'
+      # TODO: put the specs before in a example group: 'when no depth specified, meaning default depth of 0'
     end
 
   end
@@ -339,7 +352,15 @@ describe Sycamore::Tree do
       include_examples 'added node', 42
     end
 
-  end
+    context 'when an Enumerable argument given' do
+      # @todo https://www.pivotaltracker.com/story/show/94733228
+      #   Do we really need this? If so, document the reasons!
+      it 'raises an error' do
+        expect { Sycamore::Tree.new.add_node([1, 2]) }. to raise_error(Sycamore::NestedNodeSet)
+      end
+    end
+
+    end
 
 
   describe '#add_nodes' do
@@ -359,9 +380,10 @@ describe Sycamore::Tree do
     end
 
     context 'when multiple value arguments with Enumerables given' do
-      # TODO: Do we really need this?
+      # @todo https://www.pivotaltracker.com/story/show/94733228
+      #   Do we really need this? If so, document the reasons!
       it 'raises an error' do
-        expect { Sycamore::Tree.new.add_nodes([1, [2, 3]]) }. to raise_error(ArgumentError, 'NestedNodeSet')
+        expect { Sycamore::Tree.new.add_nodes([1, [2, 3]]) }. to raise_error(Sycamore::NestedNodeSet)
       end
     end
 
@@ -408,9 +430,9 @@ describe Sycamore::Tree do
 
 
 
-  ########################################
-  # Children
-  ########################################
+  ################################################################
+  # Children API                                                 #
+  ################################################################
 
   #####################
   #  query interface  #
