@@ -7,25 +7,36 @@ describe Sycamore::Nothing do
   it { is_expected.to be_a Sycamore::Tree }
   it { is_expected.to be_a Sycamore::NothingTree }
 
-  describe 'query methods' do
-
+  describe 'falsiness' do
     it { is_expected.to be_falsey }
     # it { is_expected.to be_nil }
-    it { is_expected.to be_empty }
+  end
+
+  describe 'query methods' do
+
+    describe '#nothing?' do
+      it { is_expected.to be_nothing }
+    end
+
+    describe '#present? and #absent?' do
+      it { is_expected.not_to be_present }
+      it { is_expected.to be_absent }
+    end
+
+    describe '#empty?' do
+      it { is_expected.to be_empty }
+    end
 
     describe '#size' do
-      subject { Nothing.size }
-      it { is_expected.to be 0 }
+      it { expect( Nothing.size ).to be 0 }
     end
 
     describe '#to_s' do
-      subject { Nothing.to_s }
-      it { is_expected.to eql '#<Sycamore::Nothing>' }
+      it { expect( Nothing.to_s ).to eql '#<Sycamore::Nothing>' }
     end
 
     describe '#inspect' do
-      subject { Nothing.inspect }
-      it { is_expected.to eql '#<Sycamore::Nothing>' }
+      it { expect( Nothing.inspect ).to eql '#<Sycamore::Nothing>' }
     end
   end
 

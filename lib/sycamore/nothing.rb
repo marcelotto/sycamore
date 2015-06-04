@@ -22,6 +22,16 @@ module Sycamore
       query_return true
     end
 
+    # @see {Tree#present?}
+    def present?
+      query_return false
+    end
+
+    # @see {Tree#absent?}
+    def absent?
+      query_return true
+    end
+
     # as Nothing already is "clear", this command method doesn't do any harm
     #
     def clear
@@ -64,6 +74,9 @@ module Sycamore
 
   ############################################################################
   # The Nothing Tree Singleton object
+  #
+  # @todo Use Adamantium (or something similar) to make the nothing tree immutable?
+  #   Optionally. Configurable. We won't have any other dependencies.
   #
   Nothing = NothingTree.instance.freeze
 

@@ -179,20 +179,32 @@ describe Sycamore::Tree do
   #####################
 
   describe '#nothing?' do
+    it 'does return false' do
+      expect(Tree().nothing?).to be false
+    end
+  end
 
-    context 'when this tree is not the Nothing tree' do
+  describe '#present?' do
+    it 'does return true' do
+      expect(Tree().present?).to be true
+    end
+
+=begin
+    context 'when this tree is an Absence' do
       it 'does return false' do
-        expect(Tree().nothing?).to be false
+        # expect(???.present?).to be false
       end
     end
-
-    context 'when this tree is the Nothing tree' do
-      it 'does return true' do
-        expect(Sycamore::Nothing.nothing?).to be true
-      end
-    end
+=end
 
   end
+
+  describe '#absent?' do
+    it 'does return false' do
+      expect(Tree().absent?).to be false
+    end
+  end
+
 
   describe '#empty?' do
 

@@ -79,28 +79,37 @@ print_eval 'root.add property: "value"'    # => <Tree:0x...>
 print_eval 'root.nodes # => [:property]'
 print_eval 'root = Tree(property: "value")'
 
+OUT.puts
+
 print_eval 'root = Tree(1 => 2)'
 print_eval 'root.child(1)' # => <Tree:0x...>
 print_eval 'root[1]'		  # does the same
 print_eval 'root[1].nodes' # => [2]
+
+OUT.puts
 
 print_eval 'root = Tree(1)'
 # TODO: print_eval 'root[1] << 2'
 # TODO: print_eval 'root[1].nodes' # => [2]
 # TODO: print_eval 'root[1][2] << [3, 4]'
 
+OUT.puts
 
 print_eval 'root = Tree()'
 # TODO: print_eval 'root[1][2] << [3, 4]'
 
+OUT.puts
+OUT.puts
 
 #######################################
 # Nothing
 #######################################
 
+OUT.puts
+
 print_eval 'Sycamore::Nothing.is_a? Tree' # => true
-# print_eval 'Sycamore::Nothing.absent?' # ?=> true # SRP-Violation: absent? should duck-type Absence
-# print_eval 'Sycamore::Nothing.present?' # => false
+print_eval 'Sycamore::Nothing.absent?' # ?=> true # SRP-Violation: absent? should duck-type Absence
+print_eval 'Sycamore::Nothing.present?' # => false
 print_eval 'Sycamore::Nothing.empty?' # => true
 print_eval 'Sycamore::Nothing.size'   # => 0
 print_eval 'Sycamore::Nothing.nodes'  # => []

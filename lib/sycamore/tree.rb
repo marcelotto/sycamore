@@ -157,10 +157,19 @@ module Sycamore
       query_return @map.empty?
     end
 
-    # @return [Boolean] false, unless this is the Nothing tree
     # @todo or Absence?
     #
     def nothing?
+      query_return false
+    end
+
+    # the negation of #absent?
+    def present?
+      query_return true
+    end
+
+    # the negation of #present?
+    def absent?
       query_return false
     end
 
