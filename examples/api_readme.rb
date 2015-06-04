@@ -8,11 +8,14 @@ def print_eval(rb_str_expr, silent: false)
   OUT.puts (silent ? '' : "  # => #{BINDING.eval(rb_str_expr).inspect}")
 end
 
-#######################################
-# Tree creation
-#######################################
-
 print_eval "require 'sycamore/extension'", silent: true
+
+OUT.puts
+OUT.puts
+
+#######################################
+OUT.puts '# Tree creation'
+#######################################
 
 OUT.puts
 
@@ -23,13 +26,18 @@ OUT.puts
 OUT.puts
 
 #######################################
-# Nodes
+OUT.puts '# Nodes'
 #######################################
+
+OUT.puts
 
 print_eval 'tree.empty?'
 print_eval 'tree.add_node(42)' # => #<Sycamore::Tree:0x0123456789abcd @map={42=>nil}>
 # TODO: tree.add_node(42) # => #<Sycamore::Tree:0x0123456789abcd @map={42=>Nothing}> ???
 print_eval 'tree.nodes'
+
+OUT.puts
+
 print_eval 'tree.add_nodes [1, 2]'  # => <Tree:0x...>
 print_eval 'tree.add_nodes(1, 2)'   # does the same (by splatting the args)
 print_eval 'tree.nodes'
@@ -37,11 +45,19 @@ print_eval 'tree.nodes'
 # print_eval 'tree.add_nodes [1, [2, 3]]'
 # # => ArgumentError: can't handle enumerable nodes
 
+OUT.puts
+
 print_eval 'tree << [1, 2]'
+
+OUT.puts
+
 print_eval 'Tree.new(42).nodes' # => [42]
 print_eval 'Tree(42).nodes'   # does the same
 print_eval 'Tree([1, 2]).nodes' # => [1, 2]
-# or also: Tree(1, 2).nodes # => [1, 2]   # ?
+print_eval 'Tree[1, 2].nodes' # => [1, 2]
+
+OUT.puts
+
 print_eval 'tree.empty?' # => false
 print_eval 'tree.size' # => 3
 
@@ -49,10 +65,33 @@ OUT.puts
 OUT.puts
 
 #######################################
-# Children
+OUT.puts '# Children'
 #######################################
 
-# print_eval 'tree.children.empty?' # => true
+OUT.puts
+
+# TODO: Necessary or useful?
+# print_eval 'tree.children' # => []
+
+print_eval 'root = Tree()'
+print_eval 'root << { property: "value" }' # does the same
+print_eval 'root.add property: "value"'    # => <Tree:0x...>
+print_eval 'root.nodes # => [:property]'
+print_eval 'root = Tree(property: "value")'
+
+print_eval 'root = Tree(1 => 2)'
+print_eval 'root.child(1)' # => <Tree:0x...>
+print_eval 'root[1]'		  # does the same
+print_eval 'root[1].nodes' # => [2]
+
+print_eval 'root = Tree(1)'
+# TODO: print_eval 'root[1] << 2'
+# TODO: print_eval 'root[1].nodes' # => [2]
+# TODO: print_eval 'root[1][2] << [3, 4]'
+
+
+print_eval 'root = Tree()'
+# TODO: print_eval 'root[1][2] << [3, 4]'
 
 
 #######################################
