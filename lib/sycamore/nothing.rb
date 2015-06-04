@@ -17,6 +17,11 @@ module Sycamore
       end
     end
 
+    # @see {Tree#nothing?}
+    def nothing?
+      query_return true
+    end
+
     # as Nothing already is "clear", this command method doesn't do any harm
     #
     def clear

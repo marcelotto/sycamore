@@ -178,6 +178,22 @@ describe Sycamore::Tree do
   #  query interface  #
   #####################
 
+  describe '#nothing?' do
+
+    context 'when this tree is not the Nothing tree' do
+      it 'does return false' do
+        expect(Tree().nothing?).to be false
+      end
+    end
+
+    context 'when this tree is the Nothing tree' do
+      it 'does return true' do
+        expect(Sycamore::Nothing.nothing?).to be true
+      end
+    end
+
+  end
+
   describe '#empty?' do
 
     it 'does return true, when the Tree has no nodes' do
@@ -576,11 +592,13 @@ describe Sycamore::Tree do
 
       context 'when the given atom is nil' do
         specify { expect(Tree()[nil]).to be Sycamore::Nothing }
+        specify { expect(Tree()[nil]).to be_nothing }
         # TODO when Absence defined: specify { expect(Tree[nil]).not_to be_a Absence }
       end
 
       context 'when the given atom is Nothing' do
         specify { expect(Tree()[Sycamore::Nothing]).to be Sycamore::Nothing }
+        specify { expect(Tree()[Sycamore::Nothing]).to be_nothing }
       end
 
       context 'when a corresponding node is present' do
@@ -599,6 +617,7 @@ describe Sycamore::Tree do
             subject { child }
             it { is_expected.to be_a Sycamore::Tree }
             it { is_expected.to_not be Sycamore::Nothing }
+            it { is_expected.to_not be_nothing }
             it { is_expected.to include :value }
             it { is_expected.not_to include :property }
           end
@@ -799,7 +818,7 @@ describe Sycamore::Tree do
       expect(tree).to include 42
       expect(tree.size).to be 1
       expect(tree.child(42)).to be_a Tree
-      expect(tree.child(42)).not_to be Sycamore::Nothing
+      expect(tree.child(42)).not_to be_nothing
       expect(tree.child(42)).to include 3.14
       expect(tree.child(42).size).to be 1
 
@@ -823,7 +842,7 @@ describe Sycamore::Tree do
       expect(tree).to include :root
       expect(tree.size).to be 1
       expect(tree.child(:root)).to be_a Sycamore::Tree
-      expect(tree.child(:root)).not_to be Sycamore::Nothing
+      expect(tree.child(:root)).not_to be_nothing
       expect(tree.child(:root)).to include 2
       expect(tree.child(:root)).to include 3
       # TODO: expect(tree.child(:root)).to include [2,3]
@@ -851,11 +870,11 @@ describe Sycamore::Tree do
       expect(tree).to include :noah
       expect(tree.size).to be 1
       expect(tree.child(:noah)).to be_a Sycamore::Tree
-      expect(tree.child(:noah)).not_to be Sycamore::Nothing
+      expect(tree.child(:noah)).not_to be_nothing
       expect(tree.child(:noah)).to include :shem
       expect(tree.child(:noah).size).to be 1
       expect(tree.child(:noah).child(:shem)).to be_a Sycamore::Tree
-      expect(tree.child(:noah).child(:shem)).not_to be Sycamore::Nothing
+      expect(tree.child(:noah).child(:shem)).not_to be_nothing
       expect(tree.child(:noah).child(:shem)).to include :elam
       expect(tree.child(:noah).child(:shem).size).to be 1
 
@@ -969,7 +988,7 @@ describe Sycamore::Tree do
           describe 'the added tree' do
             subject(:added_child) { tree_with_child.child(node) }
             it { is_expected.to be_a Tree }
-            it { is_expected.to_not be Sycamore::Nothing }
+            it { is_expected.to_not be_nothing }
             it { is_expected.to include child }
             it 'does add only the nodes of the given child, to the child of the new child tree' do
               expect(added_child.size).to be 1
@@ -1043,7 +1062,7 @@ describe Sycamore::Tree do
       describe 'the added tree' do
         subject(:added_child) { tree_with_child.child(node) }
         it { is_expected.to be_a Tree }
-        it { is_expected.to_not be Sycamore::Nothing }
+        it { is_expected.to_not be_nothing }
         it { is_expected.to_not be tree_with_child }
         it { is_expected.to include child }
         it 'does add only the nodes of given the given child, to the child of the new child tree' do
@@ -1061,7 +1080,7 @@ describe Sycamore::Tree do
         subject(:added_child) { tree_with_child.child(node) }
 
         it { is_expected.to be_a Tree }
-        it { is_expected.to_not be Sycamore::Nothing }
+        it { is_expected.to_not be_nothing }
         it { is_expected.to_not be tree_with_child } # TODO: Needed/Useful?
         it { is_expected.to include child }
         it { is_expected.to include 2 }

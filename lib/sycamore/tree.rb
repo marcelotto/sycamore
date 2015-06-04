@@ -157,6 +157,13 @@ module Sycamore
       query_return @map.empty?
     end
 
+    # @return [Boolean] false, unless this is the Nothing tree
+    # @todo or Absence?
+    #
+    def nothing?
+      query_return false
+    end
+
     # @param [Object] elements to check for, if it is an element of this tree
     #
     # @return [Boolean] if this tree includes the given node
