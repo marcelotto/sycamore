@@ -260,6 +260,8 @@ module Sycamore
     # command interface #
     #####################
 
+    # TODO: Make add_node, add_nodes, add_child, add_children private.
+    # TODO: Extract unique content and remove the documentation, since private?
     # adds a single leaf
     #
     # @todo https://www.pivotaltracker.com/story/show/94733228
@@ -283,6 +285,8 @@ module Sycamore
       command_return
     end
 
+    # TODO: Make add_node, add_nodes, add_child, add_children private.
+    # TODO: Extract unique content and remove the documentation, since private?
     # adds multiples leaves
     #
     # It can handle the leaves either given as arguments:
@@ -330,7 +334,6 @@ module Sycamore
       @map.delete(node)
       command_return
     end
-
 
 
     ################################################################

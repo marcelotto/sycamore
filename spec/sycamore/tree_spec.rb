@@ -341,7 +341,7 @@ describe Sycamore::Tree do
 
   describe '#add' do
 
-    context 'when a single initial atom value argument given' do
+    context 'when a single atom value argument given' do
       let(:atom) { number }
       subject { Tree[] << atom }
       it { is_expected.to include_node_with atom }
@@ -359,11 +359,62 @@ describe Sycamore::Tree do
       it { is_expected.to include_tree_with tree }
     end
 
-    context 'when multiple atom value arguments given' do
+    context 'when given multiple atoms' do
       let(:enumerable) { [symbol, number, string] }
-      subject { Tree[].add(*enumerable) }
-      it { pending 'Can/should we support multiple argument initializations here?' ; is_expected.to include_nodes_with enumerable }
+      subject { pending 'Can/should we support multiple arguments as an Enumerable?' ; Tree[].add(*enumerable) }
+      it { is_expected.to include_nodes_with enumerable }
     end
+
+    # from #add_node and #add_nodes; TODO: order and possibly restructure them
+
+    context 'when given nil' do
+      subject { Tree[] << nil }
+      it { is_expected.to be_empty }
+      it { skip 'is_expected.not_to be_a Absence' }
+    end
+
+    context 'when given multiple nils' do
+      subject { Tree[].add([nil, nil, nil]) }
+      it { is_expected.to be_empty }
+    end
+
+    context 'when given nils and non-nil atoms' do
+      subject { Tree[].add([nil, :foo, nil]) }
+      it { is_expected.not_to be_empty }
+      it { is_expected.to include_node_with :foo }
+      it { expect(subject.size).to be 1 }
+    end
+
+    context 'when given Nothing' do
+      subject { Tree[] << Sycamore::Nothing }
+      it { is_expected.to be_empty }
+      it { skip 'is_expected.not_to be_a Absence' }
+    end
+
+    context 'when given a single atom' do
+      context 'when a corresponding node for this atom is absent' do
+        specify { expect( Tree[] << :a ).to include_node_with(:a) }
+      end
+
+      context 'when a corresponding node for this atom is present' do
+        specify { expect(Tree[a: 1].add(:a)).to include_tree_with(a: 1) }
+      end
+    end
+
+    context 'when given a single Enumerable' do
+      let(:enumerable) { [symbol, number, string] }
+      subject { Tree.new.add(enumerable) }
+      it { is_expected.to include_nodes_with enumerable }
+    end
+
+    context 'when given a nested Enumerable' do
+      # @todo https://www.pivotaltracker.com/story/show/94733228
+      #   Do we really need this? If so, document the reasons!
+      it 'raises an error' do
+        expect { Tree.new.add([1, [2, 3]]) }.to raise_error(Sycamore::NestedNodeSet)
+      end
+    end
+
 
   end
 
@@ -371,6 +422,36 @@ describe Sycamore::Tree do
   describe '#remove' do
     pending
   end
+
+  describe '#remove_node' do
+
+    context 'when the given node is in this tree' do
+      let(:nodes) { [42, :foo] }
+      subject(:tree) { Tree[nodes].remove_node(42) }
+
+      it { is_expected.not_to include 42 }
+      it { is_expected.to include :foo }
+
+      it 'does decrease the size' do
+        expect(tree.size).to be nodes.size - 1
+      end
+    end
+
+    context 'when the given node is not in this tree' do
+      let(:initial_nodes) { [:foo] }
+      subject(:tree) { Tree[initial_nodes].remove_node(42) }
+
+      it { is_expected.not_to include 42 }
+      it { is_expected.to include :foo }
+
+      it 'does not decrease the size' do
+        expect(tree.size).to be initial_nodes.size
+      end
+    end
+
+  end
+
+
 
 
   describe '#clear' do
@@ -455,139 +536,6 @@ describe Sycamore::Tree do
     end
 
   end
-
-
-  #####################
-  # command interface #
-  #####################
-
-  describe '#add_node' do
-
-    context 'when given nil' do
-      subject { Tree[].add_node(nil) }
-      it { is_expected.to be_empty }
-    end
-
-    context 'when given Nothing' do
-      subject { Tree[].add_node(Sycamore::Nothing) }
-      it { is_expected.to be_empty }
-    end
-
-    context 'when given a single atom' do
-      context 'when a node for this atom not exists' do
-        specify { expect(Tree[].add_node(:a)).to include_node_with(:a) }
-      end
-
-      context 'when a node for this atom exists' do
-        specify { expect(Tree[a: 1].add_node(:a)).to include_tree_with(a: 1) }
-      end
-    end
-
-    context 'when given an Enumerable' do
-      # @todo https://www.pivotaltracker.com/story/show/94733228
-      #   Do we really need this? If so, document the reasons!
-      it 'raises an error' do
-        expect { Tree.new.add_node([1, 2]) }.to raise_error(Sycamore::NestedNodeSet)
-      end
-    end
-
-  end
-
-
-  describe '#add_nodes' do
-
-    context 'when given nil' do
-      subject { Tree[].add_nodes(nil) }
-      it { is_expected.to be_empty }
-    end
-
-    context 'when given multiple nils' do
-      subject { Tree[].add_nodes(nil, nil, nil) }
-      it { is_expected.to be_empty }
-    end
-
-    context 'when given nils and non-nil atoms' do
-      subject { Tree[].add_nodes(nil, :foo, nil) }
-      it { is_expected.not_to be_empty }
-      it { is_expected.to include_node_with :foo }
-      it { expect(subject.size).to be 1 }
-    end
-
-    context 'when given Nothing' do
-      subject { Tree[].add_nodes(Sycamore::Nothing) }
-      it { is_expected.to be_empty }
-      it { skip 'is_expected.not_to be_a Absence' }
-    end
-
-    context 'when given a single atom' do
-      context 'when the node not exists in the tree' do
-        specify { expect(Tree[].add_nodes(:a)).to include_nodes_with(:a) }
-      end
-
-      context 'when the node already exists in the tree' do
-        specify { expect(Tree[a: 1].add_nodes(:a)).to include_tree_with(a: 1) }
-      end
-    end
-
-    context 'when given multiple atoms' do
-      let(:enumerable) { [symbol, number, string] }
-      subject { Tree.new.add_nodes(*enumerable) }
-      it { is_expected.to include_nodes_with enumerable }
-
-      specify { expect(Tree.new) }
-
-    end
-
-    context 'when given multiple Enumerables' do
-      # @todo https://www.pivotaltracker.com/story/show/94733228
-      #   Do we really need this? If so, document the reasons!
-      it 'does raise an error' do
-        expect { Tree.new.add_nodes([1, [2, 3]]) }. to raise_error(Sycamore::NestedNodeSet)
-      end
-    end
-
-    context 'when given a single Enumerable' do
-      let(:enumerable) { [symbol, number, string] }
-      subject { Tree.new.add_nodes(enumerable) }
-      it { is_expected.to include_nodes_with enumerable }
-    end
-
-  end
-
-
-  describe '#remove_node' do
-
-    context 'when the given node is in this tree' do
-      let(:nodes) { [42, :foo] }
-      subject(:tree) { Tree[nodes].remove_node(42) }
-
-      it { is_expected.not_to include 42 }
-      it { is_expected.to include :foo }
-
-      it 'does decrease the size' do
-        expect(tree.size).to be nodes.size - 1
-      end
-    end
-
-    context 'when the given node is not in this tree' do
-      let(:initial_nodes) { [:foo] }
-      subject(:tree) { Tree[initial_nodes].remove_node(42) }
-
-      it { is_expected.not_to include 42 }
-      it { is_expected.to include :foo }
-
-      it 'does not decrease the size' do
-        expect(tree.size).to be initial_nodes.size
-      end
-    end
-
-  end
-
-
-  describe '#remove_nodes' do
-    pending
-  end
-
 
 
   ################################################################
