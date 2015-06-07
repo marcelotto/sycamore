@@ -38,15 +38,18 @@ module Sycamore
       command_return
     end
 
+    # TODO: Should we also allow #remove, for the same reasons we allow #clear ???
+    # def remove(*args)
+    #   command_return
+    # end
+
     # the unique string representation of the Nothing Singleton
     #
     # @return [String] '#<Sycamore::Nothing>'
     #
-    def to_s
+    def inspect
       '#<Sycamore::Nothing>'
     end
-
-    alias inspect to_s
 
 
     ####################################################################

@@ -32,7 +32,7 @@ describe Sycamore::Nothing do
     end
 
     describe '#to_s' do
-      it { expect( Nothing.to_s ).to eql '#<Sycamore::Nothing>' }
+      it { expect( Nothing.to_s ).to eql Sycamore::Tree[].to_s }
     end
 
     describe '#inspect' do
@@ -50,16 +50,25 @@ describe Sycamore::Nothing do
     it 'does raise an exception on all command methods' do
       expect_failing { Nothing << 'Bye' }
       expect_failing { Nothing.add 42 }
-      expect_failing { Nothing.add_node 42 }
-      expect_failing { Nothing.add_nodes :foo, :bar }
+      expect_failing { Nothing.add :foo, :bar }
     end
 
     describe '#clear' do
       subject { Nothing.clear }
       it { is_expected.to be Nothing }
 
-      it 'is the only command method that works' do
+      it 'does not raise an error' do
         expect { Nothing.clear }.not_to raise_error
+      end
+    end
+
+    describe '#remove' do
+      subject { pending 'Tree#remove' ; Nothing.remove(1) }
+      it { is_expected.to be Nothing }
+
+      it 'does not raise an error' do
+        pending 'Tree#remove'
+        expect { Nothing.remove(1) }.not_to raise_error
       end
 
     end
