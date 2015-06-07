@@ -52,16 +52,38 @@ module Sycamore
 
     include CQS
 
+    # TODO: Define the following arrays as CONSTANTS, which get returned by the class methods.
+
     # @return [Array<Symbol>] all command method names of this class
     #
     def self.command_methods
-      %i[add << add_node add_nodes remove_node clear]
+      additive_command_methods + destructive_command_methods
+    end
+
+    # @return [Array<Symbol>] all command method names of methods of this class,
+    #                           which only remove elements
+    #
+    def self.additive_command_methods
+      %i[add << add_node add_nodes add_child add_children]
+    end
+
+    # @return [Array<Symbol>] all command method names of methods of this class,
+    #                           which only remove elements
+    #
+    def self.destructive_command_methods
+      %i[remove_node clear] # TODO: , :remove, remove_nodes, ...
     end
 
     # @return [Array<Symbol>] all query method names of this class
     #
     def self.query_methods
-      %i[empty? include? nodes size]
+      self.predicate_methods + %i[size nodes child] << :[]
+    end
+
+    # @return [Array<Symbol>] all predicate method names of this class
+    #
+    def self.predicate_methods
+      %i[empty? nothing? present? absent? include? leaf? leaves?]
     end
 
 
