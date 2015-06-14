@@ -46,6 +46,11 @@ module Sycamore
   #
   class Tree
 
+    include Enumerable
+
+    attr_reader :treemap
+    protected :treemap
+
     ################################################################
     # CQS                                                          #
     ################################################################
@@ -103,7 +108,7 @@ module Sycamore
     # @param (see #add)
     #
     def initialize(*args, &block)
-      @map = Hash.new
+      @treemap = Hash.new
       add(*args, &block) unless args.empty? # TODO: and not block_given?
     end
 
@@ -122,6 +127,7 @@ module Sycamore
     #
     def self.[](*args, &block)
       args = args.first if args.count == 1
+
       new(args, &block)
     end
 
@@ -141,6 +147,7 @@ module Sycamore
     def self.from(*args, &block)
       args.compact!
       return Nothing if args.empty? and not block_given?
+
       new(*args, &block)
     end
 
@@ -161,6 +168,7 @@ module Sycamore
     def self.from!(*args, &block)
       args.compact!
       raise ArgumentError if args.empty? and not block_given?
+
       new(*args, &block)
     end
 
@@ -176,7 +184,7 @@ module Sycamore
     # @return [Boolean] if this tree is empty, meaning including no nodes
     #
     def empty?
-      query_return @map.empty?
+      query_return @treemap.empty?
     end
 
     # @todo or Absence?
@@ -205,23 +213,35 @@ module Sycamore
           when Tree.like?(elements)
             elements.all? do |node, child|
               include?(node) and
-                ( child.nil? or child.equal?(Nothing) or self.child(node).include?(child) )
+                ( child.nil? or child.equal?(Nothing) or
+                  self.child(node).include?(child) )
             end
           when elements.is_a?(Enumerable)
-            require 'set' # TODO: Remove this?!
-            elements.to_set.subset?(nodes.to_set)
-            # (nodes.to_set - elements.to_set).empty?
+            elements.all? { |element| include? element }
           else
-            @map.include?(elements)
+            @treemap.include?(elements)
         end)
     end
 
     # alias <= include?
 
+
+    def each(&block)
+      # require 'pry' ; binding.pry
+      # raise NotImplementedError
+      # return enum_for(:each) unless block_given?
+      case block.arity
+        when 0, 1 then @treemap.keys.each(&block)
+                  else @treemap.each(&block)
+      end
+      # @@treemap.each(&block)
+    end
+
+
     # @return [Fixnum] the number of nodes in this tree
     #
     def size
-      query_return @map.size
+      query_return @treemap.size
     end
 
 
@@ -257,7 +277,8 @@ module Sycamore
     # @return self as a proper command method (see Sycamore::CQS#command_return)
     #
     def clear
-      @map.clear
+      @treemap.clear
+
       command_return
     end
 
@@ -274,7 +295,7 @@ module Sycamore
     # @return [Array<Object>] the nodes of this tree (without their children)
     #
     def nodes
-      query_return @map.keys
+      query_return @treemap.keys
     end
 
 
@@ -303,7 +324,9 @@ module Sycamore
     def add_node(node, &block)
       return command_return if node.nil? or node.equal? Nothing
       raise NestedNodeSet if node.is_a? Enumerable
-      @map[node] ||= nil
+
+      @treemap[node] ||= nil
+
       command_return
     end
 
@@ -339,7 +362,9 @@ module Sycamore
     def add_nodes(*nodes, &block)
       nodes = nodes.first if nodes.size == 1 and nodes.is_a? Enumerable
       return add_node(nodes, &block) unless nodes.is_a? Enumerable
+
       nodes.each { |node| add_node(node, &block) }
+
       command_return
     end
 
@@ -353,7 +378,8 @@ module Sycamore
     # @return self as a proper command method (see Sycamore::CQS#command_return)
     #
     def remove_node(node, &block)
-      @map.delete(node)
+      @treemap.delete(node)
+
       command_return
     end
 
@@ -367,14 +393,15 @@ module Sycamore
     #####################
 
     def child(node, &block)
-      query_return @map[node] || Nothing # TODO: use @map.fetch(node, &block)
+      return query_return Nothing if node.nil? or node.equal? Nothing
+      query_return @treemap[node] || Absence.at(self, node)
     end
 
     alias [] child
 
     def leaf?(node, &block)
-      query_return @map.include?(node) &&
-                     ( (child = @map[node]).nil? || child.empty? )
+      query_return @treemap.include?(node) &&
+                     ( (child = @treemap[node]).nil? || child.empty? )
     end
 
     def leaves?(*nodes, &block)
@@ -407,30 +434,21 @@ module Sycamore
       return command_return if node.nil? or node.equal? Nothing
       return add_node(node, &block) if children.nil? or children.equal?(Nothing) or # TODO: when Absence defined: child.nothing? or child.abent?
                                       (Enumerable === children and children.empty?)
-      child = @map[node] ||= Tree.new
+      child = @treemap[node] ||= Tree.new
       child << children
+
       command_return
     end
 
     # TODO: This should be an atomic operation.
     def add_children(tree, &block)
-      return command_return if tree.equal? Nothing
+      return command_return if tree.equal? Nothing or tree.is_a? Absence
       raise ArgumentError unless Tree.like?(tree) # TODO: Spec this!
+
       tree.each { |node, child| add_child(node, child) }
+
       command_return
     end
-
-
-
-    ################################################################
-    # Tree as an Enumerable                                        #
-    ################################################################
-
-    # include Enumerable
-
-    # def each(&block)
-    #   @map.each(&block)
-    # end
 
 
 
@@ -438,23 +456,33 @@ module Sycamore
     # equality and equivalence                                     #
     ################################################################
 
-=begin
     def hash
-      [@map, self.class].hash
+      [@treemap, self.class].hash
     end
 
     def eql?(other)
-      self.hash == other.hash
-      # self.class == other.class and self == other
+      other.instance_of?(self.class) and self.treemap.eql?(other.treemap)
     end
 
-    # @todo Try to convert the other.to_tree ...
-    def ==(other)
-      self.hash == other.hash
-      # self.class == other.class and self === other
-    end
+    # TODO: What should be the semantics of #==?
+    #   Currently it is the same as eql?, since Hash
+    #    coerces only the values and not the keys ...
+    #
+    # @todo Use coercion! Like Equalizer#==.  But here or in ===?
+    # @todo Try to convert the other.to_tree ... ? as a coercion? Here or in ===?
+    # def ==(other)
+    #   other.instance_of?(self.class) and self.@treemap == other.@treemap
+    # end
+
+    alias == eql? # temporary solution. TODO: Remove this.
+
+    # == should be the strictest form of matching?, which gets only applied if other
+    #     is Tree.like?, since these definitely aren't a node of tree.
+    #     Enumerables aren't for sure? What's with a Range node?
+    #     Should we support this? How? ...
 
 
+=begin
     def ===(other)
       self.include?(other) and
         if other.is_a? Tree
@@ -465,26 +493,64 @@ module Sycamore
     end
 =end
 
+    def matches?(other, comparator = :===)
+      case
+        when Tree.like?(other)       then matches_tree?(other, comparator)
+        when other.is_a?(Enumerable) then matches_enumerable?(other, comparator)
+                                     else matches_atom?(other, comparator)
+      end
+    end
+
+    alias === matches?
+
+    private def matches_atom?(other, comparator = :===)
+      (self.empty? and (other.nil? or other == Nothing)) or
+        (self.size == 1 and nodes.first.send(comparator, other))
+    end
+
+    private def matches_enumerable?(other, comparator = :===)
+      self.size == other.size and
+        self.nodes.all? { |node| other.include?(node) }
+    end
+
+    private def matches_tree?(other, comparison = :===)
+      self.size == other.size and
+        self.all? { |node, child|
+          # TODO: Optimize this!
+          if child.nil?
+            other.include?(node) and
+              ( other[node].nil? or other[node] == Nothing )
+          else
+            child.matches? other[node]
+          end }
+    end
+
 
     ################################################################
     # conversion                                                   #
     ################################################################
 
-    def to_a
-      nodes
-    end
+    # Should we really support this?
+    #   Some tools, identify a arrayness with responding to to_a ...
+    #   see
+    #   - Hash#to_a: {1=>2}.to_a  => [[1, 2]]
+    #   - RSpec yield_with_args problem ...
+    #
+    # def to_a
+    #   nodes
+    # end
 
     # @todo Rename this: It doesn't behave consistently according
     #   the Ruby 2 protocol, by not returning a hash consistently
     #   (when consisting of leaves only).
-    #   Generalize this
+    #   Generalize this ...
     def to_h
       case
         when empty?   then {}
         when leaves?  then ( size == 1 ? nodes.first : nodes )
         else
           hash = {}
-          @map.each do |node, child|
+          @treemap.each do |node, child|
             hash[node] = child.to_h
           end
           hash
@@ -505,7 +571,7 @@ module Sycamore
     # or tree_like? (and an alias #structured?)
     def self.tree_like?(object)
       case object
-        when Hash || Tree # || ...
+        when Hash, Tree #, Absence ?, ... ?!
           true
         else
           (object.respond_to? :tree_like? and object.tree_like?) # or ...
@@ -521,7 +587,7 @@ module Sycamore
     # Various other Ruby protocols                                 #
     ################################################################
 
-    # overrides {Object#freeze} by delegating it to the internal hash {@map}
+    # overrides {Object#freeze} by delegating it to the internal hash {@@@treemap}
     #
     # TODO: How to do proper links with YARD and markdown support?
     #
@@ -529,7 +595,7 @@ module Sycamore
     # @see Ruby's {http://ruby-doc.org/core-2.2.2/Object.html#method-i-freeze Object#freeze}
     #
     def freeze
-      @map.freeze
+      @treemap.freeze
       super
     end
 

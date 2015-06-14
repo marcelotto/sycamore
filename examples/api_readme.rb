@@ -32,14 +32,13 @@ OUT.puts '# Nodes'
 OUT.puts
 
 print_eval 'tree.empty?'
-print_eval 'tree.add_node(42)' # => #<Sycamore::Tree:0x0123456789abcd @map={42=>nil}>
-# TODO: tree.add_node(42) # => #<Sycamore::Tree:0x0123456789abcd @map={42=>Nothing}> ???
+# TODO: Remove this from the README: print_eval 'tree.add_node(42)' # => #<Sycamore::Tree:0x0123456789abcd @@@treemap={42=>nil}>
 print_eval 'tree.nodes'
 
 OUT.puts
 
-print_eval 'tree.add_nodes [1, 2]'  # => <Tree:0x...>
-print_eval 'tree.add_nodes(1, 2)'   # does the same (by splatting the args)
+# TODO: Remove this from the README: print_eval 'tree.add_nodes [1, 2]'  # => <Tree:0x...>
+# TODO: Remove this from the README: print_eval 'tree.add_nodes(1, 2)'   # does the same (by splatting the args)
 print_eval 'tree.nodes'
 
 # print_eval 'tree.add_nodes [1, [2, 3]]'
