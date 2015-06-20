@@ -88,7 +88,8 @@ module Sycamore
     # @return [Array<Symbol>] all predicate method names of this class
     #
     def self.predicate_methods
-      %i[empty? nothing? present? absent? include? leaf? leaves?]
+      %i[empty? nothing? present? absent? include?
+         leaf? leaves? internal? external?]
     end
 
 
@@ -229,12 +230,12 @@ module Sycamore
     def each(&block)
       # require 'pry' ; binding.pry
       # raise NotImplementedError
-      # return enum_for(:each) unless block_given?
+      # TODO spec this in: return enum_for(:each) unless block_given?
       case block.arity
-        when 0, 1 then @treemap.keys.each(&block)
-                  else @treemap.each(&block)
+        when 1 then @treemap.keys.each(&block)
+               else @treemap.each(&block)
       end
-      # @@treemap.each(&block)
+      # @treemap.each(&block)
     end
 
 
@@ -399,6 +400,8 @@ module Sycamore
 
     alias [] child
 
+    # If the node has no children.
+    #
     def leaf?(node, &block)
       query_return @treemap.include?(node) &&
                      ( (child = @treemap[node]).nil? || child.empty? )
@@ -414,6 +417,12 @@ module Sycamore
         when node.is_a?(Enumerable) then node.all? { |node| leaf?(node) }
                                     else leaf?(node)
       end
+    end
+
+    alias external? leaves?
+
+    def internal?(*nodes, &block)
+      not external?(*nodes, &block) and include?(nodes)
     end
 
 
@@ -529,16 +538,6 @@ module Sycamore
     ################################################################
     # conversion                                                   #
     ################################################################
-
-    # Should we really support this?
-    #   Some tools, identify a arrayness with responding to to_a ...
-    #   see
-    #   - Hash#to_a: {1=>2}.to_a  => [[1, 2]]
-    #   - RSpec yield_with_args problem ...
-    #
-    # def to_a
-    #   nodes
-    # end
 
     # @todo Rename this: It doesn't behave consistently according
     #   the Ruby 2 protocol, by not returning a hash consistently

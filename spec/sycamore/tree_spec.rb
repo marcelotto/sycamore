@@ -750,8 +750,6 @@ describe Sycamore::Tree do
 
     context 'when given a single atom' do
 
-      # see #leaf?
-
       context 'when the given atom is nil' do
         specify { expect( Tree[].leaf?(nil) ).to be false }
       end
@@ -763,10 +761,12 @@ describe Sycamore::Tree do
       context 'when the corresponding node is present' do
 
         context 'when the corresponding node is a leaf' do
-          specify { expect(Tree[1].leaf?(1)).to be true }
-          specify { expect(Tree[1 => nil].leaf?(1)).to be true }
-          specify { expect(Tree[1 => Sycamore::Nothing].leaf?(1)).to be true }
-          specify { expect(Tree[1 => :foo, 2 => nil].leaf?(2)).to be true }
+          specify {
+            expect( Tree[1                     ].leaf?(1) ).to be true
+            expect( Tree[1 => nil              ].leaf?(1) ).to be true
+            expect( Tree[1 => Sycamore::Nothing].leaf?(1) ).to be true
+            expect( Tree[1 => :foo, 2 => nil   ].leaf?(2) ).to be true
+          }
         end
 
         context 'when the corresponding node has a child' do
@@ -799,7 +799,6 @@ describe Sycamore::Tree do
 
   end
 
-
   describe '#leaves?' do
 
     context 'without arguments' do
@@ -809,6 +808,7 @@ describe Sycamore::Tree do
         specify { expect( Tree[1 => nil]               ).to be_leaves }
         specify { expect( Tree[1 => Sycamore::Nothing] ).to be_leaves }
         specify { expect( Tree[1, 2, 3]                ).to be_leaves }
+        specify { expect( Tree[1 => 2].child(1)        ).to be_leaves }
       end
 
       context 'when some nodes are not leaves' do
@@ -849,6 +849,36 @@ describe Sycamore::Tree do
       end
     end
 
+  end
+
+  describe '#external?' do
+    # see #leaves?
+  end
+
+  describe '#internal?' do
+
+    # see #leaves?
+
+    context 'when given a single atom' do
+      context 'when the given atom is nil' do
+        specify { expect( Tree[].internal?(nil) ).to be false }
+        specify { expect( Tree[].external?(nil) ).to be false }
+      end
+
+      context 'when the corresponding node is absent' do
+        specify { expect( Tree().external?(42)   ).to be false }
+        specify { expect( Tree[43].external?(42) ).to be false }
+        specify { expect( Tree().internal?(42)   ).to be false }
+        specify { expect( Tree[43].internal?(42) ).to be false }
+      end
+    end
+
+    context 'when given something Tree.like' do
+      it 'raises an ArgumentError' do
+        expect { Tree().external?(a: 1) }.to raise_error ArgumentError
+        expect { Tree().internal?(a: 1) }.to raise_error ArgumentError
+      end
+    end
   end
 
 
