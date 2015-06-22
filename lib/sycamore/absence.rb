@@ -5,7 +5,7 @@ module Sycamore
 
     def initialize(parent_tree, parent_node)
       raise ArgumentError if not (parent_tree.is_a?(Tree) or
-                                  parent_tree.is_a?(Absence)) or not parent_node
+                                  parent_tree.is_a?(Absence)) or parent_node.nil?
       @parent_tree, @parent_node = parent_tree, parent_node
     end
 

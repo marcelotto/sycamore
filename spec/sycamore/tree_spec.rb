@@ -227,14 +227,15 @@ describe Sycamore::Tree do
 
     context 'when given an atom' do
       context 'when the atom is in the node set' do
-        specify { expect( Tree(1) ).to include 1 }
-        specify { expect( Tree([42, another_string]) ).to include 42 }
-        specify { expect( Tree(property: string) ).to include :property }
+        specify { expect( Tree[1]                  ).to include 1 }
+        specify { expect( Tree[42, another_string] ).to include 42 }
+        specify { expect( Tree(property: string)   ).to include :property }
 
-        specify { expect( Tree[0].include? 0 ).to be true }
-        specify { expect( Tree[''].include? '' ).to be true }
-        specify { expect( Tree[1,2].include? 1 ).to be true }
-        specify { expect( Tree[1,2].include? 2 ).to be true }
+        specify { expect( Tree[0    ].include? 0    ).to be true }
+        specify { expect( Tree[''   ].include? ''   ).to be true }
+        specify { expect( Tree[false].include? false).to be true }
+        specify { expect( Tree[1, 2 ].include? 1    ).to be true }
+        specify { expect( Tree[1, 2 ].include? 2    ).to be true }
       end
 
       context 'when the atom is not in the node set' do
@@ -242,6 +243,7 @@ describe Sycamore::Tree do
         specify { expect( Tree[] ).to_not include number } # This relies on Tree#each
         specify { expect( Tree[1].include? 2 ).to be false }
         specify { expect( Tree[1,2].include? [1, 3] ).to be false }
+        specify { expect( Tree[].include? true ).to be false }
       end
 
     end
@@ -417,7 +419,15 @@ describe Sycamore::Tree do
       let(:tree) { { symbol => number } }
       subject { Tree[] << tree }
       it { is_expected.to include_tree_with tree }
+
+      context 'when the key is false' do
+        let(:tree) { { false => number } }
+        subject { Tree[] << tree }
+        it { is_expected.to include_tree_with tree }
+      end
+
     end
+
 
     context 'when given multiple atoms' do
       let(:enumerable) { [symbol, number, string] }
@@ -451,6 +461,12 @@ describe Sycamore::Tree do
       it { is_expected.not_to be_a Sycamore::Absence }
     end
 
+    context 'when given false' do
+      subject { Tree[] << false }
+      it { is_expected.not_to be_empty }
+      it { is_expected.to include_node_with false }
+    end
+
     context 'when given a single atom' do
       context 'when a corresponding node for this atom is absent' do
         specify { expect( Tree[] << :a ).to include_node_with(:a) }
@@ -479,15 +495,15 @@ describe Sycamore::Tree do
   end
 
 
-  describe '#remove' do
+  describe '#delete' do
     pending
   end
 
-  describe '#remove_node' do
+  describe '#delete_node' do
 
     context 'when the given node is in this tree' do
       let(:nodes) { [42, :foo] }
-      subject(:tree) { Tree[nodes].remove_node(42) }
+      subject(:tree) { Tree[nodes].delete_node(42) }
 
       it { is_expected.not_to include 42 } # This relies on Tree#each
       it { expect(tree.include?(42)).to be false }
@@ -500,7 +516,7 @@ describe Sycamore::Tree do
 
     context 'when the given node is not in this tree' do
       let(:initial_nodes) { [:foo] }
-      subject(:tree) { Tree[initial_nodes].remove_node(42) }
+      subject(:tree) { Tree[initial_nodes].delete_node(42) }
 
       it { expect(tree.include? 42).to be false }
       it { is_expected.not_to include 42 } # This relies on Tree#each
@@ -529,7 +545,7 @@ describe Sycamore::Tree do
 
       it { is_expected.to be_empty }
 
-      it 'does remove all nodes' do
+      it 'does delete all nodes' do
         nodes.each do |node|
           expect(subject.include?(node)).to be false
           expect(subject).not_to include(node) # This relies on Tree#each
@@ -613,15 +629,33 @@ describe Sycamore::Tree do
     context 'when given a single atom' do
 
       context 'when the given atom is nil' do
-        specify { expect( Tree.new[nil] ).not_to be_a Sycamore::Absence }
-        specify { expect( Tree.new[nil] ).to be Sycamore::Nothing }
-        specify { expect( Tree.new[nil] ).to be_nothing }
+        specify { expect( Tree.new.child(nil) ).not_to be_a Sycamore::Absence }
+        specify { expect( Tree.new.child(nil) ).to be Sycamore::Nothing }
+        specify { expect( Tree.new.child(nil) ).to be_nothing }
       end
 
       context 'when the given atom is Nothing' do
-        specify { expect(Tree.new[Sycamore::Nothing]).not_to be_a Sycamore::Absence }
-        specify { expect(Tree.new[Sycamore::Nothing]).to be Sycamore::Nothing }
-        specify { expect(Tree.new[Sycamore::Nothing]).to be_nothing }
+        specify { expect(Tree.new.child(Sycamore::Nothing)).not_to be_a Sycamore::Absence }
+        specify { expect(Tree.new.child(Sycamore::Nothing)).to be Sycamore::Nothing }
+        specify { expect(Tree.new.child(Sycamore::Nothing)).to be_nothing }
+      end
+
+      context 'when the given atom is false' do
+        specify { expect( Tree.new.child(false) ).not_to be Sycamore::Nothing }
+        specify { expect( Tree.new.child(false) ).to be_a Sycamore::Absence }
+        specify { expect( Tree.new.child(false) ).not_to be_nothing }
+        specify { expect( Tree.new.child(false) ).to be_absent }
+
+        specify { expect( Tree[false => :foo].child(false) ).not_to be_a Sycamore::Absence }
+        specify { expect( Tree[false => :foo].child(false) ).not_to be Sycamore::Nothing }
+        specify { expect( Tree[false => :foo].child(false) ).not_to be_absent }
+        specify { expect( Tree[false => :foo].child(false) ).to include :foo }
+        specify { expect( Tree[false => :foo].child(false) ).not_to be_a Sycamore::Absence }
+
+        specify { expect( Tree[4 => {false => 2}].child(4) ).not_to be_a Sycamore::Absence }
+        specify { expect( Tree[4 => {false => 2}].child(4) ).to eq Tree(false => 2) }
+        specify { expect( Tree[4 => {false => 2}].child(4).child(false) ).not_to be_a Sycamore::Absence }
+        specify { expect( Tree[4 => {false => 2}].child(4).child(false) ).to eq Tree(2) }
       end
 
       context 'when a corresponding node is present' do
@@ -967,6 +1001,14 @@ describe Sycamore::Tree do
       expect(tree.child(:root)).to include 0
       expect(tree.child(:root).size).to be 4
 
+    end
+
+    specify 'some examples when the node is false' do
+      tree = Sycamore::Tree.new
+      tree.add_child(false, :foo) # => {false => :foo}
+      expect(tree.size).to be 1
+      expect(tree.child(false)).to include :foo
+      expect(tree.child(false).size).to be 1
     end
 
     specify 'some examples for hashes' do
@@ -1498,7 +1540,19 @@ describe Sycamore::Tree do
   end
 
   describe '#inspect' do
-    it 'contains the hash representation' # from #to_h ???
+
+    shared_examples_for 'every inspect string' do |tree|
+      it 'is in the usual Ruby inspect style' do
+        # expect( tree.inspect ).to match /^\#/
+      end
+      it 'contains the hash representation' do
+        # from #to_h ???
+      end
+
+    end
+
+
+
   end
 
 

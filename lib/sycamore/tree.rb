@@ -66,17 +66,17 @@ module Sycamore
     end
 
     # @return [Array<Symbol>] all command method names of methods of this class,
-    #                           which only remove elements
+    #                           which only add elements
     #
     def self.additive_command_methods
       %i[add << add_node add_nodes add_child add_children]
     end
 
     # @return [Array<Symbol>] all command method names of methods of this class,
-    #                           which only remove elements
+    #                           which only delete elements
     #
     def self.destructive_command_methods
-      %i[remove_node clear] # TODO: , :remove, remove_nodes, ...
+      %i[delete_node clear] # TODO: , :remove, delete_nodes, ...
     end
 
     # @return [Array<Symbol>] all query method names of this class
@@ -278,7 +278,7 @@ module Sycamore
 
     alias << add
 
-    # removes all nodes and their children, resulting in an empty tree
+    # deletes all nodes and their children, resulting in an empty tree
     #
     # @return self as a proper command method (see Sycamore::CQS#command_return)
     #
@@ -377,14 +377,14 @@ module Sycamore
 
     # removes a node with its child
     #
-    # If the given node is in the {#nodes} set, it gets removed, otherwise
+    # If the given node is in the {#nodes} set, it gets deleted, otherwise
     # nothing happens.
     #
-    # @param [Object] node to remove
+    # @param [Object] node to delete
     #
     # @return self as a proper command method (see Sycamore::CQS#command_return)
     #
-    def remove_node(node, &block)
+    def delete_node(node, &block)
       @treemap.delete(node)
 
       command_return
