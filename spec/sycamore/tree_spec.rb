@@ -1,3 +1,5 @@
+require 'set'
+
 describe Sycamore::Tree do
 
   it { is_expected.to be_a Enumerable }
@@ -1482,30 +1484,6 @@ describe Sycamore::Tree do
     pending
   end
 
-  # Should we really support this?
-  #   Some tools, identify a arrayness with responding to to_a ...
-  #   see
-  #   - Hash#to_a: {1=>2}.to_a  => [[1, 2]]
-  #   - RSpec yield_with_args problem ...
-=begin
-  describe '#to_a' do
-    # TODO: shared example or matcher for ...
-    specify { expect( Tree[         ].to_a ).to eq( [] ) }
-    specify { expect( Tree[ 1       ].to_a ).to eq( [1] ) }
-    specify { expect( Tree[ 1, 2, 3 ].to_a ).to eq( [1, 2, 3] ) }
-    specify { expect( Tree[ :a => 1 ].to_a ).to eq( [:a] ) }
-    specify { expect( Tree[ :a => 1, :b => [2, 3] ].to_a ).to eq( [:a, :b] ) }
-  end
-=end
-
-
-  describe '#to_set' do # by nodes.to_set
-    it "does require 'set'"
-    it 'does delegate to Sets standard #to_set implementation'
-
-  end
-
-
   describe '#to_s' do
     it 'delegates to the hash representation of #to_h'
     # TODO: shared example or matcher for ...
@@ -1518,7 +1496,6 @@ describe Sycamore::Tree do
                           '{:a=>1, :b=>[2, 3]}' ) }
 
   end
-
 
   describe '#inspect' do
     it 'contains the hash representation' # from #to_h ???
