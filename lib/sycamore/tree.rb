@@ -82,13 +82,13 @@ module Sycamore
     # @return [Array<Symbol>] all query method names of this class
     #
     def self.query_methods
-      self.predicate_methods + %i[size nodes child] << :[]
+      self.predicate_methods + %i[size nodes keys child] << :[]
     end
 
     # @return [Array<Symbol>] all predicate method names of this class
     #
     def self.predicate_methods
-      %i[empty? nothing? present? absent? include?
+      %i[empty? nothing? present? absent? include? include_node? has_key?
          leaf? leaves? internal? external?]
     end
 
@@ -213,16 +213,21 @@ module Sycamore
         case
           when Tree.like?(elements)
             elements.all? do |node, child|
-              include?(node) and
-                ( child.nil? or child.equal?(Nothing) or
-                  self.child(node).include?(child) )
+              include_node?(node) and ( child.nil? or child.equal?(Nothing) or
+                                          self.child(node).include?(child) )
             end
           when elements.is_a?(Enumerable)
-            elements.all? { |element| include? element }
+            elements.all? { |element| include_node? element }
           else
-            @treemap.include?(elements)
+            include_node? elements
         end)
     end
+
+    def include_node?(node)
+      @treemap.include?(node)
+    end
+
+    alias has_key? include_node?  # Hash compatibility
 
     # alias <= include?
 
@@ -299,6 +304,7 @@ module Sycamore
       query_return @treemap.keys
     end
 
+    alias keys nodes  # Hash compatibility
 
     #####################
     # command interface #
