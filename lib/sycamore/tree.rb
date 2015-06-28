@@ -76,7 +76,7 @@ module Sycamore
     #                           which only delete elements
     #
     def self.destructive_command_methods
-      %i[delete_node clear] # TODO: , :remove, delete_nodes, ...
+      %i[delete >> delete_node delete_nodes delete_children clear]
     end
 
     # @return [Array<Symbol>] all query method names of this class
@@ -278,6 +278,29 @@ module Sycamore
 
     alias << add
 
+    # The universal method to remove nodes with or without children.
+    #
+    # Depending on the argument, this method only delegates appropriately to one
+    # of the other more specific `delete` methods.
+    #
+    # @param [Object, Hash, Enumerable] nodes_or_struct TODO TODOC
+    #
+    #
+    # @return self as a proper command method (see Sycamore::CQS#command_return)
+    #
+    # @see #add_nodes
+    #
+    def delete(nodes_or_struct, &block)
+      if Tree.like? nodes_or_struct
+        delete_children(nodes_or_struct, &block)
+      else
+        delete_nodes(nodes_or_struct, &block)
+      end
+      command_return
+    end
+
+    alias >> delete
+
     # deletes all nodes and their children, resulting in an empty tree
     #
     # @return self as a proper command method (see Sycamore::CQS#command_return)
@@ -385,11 +408,21 @@ module Sycamore
     # @return self as a proper command method (see Sycamore::CQS#command_return)
     #
     def delete_node(node, &block)
+      raise NestedNodeSet if node.is_a? Enumerable
+
       @treemap.delete(node)
 
       command_return
     end
 
+    def delete_nodes(*nodes, &block)
+      nodes = nodes.first if nodes.size == 1 and nodes.is_a? Enumerable
+      return delete_node(nodes, &block) unless nodes.is_a? Enumerable
+
+      nodes.each { |node| delete_node(node, &block) }
+
+      command_return
+    end
 
     ################################################################
     # Children API                                                 #
@@ -449,6 +482,7 @@ module Sycamore
       return command_return if node.nil? or node.equal? Nothing
       return add_node(node, &block) if children.nil? or children.equal?(Nothing) or # TODO: when Absence defined: child.nothing? or child.abent?
                                       (Enumerable === children and children.empty?)
+
       child = @treemap[node] ||= Tree.new
       child << children
 
@@ -461,6 +495,21 @@ module Sycamore
       raise ArgumentError unless Tree.like?(tree) # TODO: Spec this!
 
       tree.each { |node, child| add_child(node, child) }
+
+      command_return
+    end
+
+    # TODO: This should be an atomic operation.
+    def delete_children(tree, &block)
+      return command_return if tree.equal? Nothing or tree.is_a? Absence
+      raise ArgumentError unless Tree.like?(tree) # TODO: Spec this!
+
+      tree.each do |node, child|
+        next unless include? node
+        this_child = self.child(node)
+        this_child.delete child
+        delete_node(node) if this_child.empty?
+      end
 
       command_return
     end
