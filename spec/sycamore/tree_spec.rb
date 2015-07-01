@@ -482,10 +482,20 @@ describe Sycamore::Tree do
     end
 
     context 'when given a nested Enumerable' do
-      # @todo https://www.pivotaltracker.com/story/show/94733228
-      #   Do we really need this? If so, document the reasons!
-      it 'raises an error' do
-        expect { Tree.new.add([1, [2, 3]]) }.to raise_error(Sycamore::NestedNodeSet)
+      context 'when the nested Enumerable is Tree-like' do
+        specify { expect(Tree[:a, b: 1]         === {a: nil, b: 1}       ).to be true }
+        specify { expect(Tree[:b,  a: 1, c: 2 ] === {a: 1, b: nil, c: 2} ).to be true }
+        specify { expect(Tree[:b, {a: 1, c: 2}] === {a: 1, b: nil, c: 2} ).to be true }
+        specify { expect(Tree[:a, b: {c: 2}   ] === {a: nil, b: {c: 2}}  ).to be true }
+      end
+
+      context 'when the nested Enumerable is not Tree-like' do
+        # @todo https://www.pivotaltracker.com/story/show/94733228
+        #   Do we really need this? If so, document the reasons!
+        it 'raises an error' do
+          expect { Tree.new.add([1, [2, 3]]) }.to raise_error(Sycamore::NestedNodeSet)
+        end
+
       end
     end
 

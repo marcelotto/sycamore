@@ -353,6 +353,7 @@ module Sycamore
     #
     def add_node(node, &block)
       return command_return if node.nil? or node.equal? Nothing
+      return add_children(node) if Tree.like? node
       raise NestedNodeSet if node.is_a? Enumerable
 
       @treemap[node] ||= nil
