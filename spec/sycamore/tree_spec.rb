@@ -1619,6 +1619,15 @@ describe Sycamore::Tree do
                           { :a => 1, :b => [2, 3] } ) }
   end
 
+  # describe '#to_a' do
+  #   specify { expect( Tree[         ].to_a ).to eq( [] ) }
+  #   specify { expect( Tree[ 1       ].to_a ).to eq( [1] ) }
+  #   specify { expect( Tree[ 1, 2, 3 ].to_a ).to eq( [1, 2, 3] ) }
+  #   specify { expect( Tree[ :a => 1 ].to_a ).to eq( [ :a => [1] ] ) }
+  #   specify { expect( Tree[ :a => 1, :b => [2, 3] ].to_a ).to eq(
+  #                         [ :a => [1], :b => [2, 3] ] ) }
+  # end
+
   describe '#to_h' do
     pending
   end
@@ -1640,15 +1649,19 @@ describe Sycamore::Tree do
 
     shared_examples_for 'every inspect string' do |tree|
       it 'is in the usual Ruby inspect style' do
-        # expect( tree.inspect ).to match /^\#/
+        expect( tree.inspect ).to match /^#<Sycamore::Tree:0x/
+      end
+      it 'contains the object identity' do
+        expect( tree.inspect ).to include tree.object_id.to_s(16)
       end
       it 'contains the hash representation' do
-        # from #to_h ???
+        expect( tree.inspect ).to include tree.to_h.inspect
       end
-
     end
 
-
+    include_examples 'every inspect string', Sycamore::Tree.new
+    include_examples 'every inspect string', Sycamore::Tree[1,2,3]
+    include_examples 'every inspect string', Sycamore::Tree(foo: 1, bar: [2,3])
 
   end
 

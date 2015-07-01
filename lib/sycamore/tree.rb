@@ -594,6 +594,10 @@ module Sycamore
     # conversion                                                   #
     ################################################################
 
+    # def to_a
+    #   map { |node, child| child.nil? ? node : { node => child.to_a } }
+    # end
+
     # @todo Rename this: It doesn't behave consistently according
     #   the Ruby 2 protocol, by not returning a hash consistently
     #   (when consisting of leaves only).
@@ -615,9 +619,10 @@ module Sycamore
       to_h.to_s
     end
 
-    # Temporary impl., spec this!
+    # @return a developer-friendly representation of `self` in the usual Ruby Object#inspect style.
+    #
     def inspect
-      "Sycamore::Tree(#{to_h.inspect})"
+      "#<Sycamore::Tree:0x#{object_id.to_s(16)}(#{to_h.inspect})>"
     end
 
 
@@ -641,7 +646,7 @@ module Sycamore
     # Various other Ruby protocols                                 #
     ################################################################
 
-    # overrides {Object#freeze} by delegating it to the internal hash {@@@treemap}
+    # overrides {Object#freeze} by delegating it to the internal hash {@treemap}
     #
     # TODO: How to do proper links with YARD and markdown support?
     #
