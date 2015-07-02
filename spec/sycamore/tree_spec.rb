@@ -595,12 +595,20 @@ describe Sycamore::Tree do
         end
       end
 
-      context 'when the collection contains Enumerables' do
-        # @todo https://www.pivotaltracker.com/story/show/94733228
-        #   Do we really need this? If so, document the reasons!
-        it 'raises an error' do
-          expect { Tree.new.delete([1, [2, 3]]) }.to raise_error(Sycamore::NestedNodeSet)
+      context 'when given a nested Enumerable' do
+        context 'when the nested Enumerable is Tree-like' do
+          specify { expect(Tree[a: 1, b: 2].delete([:a, b: 2]) ).to be_empty }
+          specify { expect(Tree[a: 1, b: [2, 3]].delete([:a, b: 2]) === {b: 3} ).to be true }
         end
+
+        context 'when the nested Enumerable is not Tree-like' do
+          # @todo https://www.pivotaltracker.com/story/show/94733228
+          #   Do we really need this? If so, document the reasons!
+          it 'raises an error' do
+            expect { Tree.new.delete([1, [2, 3]]) }.to raise_error(Sycamore::NestedNodeSet)
+          end
+        end
+
       end
 
     end

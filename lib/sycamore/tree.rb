@@ -409,6 +409,7 @@ module Sycamore
     # @return self as a proper command method (see Sycamore::CQS#command_return)
     #
     def delete_node(node, &block)
+      return delete_children(node) if Tree.like? node
       raise NestedNodeSet if node.is_a? Enumerable
 
       @treemap.delete(node)
