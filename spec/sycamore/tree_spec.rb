@@ -513,7 +513,7 @@ describe Sycamore::Tree do
 
     context 'when given Nothing' do
       let(:nodes) { [42, :foo] }
-      subject(:tree) { Tree[nodes].delete(Nothing) }
+      subject(:tree) { Tree[nodes].delete(Sycamore::Nothing) }
 
       it { is_expected.to include nodes }
       it { expect(tree.size).to be 2 }
