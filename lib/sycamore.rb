@@ -4,6 +4,7 @@ require 'sycamore/cqs'
 require 'sycamore/tree'
 require 'sycamore/nothing'
 require 'sycamore/absence'
+require 'sycamore/path'
 
 ##
 # see README.md
