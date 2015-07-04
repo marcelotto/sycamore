@@ -70,7 +70,14 @@ describe Sycamore::Absence do
         it { is_expected.not_to be_absent }
         it { is_expected.to     be_present }
         it { is_expected.not_to be_nothing }
-        it { is_expected.not_to be_empty }
+
+        it 'is empty when given Nothing or nil, otherwise not' do
+          if added_data == Sycamore::Nothing or added_data.nil?
+            is_expected.to be_empty
+          else
+            is_expected.not_to be_empty
+          end
+        end
 
         it { is_expected.to include added_data }
       end
@@ -112,6 +119,8 @@ describe Sycamore::Absence do
         end
       end
 
+      # TODO spec the negation of: include_examples 'creating a tree by adding', nil
+      # TODO: include_examples 'creating a tree by adding', Sycamore::Nothing
       include_examples 'creating a tree by adding', number
       include_examples 'creating a tree by adding', [symbol, number, string]
       include_examples 'creating a tree by adding', {symbol => number, symbol => string}
