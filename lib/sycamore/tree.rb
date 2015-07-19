@@ -233,9 +233,7 @@ module Sycamore
 
 
     def each(&block)
-      # require 'pry' ; binding.pry
-      # raise NotImplementedError
-      # TODO spec this in: return enum_for(:each) unless block_given?
+      # return enum_for(__callee__) unless block_given? # TODO spec this in
       case block.arity
         when 1 then @treemap.keys.each(&block)
                else @treemap.each(&block)
@@ -243,6 +241,36 @@ module Sycamore
       # @treemap.each(&block)
     end
 
+    def each_path(with_ancestor: Path::ROOT, &block)
+      return enum_for(__callee__) unless block_given?
+      each do |node, child|
+        if child
+          child.each_path(with_ancestor: with_ancestor.branch(node), &block)
+        else
+          yield Path[with_ancestor, node]
+        end
+      end
+      self
+    end
+
+    alias paths each_path
+
+    def has_path?(*args)
+      raise ArgumentError, "wrong number of arguments (0 for 1)" if args.count == 0
+
+      if args.count == 1
+        arg = args.first
+        if arg.is_a? Path
+          arg.in? self
+        else
+          Path.of(arg).in? self
+        end
+      else
+        Path.of(*args).in? self
+      end
+    end
+
+    alias path? has_path?
 
     # @return [Fixnum] the number of nodes in this tree
     #
@@ -441,6 +469,24 @@ module Sycamore
 
     alias [] child
 
+
+    def fetch(*node_and_default, &block)
+      case node_and_default.size
+        when 1 then node = node_and_default.first
+          tree = @treemap.fetch(node, &block)
+          tree = Nothing if tree.nil?
+          tree
+        when 2 then node, default = *node_and_default
+          if block_given?
+            warn "block supersedes default value argument"
+            fetch(node, &block)
+          else
+            @treemap.fetch(node, default) or Nothing
+          end
+        else raise ArgumentError, "wrong number of arguments (0 for 1)"
+      end
+    end
+
     # If the node has no children.
     #
     def leaf?(node, &block)
@@ -452,7 +498,7 @@ module Sycamore
       node = nodes.first
       query_return case
         when nodes.empty?           then leaves?(self.nodes)
-        # if we get multiple arguments, recursively delegate them as an Enumerable
+        # if we get multiple arguments, delegate them recursively as an Enumerable
         when nodes.size > 1         then leaves?(nodes)
         when Tree.like?(node)       then raise ArgumentError
         when node.is_a?(Enumerable) then node.all? { |node| leaf?(node) }
@@ -460,11 +506,13 @@ module Sycamore
       end
     end
 
+    alias flat? leaves?
     alias external? leaves?
 
     def internal?(*nodes, &block)
       not external?(*nodes, &block) and include?(nodes)
     end
+
 
 
     #####################
@@ -483,6 +531,7 @@ module Sycamore
     def add_child(node, children, &block)
       return command_return if node.nil? or node.equal? Nothing
       return add_node(node, &block) if children.nil? or children.equal?(Nothing) or # TODO: when Absence defined: child.nothing? or child.abent?
+                                      # Enumerable === children
                                       (Enumerable === children and children.empty?)
 
       child = @treemap[node] ||= Tree.new
