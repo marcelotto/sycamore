@@ -1,12 +1,18 @@
 
 # Sycamore
+
 Sycamore is an implementation of a [Tree data structure](http://en.wikipedia.org/wiki/Tree_(data_structure\)) of unordered values, solely based on Ruby's native Hash maps. 
 
-It can be used as a more usable/pleasant/powerful alternative to a standard Ruby Hash (with `Sycamore::Tree`) or Struct/OpenStruct (with `Sycamore::Structure`) or a Set ... whenever all elements are value objects and the order of all elements is irrelevant. It tries to be as close to Ruby's language, spirit and standard library as possible, by being 100% compatible to Ruby's Hash, while using as little as possible overhead to a bare Hash, regarding speed and memory consumption. From a data structure standpoint, a `Sycamore::Tree` is nothing more than a wrapper around a Ruby `Hash`, with a special interpretation and some restrictions on its content. 
+It can be used as a more usable/pleasant/powerful alternative to a standard Ruby Hash (with `Sycamore::Tree`) or Struct/OpenStruct (with `Sycamore::Structure`) or a Set ... whenever all elements are value objects and the order of all elements is irrelevant. [More on: Why `Sycamore::Tree` over `Hash`?]
+
+It tries to be as close to Ruby's language, spirit and standard library as possible, by being 100% compatible to Ruby's Hash, while using as little as possible overhead to a bare Hash, regarding speed and memory consumption. From a data structure standpoint, a `Sycamore::Tree` is nothing more than a wrapper around a Ruby `Hash`, with a special interpretation and some restrictions on its content. 
 [The latter restrictions, by some required and some optional rules to follow. !?] 
 [For some cases, it might have a slight/significant more memory consumption, when ... breite Trees]
 
+
 A `Sycamore::Tree` interprets a Ruby Hash as a set of nodes and a mapping to potential child trees, i.e. other `Sycamore::Tree`s recursivly, containing nodes with more Sycamore trees etc., but the nesting is abstracted away. It provides a Ruby Hash compatible API, which controls the full life-cycle of a `Sycamore::Tree`, without having to take care or even notice the nesting (of Hashs via Trees). Sycamore has a notion of Absence, so the controlled life-cycle begins before the creation, so that Trees get created automatically, but only then, when absolutely required.
+
+So, in essence, in Sycamore there are no `nil`s anymore and we thereby get rid of what Tony Hoare called [his billion-dollar-mistake](http://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare). At least in Ruby, where it is surprisingly easy to implement [in restricted circumstances].
 
 
 ## Installation
@@ -263,6 +269,10 @@ Also note, that `child` and `[]` support a second variant using `Path`s, which w
 
 ### Tree equivalence
 
+
+## Project Status?
+
+??
 
 ## Development
 
