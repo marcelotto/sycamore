@@ -474,8 +474,7 @@ module Sycamore
       case node_and_default.size
         when 1 then node = node_and_default.first
           tree = @treemap.fetch(node, &block)
-          tree = Nothing if tree.nil?
-          tree
+          tree.nil? ? Nothing : tree
         when 2 then node, default = *node_and_default
           if block_given?
             warn "block supersedes default value argument"
