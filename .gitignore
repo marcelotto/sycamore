@@ -11,6 +11,8 @@
 
 # TODO: should be defined another way, since personal folders
 /spike/
+/lib/scratch
+/spec/scratch
 /doc/readme-drafts
 /doc/methods
 /doc

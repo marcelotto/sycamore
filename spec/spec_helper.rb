@@ -3,6 +3,7 @@ require 'sycamore'
 
 SPEC_DIR = File.dirname(__FILE__)
 
+Dir[File.join(SPEC_DIR, 'scratch/support/**/*.rb')].each {|f| require f }
 Dir[File.join(SPEC_DIR, 'support/**/*.rb')].each {|f| require f }
 
 # TODO: How can we implement this without global variables with RSpec?
