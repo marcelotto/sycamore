@@ -855,75 +855,9 @@ describe Sycamore::Tree do
       end
 
       context 'when a corresponding node is absent' do
-        let(:root) { Sycamore::Tree() }
-        let(:child) { root[:property] }
+        # see Tree-Absence interaction spec
 
         # TODO: Really the same behaviour as when node is a leaf?
-
-        describe 'root' do
-          subject { root }
-          it { is_expected.to be_empty }
-        end
-
-        describe 'child' do
-          subject { child }
-          it { is_expected.to     be_a Sycamore::Absence }
-          # it { is_expected.to     be_a Sycamore::Tree }
-          # it { is_expected.to     be   Sycamore::Nothing }
-          it { is_expected.not_to be_nothing }
-          it { is_expected.not_to be_present }
-          it { is_expected.to     be_absent }
-          it { is_expected.to     be_requested }
-          it { is_expected.not_to be_created }
-          it { is_expected.not_to be_installed }
-          it { is_expected.not_to be_absent_parent }
-          it { is_expected.to     be_empty }
-          it { is_expected.not_to include :property } # This relies on Tree#each
-          specify { expect( child.include?(:property) ).to be false }
-        end
-
-        context 'when something gets added to absent child' do
-          let(:more)    { :more }
-          before(:each) { child.add more }
-
-          describe 'root' do
-            subject { root }
-            it { is_expected.to include :property }
-            it { expect( root.include?(:property) ).to be true }
-          end
-
-          describe 'child' do
-            subject { child }
-            it { is_expected.to be_a Sycamore::Absence }
-            # it { is_expected.to     be_a Sycamore::Tree }
-            # it { is_expected.to     be   Sycamore::Nothing }
-            it { is_expected.not_to be_nothing }
-            it { is_expected.not_to be_absent }
-            it { is_expected.to     be_present }
-            it { is_expected.not_to be_requested }
-            it { is_expected.to     be_created }
-            it { is_expected.to     be_installed }
-            it { is_expected.not_to be_empty }
-            it { is_expected.to include more } # This relies on Tree#each
-            specify { expect( child.include?(more) ).to be true }
-          end
-
-          describe 'new present child' do
-            let(:new_child) { root[:property] }
-            subject { new_child }
-            it { is_expected.not_to be_a Sycamore::Absence }
-            it { is_expected.not_to be   Sycamore::Nothing }
-            it { is_expected.to     be_a Sycamore::Tree }
-            it { is_expected.not_to be_nothing }
-            it { is_expected.not_to be_absent }
-            it { is_expected.to     be_present }
-            it { is_expected.not_to be_empty }
-            it { is_expected.to include more } # This relies on Tree#each
-            specify { expect( child.include?(more) ).to be true }
-          end
-
-        end
-
       end
 
     end
