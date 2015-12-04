@@ -8,6 +8,7 @@
 /spec/reports/
 /tmp/
 /examples/*.out.rb
+/spec/examples.txt
 
 # TODO: should be defined another way, since personal folders
 /spike/
@@ -16,3 +17,4 @@
 /doc/readme-drafts
 /doc/methods
 /doc
+

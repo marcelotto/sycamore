@@ -38,3 +38,10 @@ alias another_symbol symbol
 def last_symbol
   $last_symbol
 end
+
+RSpec.configure do |config|
+  config.raise_errors_for_deprecations!
+
+  config.example_status_persistence_file_path = './spec/examples.txt'
+end
+
