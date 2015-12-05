@@ -95,7 +95,7 @@ module Sycamore
 
 
     ################################################################
-    # creation                                                     #
+    # factory methods                                              #
     ################################################################
 
     # creates a Tree and initializes it, by {#add}ing optional initial nodes
@@ -113,7 +113,6 @@ module Sycamore
       add(*args, &block) unless args.empty? # TODO: and not block_given?
     end
 
-    ############################################################################
     # Another convenience method for the constructor. With it, you can write
     #
     #     Sycamore::Tree[...] { ... }
@@ -132,7 +131,6 @@ module Sycamore
       new(args, &block)
     end
 
-    ############################################################################
     # Another convenience method for the constructor. With it, you can write
     #
     #     Sycamore::Tree.from(...) { ... }
@@ -152,7 +150,6 @@ module Sycamore
       new(*args, &block)
     end
 
-    ############################################################################
     # Another convenience method for the constructor. With it, you can write
     #
     #     Sycamore::Tree.from!(...) { ... }
@@ -173,6 +170,63 @@ module Sycamore
       new(*args, &block)
     end
 
+
+    ################################################################
+    # Child construction
+    ################################################################
+
+    def new_child(*args, &block)
+      case
+        when child_constructor.nil? then self.class.new(*args, &block)
+        when child_class            then child_class.new(*args, &block)
+        # TODO: pending Tree#clone
+        # when child_prototype        then child_prototype.clone.add(*args, &block)
+        when child_generator        then child_generator.call
+        else raise "invalid child constructor: #{child_constructor.inspect}"
+      end
+    end
+
+    def child_constructor=(prototype_or_class)
+      case prototype_or_class
+        when Class then self.child_class = prototype_or_class
+        # TODO: pending Tree#clone
+        # when Tree  then self.child_prototype = prototype_or_class
+        else raise ArgumentError, "expected a Sycamore::Tree object or subclass, but got a #{prototype_or_class}"
+      end
+    end
+
+    def child_constructor(&block)
+      @child_constructor
+    end
+
+    def child_class
+      @child_constructor if @child_constructor.is_a? Class
+    end
+
+    def child_class=(tree_class)
+      raise ArgumentError, "expected a Tree subclass, but got a #{tree_class}" unless tree_class <= Tree
+      @child_constructor = tree_class
+    end
+
+
+    # TODO: pending Tree#clone
+    # def child_prototype
+    #   @child_constructor if @child_constructor.is_a? Tree
+    # end
+    #
+    # def child_prototype=(tree)
+    #   raise ArgumentError, "expected a Tree object, but got a #{tree}" unless tree.is_a? Tree
+    #   @child_constructor = tree
+    # end
+
+
+    def child_generator
+      @child_constructor if @child_constructor.is_a? Proc
+    end
+
+    def def_child_generator(&block)
+      @child_constructor = block
+    end
 
     ################################################################
     # general nodes and children API                               #
@@ -533,7 +587,7 @@ module Sycamore
                                       # Enumerable === children
                                       (Enumerable === children and children.empty?)
 
-      child = @treemap[node] ||= Tree.new
+      child = @treemap[node] ||= new_child
       child << children
 
       command_return
@@ -541,7 +595,7 @@ module Sycamore
 
     # TODO: This should be an atomic operation.
     def add_children(tree, &block)
-      return command_return if tree.equal? Nothing or tree.is_a? Absence
+      return command_return if tree.respond_to?(:absent?) and tree.absent?
       raise ArgumentError unless Tree.like?(tree) # TODO: Spec this!
 
       tree.each { |node, child| add_child(node, child) }
@@ -551,7 +605,7 @@ module Sycamore
 
     # TODO: This should be an atomic operation.
     def delete_children(tree, &block)
-      return command_return if tree.equal? Nothing or tree.is_a? Absence
+      return command_return if tree.respond_to?(:absent?) and tree.absent?
       raise ArgumentError unless Tree.like?(tree) # TODO: Spec this!
 
       tree.each do |node, child|
