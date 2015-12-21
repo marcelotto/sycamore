@@ -34,6 +34,7 @@ describe Sycamore::Tree do
 
       context "before require 'sycamore/extension'" do
         it 'raises NoMethodError' do
+          skip "until initialize uses the block and we enabled Tree() again"
           pending "We must ensure sycamore/extension is not required yet!"
           expect { Tree() }.to raise_error NoMethodError
         end
@@ -42,6 +43,7 @@ describe Sycamore::Tree do
       context "after require 'sycamore/extension'" do
         before(:all) { require 'sycamore/extension' }
         it 'creates a Tree' do
+          skip "until initialize uses the block and we enabled Tree() again"
           expect( Tree() ).to be_a Sycamore::Tree
         end
       end
@@ -49,24 +51,27 @@ describe Sycamore::Tree do
     end
 
     context 'when no initial nodes and/or a block given' do
-      specify { expect( Tree() ).to be_a Sycamore::Tree }
-      specify { expect( Tree() ).to be_empty }
+      specify { expect( Sycamore::Tree.new ).to be_a Sycamore::Tree }
+      specify { expect( Sycamore::Tree.new ).to be_empty }
     end
 
     context 'when arguments and/or a block given' do
 
       context 'when a single initial atom value given' do
-        specify { expect( Tree(42) ).to include_node_with 42 }
+        specify { expect( Sycamore::Tree[42] ).to include_node_with 42 }
       end
 
       context 'when a single Enumerable given' do
         let(:enumerable) { [number, string, symbol] }
-        specify { expect( Tree(enumerable) ).to include_nodes_with enumerable }
+        specify { expect( Sycamore::Tree[enumerable] ).to include_nodes_with enumerable }
       end
 
       context 'when multiple atom values given' do
         it 'raises an ArgumentError' do
-          expect { Tree(:foo, :bar, :baz) }.to raise_error ArgumentError
+          expect { Tree.new(:foo, :bar, :baz) }.to raise_error ArgumentError
+        end
+        it 'is possible with Tree.[]' do
+          expect { Tree[:foo, :bar, :baz].to include_nodes_with :foo, :bar, :baz }
         end
       end
 
@@ -278,19 +283,19 @@ describe Sycamore::Tree do
 
   describe '#nothing?' do
     it 'does return false' do
-      expect(Tree().nothing?).to be false
+      expect(Tree.new.nothing?).to be false
     end
   end
 
   describe '#present?' do
     it 'does return true' do
-      expect(Tree().present?).to be true
+      expect(Tree.new.present?).to be true
     end
   end
 
   describe '#absent?' do
     it 'does return false' do
-      expect(Tree().absent?).to be false
+      expect(Tree.new.absent?).to be false
     end
   end
 
@@ -300,19 +305,19 @@ describe Sycamore::Tree do
   describe '#empty?' do
 
     it 'does return true, when the Tree has no nodes' do
-      expect(Tree().empty?).to be_truthy
-      expect(Tree().empty?).to be true
-      expect(Tree(nil).empty?).to be true
-      expect(Tree([nil]).empty?).to be true
-      expect(Tree(Sycamore::Nothing).empty?).to be true
-      expect(Tree([Sycamore::Nothing]).empty?).to be true
+      expect(Tree.new.empty?).to be_truthy
+      expect(Tree.new.empty?).to be true
+      expect(Tree[nil].empty?).to be true
+      expect(Tree.new([nil]).empty?).to be true
+      expect(Tree[Sycamore::Nothing].empty?).to be true
+      expect(Tree.new([Sycamore::Nothing]).empty?).to be true
     end
 
     it 'does return false, when the Tree has nodes' do
-      expect(Tree(42).empty?).to be_falsey
-      expect(Tree(42).empty?).to be false
-      expect(Tree([42]).empty?).to be false
-      expect(Tree(property: :value).empty?).to be false
+      expect(Tree[42].empty?).to be_falsey
+      expect(Tree[42].empty?).to be false
+      expect(Tree[[42]].empty?).to be false
+      expect(Tree[property: :value].empty?).to be false
     end
 
   end
@@ -325,7 +330,7 @@ describe Sycamore::Tree do
       context 'when the atom is in the node set' do
         specify { expect( Tree[1]                  ).to include 1 }
         specify { expect( Tree[42, another_string] ).to include 42 }
-        specify { expect( Tree(property: string)   ).to include :property }
+        specify { expect( Tree[property: string]   ).to include :property }
 
         specify { expect( Tree[0    ].include? 0    ).to be true }
         specify { expect( Tree[''   ].include? ''   ).to be true }
@@ -350,7 +355,7 @@ describe Sycamore::Tree do
         specify { expect( Tree[1, 2].include? [1, 2] ).to be true }
         specify { expect( Tree[1, 2].include? [2, 1] ).to be true }
         specify { expect( Tree[1, 2, 3].include? [1, 2] ).to be true }
-        specify { expect( Tree([:foo, :bar, :baz]).include? [:baz, :foo] ).to be true }
+        specify { expect( Tree[:foo, :bar, :baz].include? [:baz, :foo] ).to be true }
       end
 
       context 'when none of its elements is in the node set' do
@@ -507,7 +512,7 @@ describe Sycamore::Tree do
     context 'when given a sequence of atoms' do
 
       context 'when given a single Enumerable' do
-        specify { expect( Tree(prop1: 1, prop2: [:foo, :bar]).path?(:prop2, :foo) ).to be true }
+        specify { expect( Tree[prop1: 1, prop2: [:foo, :bar]].path?(:prop2, :foo) ).to be true }
         specify { expect( Tree[1 => 2].path?([1, 2])     ).to be true }
         specify { expect( Tree[1 => 2].path?([1, 2, 3])  ).to be false }
         specify { expect( Tree[1 => 2].path?([1, 2, 3])  ).to be false }
@@ -515,7 +520,7 @@ describe Sycamore::Tree do
       end
 
       context 'when given multiple arguments' do
-        specify { expect( Tree(prop1: 1, prop2: [:foo, :bar]).path?(:prop2, :foo) ).to be true }
+        specify { expect( Tree[prop1: 1, prop2: [:foo, :bar]].path?(:prop2, :foo) ).to be true }
         specify { expect( Tree[1 => 2].path?(1, 2)     ).to be true }
         specify { expect( Tree[1 => 2].path?(1, 2, 3)  ).to be false }
         specify { expect( Tree[1 => 2].path?(1, 2, 3)  ).to be false }
@@ -525,7 +530,7 @@ describe Sycamore::Tree do
 
     context 'when no arguments given' do
       it 'raises an ArgumentError' do
-        expect { Tree().path? }.to raise_error ArgumentError
+        expect { Tree.new.path? }.to raise_error ArgumentError
       end
     end
 
@@ -536,7 +541,7 @@ describe Sycamore::Tree do
   describe '#size' do
 
     context 'when empty' do
-      specify { expect( Tree[].size ).to be 0 }
+      specify { expect( Tree.new.size ).to be 0 }
     end
 
     context 'when having one leaf' do
@@ -894,9 +899,9 @@ describe Sycamore::Tree do
         specify { expect( Tree[false => :foo].child(false) ).to include :foo }
 
         specify { expect( Tree[4 => {false => 2}].child(4) ).not_to be_a Sycamore::Absence }
-        specify { expect( Tree[4 => {false => 2}].child(4) ).to eq Tree(false => 2) }
+        specify { expect( Tree[4 => {false => 2}].child(4) ).to eq Tree[false => 2] }
         specify { expect( Tree[4 => {false => 2}].child(4).child(false) ).not_to be_a Sycamore::Absence }
-        specify { expect( Tree[4 => {false => 2}].child(4).child(false) ).to eq Tree(2) }
+        specify { expect( Tree[4 => {false => 2}].child(4).child(false) ).to eq Tree[2] }
       end
 
       context 'when a corresponding node is present' do
@@ -925,7 +930,7 @@ describe Sycamore::Tree do
         end
 
         context 'when the node is a leaf' do
-          let(:root) { Sycamore::Tree(42) }
+          let(:root) { Sycamore::Tree[42] }
           let(:child) { root.child(42) }
 
           # TODO: Really the same behaviour as when node absent?
@@ -973,16 +978,16 @@ describe Sycamore::Tree do
       context 'when the given atom is a boolean' do
         specify { expect { Sycamore::Tree[].fetch(true) }.to raise_error KeyError }
         specify { expect { Sycamore::Tree[].fetch(false) }.to raise_error KeyError }
-        specify { expect( Sycamore::Tree(true).fetch(true) ).to be Sycamore::Nothing }
-        specify { expect( Sycamore::Tree(false).fetch(false) ).to be Sycamore::Nothing }
+        specify { expect( Sycamore::Tree[true].fetch(true) ).to be Sycamore::Nothing }
+        specify { expect( Sycamore::Tree[false].fetch(false) ).to be Sycamore::Nothing }
       end
 
       context 'when a corresponding node is present' do
-        subject(:tree) { Sycamore::Tree(property: :value) }
+        subject(:tree) { Sycamore::Tree[property: :value] }
         specify { expect( tree.fetch(:property) ).to be tree.child(:property) }
 
         context 'when the node is a leaf' do
-          specify { expect( Sycamore::Tree(42).fetch(42) ).to be Sycamore::Nothing }
+          specify { expect( Sycamore::Tree[42].fetch(42) ).to be Sycamore::Nothing }
         end
       end
 
@@ -1010,11 +1015,11 @@ describe Sycamore::Tree do
       end
 
       context 'when a corresponding node is present' do
-        subject(:tree) { Sycamore::Tree(property: :value) }
+        subject(:tree) { Sycamore::Tree[property: :value] }
         specify { expect( tree.fetch(:property, :default) ).to be tree.child(:property) }
 
         context 'when the node is a leaf' do
-          specify { expect( Sycamore::Tree(:property).fetch(:property, :default) ).to be Sycamore::Nothing }
+          specify { expect( Sycamore::Tree[:property].fetch(:property, :default) ).to be Sycamore::Nothing }
         end
       end
 
@@ -1043,11 +1048,11 @@ describe Sycamore::Tree do
       end
 
       context 'when a corresponding node is present' do
-        subject(:tree) { Sycamore::Tree(property: :value) }
+        subject(:tree) { Sycamore::Tree[property: :value] }
         specify { expect( tree.fetch(:property) { 42 } ).to be tree.child(:property) }
 
         context 'when the node is a leaf' do
-          specify { expect( Sycamore::Tree(:property).fetch(:property) { 42 } ).to be Sycamore::Nothing }
+          specify { expect( Sycamore::Tree[:property].fetch(:property) { 42 } ).to be Sycamore::Nothing }
         end
       end
 
@@ -1076,11 +1081,11 @@ describe Sycamore::Tree do
       end
 
       context 'when a corresponding node is present' do
-        subject(:tree) { Sycamore::Tree(property: :value) }
+        subject(:tree) { Sycamore::Tree[property: :value] }
         specify { expect( tree.fetch(:property, :default) { 42 } ).to be tree.child(:property) }
 
         context 'when the node is a leaf' do
-          specify { expect( Sycamore::Tree(:property).fetch(:property, :default) { 42 } ).to be Sycamore::Nothing }
+          specify { expect( Sycamore::Tree[:property].fetch(:property, :default) { 42 } ).to be Sycamore::Nothing }
         end
       end
 
@@ -1139,7 +1144,7 @@ describe Sycamore::Tree do
       end
 
       context 'when the corresponding node is absent' do
-        specify { expect( Tree().leaf?(42)   ).to be false }
+        specify { expect( Tree.new.leaf?(42)   ).to be false }
         specify { expect( Tree[43].leaf?(42) ).to be false }
       end
 
@@ -1195,7 +1200,7 @@ describe Sycamore::Tree do
 
     context 'when given something Tree.like' do
       it 'raises an ArgumentError' do
-        expect { Tree().leaves?(a: 1) }.to raise_error ArgumentError
+        expect { Tree.new.leaves?(a: 1) }.to raise_error ArgumentError
       end
     end
 
@@ -1216,17 +1221,17 @@ describe Sycamore::Tree do
       end
 
       context 'when the corresponding node is absent' do
-        specify { expect( Tree().external?(42)   ).to be false }
+        specify { expect( Tree.new.external?(42)   ).to be false }
         specify { expect( Tree[43].external?(42) ).to be false }
-        specify { expect( Tree().internal?(42)   ).to be false }
+        specify { expect( Tree.new.internal?(42)   ).to be false }
         specify { expect( Tree[43].internal?(42) ).to be false }
       end
     end
 
     context 'when given something Tree.like' do
       it 'raises an ArgumentError' do
-        expect { Tree().external?(a: 1) }.to raise_error ArgumentError
-        expect { Tree().internal?(a: 1) }.to raise_error ArgumentError
+        expect { Tree.new.external?(a: 1) }.to raise_error ArgumentError
+        expect { Tree.new.internal?(a: 1) }.to raise_error ArgumentError
       end
     end
   end
@@ -1972,7 +1977,7 @@ describe Sycamore::Tree do
 
     include_examples 'every inspect string', Sycamore::Tree.new
     include_examples 'every inspect string', Sycamore::Tree[1,2,3]
-    include_examples 'every inspect string', Sycamore::Tree(foo: 1, bar: [2,3])
+    include_examples 'every inspect string', Sycamore::Tree[foo: 1, bar: [2,3]]
 
   end
 

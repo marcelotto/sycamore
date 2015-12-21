@@ -5,7 +5,7 @@ describe Sycamore::Tree do
     context 'when given a single atom' do
       context 'when a corresponding node is absent' do
 
-        let(:root) { Sycamore::Tree() }
+        let(:root) { Sycamore::Tree.new }
         let(:absent_child) { root[:absent_node_child] }
 
         describe 'root' do

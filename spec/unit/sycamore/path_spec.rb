@@ -139,12 +139,12 @@ describe Sycamore::Path do
     end
 
     context 'when given a Tree' do
-      specify { expect( Sycamore::Path[1    ].in? Sycamore::Tree(1=>2) ).to be true }
-      specify { expect( Sycamore::Path[1,2  ].in? Sycamore::Tree(1=>2) ).to be true }
-      specify { expect( Sycamore::Path[1,2,3].in? Sycamore::Tree(1=>2) ).to be false }
-      specify { expect( Sycamore::Path[1,2,3].in? Sycamore::Tree(1=>{2=>3}) ).to be true }
-      specify { expect( Sycamore::Path[2    ].in? Sycamore::Tree(1=>2) ).to be false }
-      specify { expect( Sycamore::Path[1,2  ].in? Sycamore::Tree(1=>[2,3]) ).to be true }
+      specify { expect( Sycamore::Path[1    ].in? Sycamore::Tree[1=>2] ).to be true }
+      specify { expect( Sycamore::Path[1,2  ].in? Sycamore::Tree[1=>2] ).to be true }
+      specify { expect( Sycamore::Path[1,2,3].in? Sycamore::Tree[1=>2] ).to be false }
+      specify { expect( Sycamore::Path[1,2,3].in? Sycamore::Tree[1=>{2=>3}] ).to be true }
+      specify { expect( Sycamore::Path[2    ].in? Sycamore::Tree[1=>2] ).to be false }
+      specify { expect( Sycamore::Path[1,2  ].in? Sycamore::Tree[1=>[2,3]] ).to be true }
     end
   end
 

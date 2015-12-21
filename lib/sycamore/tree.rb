@@ -2,26 +2,6 @@ module Sycamore
 
   ############################################################################
   #
-  # Tree factory function
-  #
-  # A convenience method for the constructor. With it, you can write
-  #
-  #     Sycamore::Tree(...) { ... }
-  #
-  # instead of the longer
-  #
-  #     Sycamore::Tree.new(...) { ... }
-  #
-  # @see For an even more convenient method, see the unqualified usage with
-  #   the global {::Tree()} function.
-  #
-  def self.Tree(*args, &block)
-    Sycamore::Tree.new(*args, &block)
-  end
-
-
-  ############################################################################
-  #
   # A data structure for a mapping of nodes to other {Tree}s, containing nodes
   # with more {Tree}s as children and so on recursively.
   #
@@ -772,4 +752,24 @@ module Sycamore
     end
 
   end
+
+  ############################################################################
+  #
+  # Tree factory function
+  #
+  # A convenience method for the constructor. With it, you can write
+  #
+  #     Sycamore::Tree { ... }
+  #
+  # instead of the longer
+  #
+  #     Sycamore::Tree.new { ... }
+  #
+  # @see For an even more convenient method, see the unqualified usage with
+  #   the global {::Tree()} function.
+  #
+  # def self.Tree(&block)
+  #   Sycamore::Tree.new(&block)
+  # end
+
 end
