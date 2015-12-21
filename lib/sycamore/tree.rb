@@ -57,39 +57,48 @@ module Sycamore
 
     include CQS
 
-    # TODO: Define the following arrays as CONSTANTS, which get returned by the class methods.
+    ADDITIVE_COMMAND_METHODS =
+      %i[add << add_node add_nodes add_child add_children]
+    DESTRUCTIVE_COMMAND_METHODS =
+      %i[delete >> delete_node delete_nodes delete_children clear]
+    COMMAND_METHODS =
+      ADDITIVE_COMMAND_METHODS + DESTRUCTIVE_COMMAND_METHODS
 
-    # @return [Array<Symbol>] all command method names of this class
+    PREDICATE_METHODS =
+      %i[empty? nothing? present? absent? has_key? include? include_node?
+         leaf? leaves? internal? external?]
+    QUERY_METHODS =
+      PREDICATE_METHODS + %i[size nodes keys child] << :[]
+
+
+    # @return [Array<Symbol>] the names of all methods, which can change the state of a Tree
     #
     def self.command_methods
-      additive_command_methods + destructive_command_methods
+      COMMAND_METHODS
     end
 
-    # @return [Array<Symbol>] all command method names of methods of this class,
-    #                           which only add elements
+    # @return [Array<Symbol>] the names of all command methods, which add elements to a Tree only
     #
     def self.additive_command_methods
-      %i[add << add_node add_nodes add_child add_children]
+      ADDITIVE_COMMAND_METHODS
     end
 
-    # @return [Array<Symbol>] all command method names of methods of this class,
-    #                           which only delete elements
+    # @return [Array<Symbol>] the names of all command methods, which delete elements from a Tree only
     #
     def self.destructive_command_methods
-      %i[delete >> delete_node delete_nodes delete_children clear]
+      DESTRUCTIVE_COMMAND_METHODS
     end
 
-    # @return [Array<Symbol>] all query method names of this class
+    # @return [Array<Symbol>] the names of all methods, which side-effect-freeze return only a value
     #
     def self.query_methods
-      self.predicate_methods + %i[size nodes keys child] << :[]
+      QUERY_METHODS
     end
 
-    # @return [Array<Symbol>] all predicate method names of this class
+    # @return [Array<Symbol>] the names of all query methods, which return a boolean
     #
     def self.predicate_methods
-      %i[empty? nothing? present? absent? include? include_node? has_key?
-         leaf? leaves? internal? external?]
+      PREDICATE_METHODS
     end
 
 
