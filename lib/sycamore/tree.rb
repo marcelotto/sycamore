@@ -2,8 +2,8 @@ module Sycamore
 
   ############################################################################
   #
-  # A data structure for a mapping of nodes to other {Tree}s, containing nodes
-  # with more {Tree}s as children and so on recursively.
+  # A Sycamore tree is a set of nodes with links to their child trees,
+  # consisting of the child nodes and their child trees etc.
   #
   # TODO: include the usage demonstrations from the dedicated Markdown documents,
   #         also included in the {README.md}? If not, add a reference to {README.md}.
@@ -89,9 +89,9 @@ module Sycamore
 
     # creates a Tree and initializes it, by {#add}ing optional initial nodes
     #
-    # When arguments and/or a block given, it delegates them to {#add}.
+    # When arguments and/or a block given, they both get delegated to {#add}.
     #
-    # If you want to provide multiple initial leaves as arguments, use Tree[].
+    # TODO: If you want to provide multiple initial leaves as arguments, use Tree[].
     # (We don't support it here, since we want the possibility to receive
     # additional arguments, e.g. for options etc.)
     #
@@ -102,7 +102,7 @@ module Sycamore
       add(*args, &block) unless args.empty? # TODO: and not block_given?
     end
 
-    # Another convenience method for the constructor. With it, you can write
+    # A convenience method for the constructor. With it, you can write
     #
     #     Sycamore::Tree[...] { ... }
     #
@@ -120,7 +120,7 @@ module Sycamore
       new(args, &block)
     end
 
-    # Another convenience method for the constructor. With it, you can write
+    # A convenience method for the constructor. With it, you can write
     #
     #     Sycamore::Tree.from(...) { ... }
     #
@@ -139,7 +139,7 @@ module Sycamore
       new(*args, &block)
     end
 
-    # Another convenience method for the constructor. With it, you can write
+    # A convenience method for the constructor. With it, you can write
     #
     #     Sycamore::Tree.from!(...) { ... }
     #
@@ -260,7 +260,7 @@ module Sycamore
                                           self.child(node).include?(child) )
             end
           when elements.is_a?(Enumerable)
-            elements.all? { |element| include_node? element }
+            elements.all? { |element| include_node? element } # TODO: use include_nodes?
           else
             include_node? elements
         end)
@@ -392,6 +392,13 @@ module Sycamore
     #  query interface  #
     #####################
 
+    # The set of child nodes of the parent.
+    #
+    # @example
+    #   Tree[:foo].nodes                    # => [:foo]
+    #   Tree[foo: i%[bar baz]].nodes        # => [:foo]
+    #   Tree[foo: i%[bar baz]][:foo].nodes  # => [:bar, :baz]
+    #
     # @return [Array<Object>] the nodes of this tree (without their children)
     #
     def nodes

@@ -3,9 +3,17 @@ require 'singleton'
 module Sycamore
 
   ############################################################################
-  # The Nothing Tree Singleton class
+  # The Nothing Tree singleton class
   #
-  # It is a normal empty Sycamore Tree, that is immutable.
+  # The Nothing Tree is an empty Sycamore Tree, and means "there are no nodes".
+  #
+  # It is immutable:
+  # - Query method calls, will behave like a normal, empty Tree.
+  # - Destructive command calls, will be ignored, i.e. being no-ops.
+  # - But all additive command calls, will raise a NothingAdditionError < NothingAccessError # TODO
+  #
+  # It is the only Tree object that will `true` on a #nothing call.
+  # But like Absence, it will return `true` on #absent? and `false` on #present?.
   #
   class NothingTree < Tree
     include Singleton
@@ -32,6 +40,8 @@ module Sycamore
       query_return true
     end
 
+    # TODO: Destructive commands should be no-ops in general
+    #
     # as Nothing already is "clear", this command method doesn't do any harm
     #
     def clear
