@@ -863,6 +863,51 @@ describe Sycamore::Tree do
   end
 
 
+  describe '#node' do
+
+    shared_examples 'result invariants' do
+      it { is_expected.not_to be_an Enumerable }
+    end
+
+    context 'when empty' do
+      subject { Sycamore::Tree[].node }
+      include_examples 'result invariants'
+      it { is_expected.to be_nil }
+    end
+
+    context 'when containing a single leaf node' do
+      let(:atom) { symbol }
+      subject { Sycamore::Tree[atom].node }
+      include_examples 'result invariants'
+      it { is_expected.to eq atom }
+    end
+
+
+    context 'when containing multiple nodes' do
+      context 'when no reduce function specified' do
+        it 'does raise a TypeError' do
+          expect { Sycamore::Tree[:foo, :bar].node }.to raise_error TypeError
+          expect { Sycamore::Tree[foo: 1, bar: 2, baz: nil].node }.to raise_error TypeError
+        end
+      end
+
+      context 'when a reducer or selector function specified' do
+        it 'does return the application of reduce function on the node set' do
+          pending
+          expect( Sycamore::Tree[1,2,3].node(&:max) ).to eq 3
+          expect( Sycamore::Tree[1,2,3]
+                    .node { |nodes| nodes.reduce { |value, sum| sum += value } }
+                ).to eq 6
+        end
+      end
+    end
+
+    context 'when another depth than the default 0 given' do
+      it 'does merge the nodes of all children down to the given tree depth'
+    end
+
+  end
+
   ################################################################
   # Children API                                                 #
   ################################################################

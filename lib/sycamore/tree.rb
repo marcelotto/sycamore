@@ -407,6 +407,15 @@ module Sycamore
 
     alias keys nodes  # Hash compatibility
 
+    # TODO: provide support for selector and reducer functions
+    def node
+      nodes = self.nodes
+      raise TypeError, "no implicit conversion of node set #{nodes} into a single node" if
+        nodes.size > 1
+      query_return nodes.first
+    end
+
+
     #####################
     # command interface #
     #####################
