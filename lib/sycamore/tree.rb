@@ -395,9 +395,10 @@ module Sycamore
     # The set of child nodes of the parent.
     #
     # @example
-    #   Tree[:foo].nodes                    # => [:foo]
-    #   Tree[foo: i%[bar baz]].nodes        # => [:foo]
-    #   Tree[foo: i%[bar baz]][:foo].nodes  # => [:bar, :baz]
+    #   child = [:bar, :baz]
+    #   tree = Tree[foo: child]
+    #   tree.nodes        # => [:foo]
+    #   tree[:foo].nodes  # => [:bar, :baz]
     #
     # @return [Array<Object>] the nodes of this tree (without their children)
     #
@@ -407,7 +408,22 @@ module Sycamore
 
     alias keys nodes  # Hash compatibility
 
-    # TODO: provide support for selector and reducer functions
+    # The only child node of the parent or an Exception, if more nodes present
+    #
+    # @example
+    #   Tree[1].node  # => 1
+    #   Tree.new.node  # => nil
+    #
+    #   matz = Tree[birthday: DateTime.parse('1965-04-14')]
+    #   matz[:birthday].node  # => #<DateTime: 1965-04-14T00:00:00+00:00 ((2438865j,0s,0n),+0s,2299161j)>
+    #
+    #   Tree[1,2].node  # => TypeError: no implicit conversion of node set [1, 2] into a single node
+    #
+    # @return [Object] the single present node or nil, if no nodes present
+    # @raise [TypeError] if more than one node present
+    #
+    # @todo Provide support for selector and reducer functions.
+    # @todo Raise a more specific Exception than TypeError.
     def node
       nodes = self.nodes
       raise TypeError, "no implicit conversion of node set #{nodes} into a single node" if
