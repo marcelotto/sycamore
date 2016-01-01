@@ -4,7 +4,7 @@ describe Sycamore::Tree do
 
   it { is_expected.to be_a Enumerable }
 
-  specify { expect { Sycamore::Tree[].treemap }.to raise_error NoMethodError }
+  specify { expect { Sycamore::Tree[].data }.to raise_error NoMethodError }
 
   ############################################################################
   # construction

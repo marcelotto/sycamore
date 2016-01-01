@@ -4,6 +4,8 @@ module Sycamore
   #
   # A Sycamore tree is a set of nodes with links to their child trees,
   # consisting of the child nodes and their child trees etc.
+  # The links from a node to its child tree is stored in a Hash,
+  # the {@data} instance variable.
   #
   # @see {README.md} for an introduction
   #
@@ -11,8 +13,8 @@ module Sycamore
 
     include Enumerable
 
-    attr_reader :treemap
-    protected :treemap
+    attr_reader :data
+    private :data
 
     ################################################################
     # CQS                                                          #
@@ -22,16 +24,17 @@ module Sycamore
 
     ADDITIVE_COMMAND_METHODS =
       %i[add << add_node add_nodes add_child add_children]
+
     DESTRUCTIVE_COMMAND_METHODS =
       %i[delete >> delete_node delete_nodes delete_children clear]
-    COMMAND_METHODS =
-      ADDITIVE_COMMAND_METHODS + DESTRUCTIVE_COMMAND_METHODS
+
+    COMMAND_METHODS = ADDITIVE_COMMAND_METHODS + DESTRUCTIVE_COMMAND_METHODS
 
     PREDICATE_METHODS =
       %i[empty? nothing? present? absent? has_key? include? include_node?
          leaf? leaves? internal? external?]
-    QUERY_METHODS =
-      PREDICATE_METHODS + %i[size nodes keys child] << :[]
+
+    QUERY_METHODS = PREDICATE_METHODS + %i[size nodes keys child] << :[]
 
 
     # @return [Array<Symbol>] the names of all methods, which can change the state of a Tree
@@ -65,7 +68,6 @@ module Sycamore
     end
 
 
-
     ########################################################################
     # construction
     ########################################################################
@@ -73,7 +75,7 @@ module Sycamore
     # creates a new empty Tree
     #
     def initialize
-      @treemap = Hash.new
+      @data = Hash.new
     end
 
     # creates a new Tree and initializes it with the given data
@@ -90,7 +92,7 @@ module Sycamore
     #
     def self.with(*args)
       tree = new
-      tree.add(args.count == 1 ? args.first : args) unless args.empty?
+      tree.add( args.size == 1 ? args.first : args ) unless args.empty?
       tree
     end
 
@@ -168,7 +170,7 @@ module Sycamore
     # @return [Boolean] if this tree is empty, meaning including no nodes
     #
     def empty?
-      query_return @treemap.empty?
+      query_return @data.empty?
     end
 
     # @todo or Absence?
@@ -207,7 +209,7 @@ module Sycamore
     end
 
     def include_node?(node)
-      @treemap.include?(node)
+      @data.include?(node)
     end
 
     alias has_key? include_node?  # Hash compatibility
@@ -218,10 +220,10 @@ module Sycamore
     def each(&block)
       # return enum_for(__callee__) unless block_given? # TODO spec this in
       case block.arity
-        when 1 then @treemap.keys.each(&block)
-               else @treemap.each(&block)
+        when 1 then @data.keys.each(&block)
+               else @data.each(&block)
       end
-      # @treemap.each(&block)
+      # @data.each(&block)
     end
 
     def each_path(with_ancestor: Path::ROOT, &block)
@@ -258,7 +260,7 @@ module Sycamore
     # @return [Fixnum] the number of nodes in this tree
     #
     def size
-      query_return @treemap.size
+      query_return @data.size
     end
 
 
@@ -317,7 +319,7 @@ module Sycamore
     # @return self as a proper command method (see Sycamore::CQS#command_return)
     #
     def clear
-      @treemap.clear
+      @data.clear
 
       command_return
     end
@@ -343,7 +345,7 @@ module Sycamore
     # @return [Array<Object>] the nodes of this tree (without their children)
     #
     def nodes
-      query_return @treemap.keys
+      query_return @data.keys
     end
 
     alias keys nodes  # Hash compatibility
@@ -399,7 +401,7 @@ module Sycamore
       return add_children(node) if Tree.like? node
       raise NestedNodeSet if node.is_a? Enumerable
 
-      @treemap[node] ||= nil
+      @data[node] ||= nil
 
       command_return
     end
@@ -455,7 +457,7 @@ module Sycamore
       return delete_children(node) if Tree.like? node
       raise NestedNodeSet if node.is_a? Enumerable
 
-      @treemap.delete(node)
+      @data.delete(node)
 
       command_return
     end
@@ -479,7 +481,7 @@ module Sycamore
 
     def child(node)
       return query_return Nothing if node.nil? or node.equal? Nothing
-      query_return @treemap[node] || Absence.at(self, node)
+      query_return @data[node] || Absence.at(self, node)
     end
 
     alias [] child
@@ -488,14 +490,14 @@ module Sycamore
     def fetch(*node_and_default, &block)
       case node_and_default.size
         when 1 then node = node_and_default.first
-          tree = @treemap.fetch(node, &block)
+          tree = @data.fetch(node, &block)
           tree.nil? ? Nothing : tree
         when 2 then node, default = *node_and_default
           if block_given?
             warn "block supersedes default value argument"
             fetch(node, &block)
           else
-            @treemap.fetch(node, default) or Nothing
+            @data.fetch(node, default) or Nothing
           end
         else raise ArgumentError, "wrong number of arguments (0 for 1)"
       end
@@ -504,8 +506,8 @@ module Sycamore
     # If the node has no children.
     #
     def leaf?(node)
-      query_return @treemap.include?(node) &&
-                     ( (child = @treemap[node]).nil? || child.empty? )
+      query_return @data.include?(node) &&
+                     ( (child = @data[node]).nil? || child.empty? )
     end
 
     def leaves?(*nodes)
@@ -548,7 +550,7 @@ module Sycamore
                                   # Enumerable === children
                                   (Enumerable === children and children.empty?)
 
-      child = @treemap[node] ||= new_child
+      child = @data[node] ||= new_child
       child << children
 
       command_return
@@ -586,11 +588,11 @@ module Sycamore
     ################################################################
 
     def hash
-      [@treemap, self.class].hash
+      [@data, self.class].hash
     end
 
     def eql?(other)
-      other.instance_of?(self.class) and self.treemap.eql?(other.treemap)
+      other.instance_of?(self.class) and @data.eql?(other.data)
     end
 
     # TODO: What should be the semantics of #==?
@@ -600,7 +602,7 @@ module Sycamore
     # @todo Use coercion! Like Equalizer#==.  But here or in ===?
     # @todo Try to convert the other.to_tree ... ? as a coercion? Here or in ===?
     # def ==(other)
-    #   other.instance_of?(self.class) and self.@treemap == other.@treemap
+    #   other.instance_of?(self.class) and self.@data == other.@data
     # end
 
     alias == eql? # temporary solution. TODO: Remove this.
@@ -673,7 +675,7 @@ module Sycamore
         when leaves?  then ( size == 1 ? nodes.first : nodes )
         else
           hash = {}
-          @treemap.each do |node, child|
+          @data.each do |node, child|
             hash[node] = child.to_h
           end
           hash
@@ -711,7 +713,7 @@ module Sycamore
     # Various other Ruby protocols                                 #
     ################################################################
 
-    # overrides {Object#freeze} by delegating it to the internal hash {@treemap}
+    # overrides {Object#freeze} by delegating it to the internal hash {@data}
     #
     # TODO: How to do proper links with YARD and markdown support?
     #
@@ -719,7 +721,7 @@ module Sycamore
     # @see Ruby's {http://ruby-doc.org/core-2.2.2/Object.html#method-i-freeze Object#freeze}
     #
     def freeze
-      @treemap.freeze
+      @data.freeze
       super
     end
 

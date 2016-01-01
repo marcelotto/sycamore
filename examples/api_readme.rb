@@ -32,7 +32,7 @@ OUT.puts '# Nodes'
 OUT.puts
 
 print_eval 'tree.empty?'
-# TODO: Remove this from the README: print_eval 'tree.add_node(42)' # => #<Sycamore::Tree:0x0123456789abcd @@@treemap={42=>nil}>
+# TODO: Remove this from the README: print_eval 'tree.add_node(42)' # => #<Sycamore::Tree:0x0123456789abcd @@@data={42=>nil}>
 print_eval 'tree.nodes'
 
 OUT.puts
