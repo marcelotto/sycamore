@@ -11,20 +11,20 @@ describe Sycamore::Tree do
   ############################################################################
 
   describe '#initialize' do
-    context 'when no initial nodes and/or a block given' do
+    context 'when given no initial nodes and/or a block' do
       specify { expect( Sycamore::Tree.new ).to be_a Sycamore::Tree }
       specify { expect( Sycamore::Tree.new ).to be_empty }
     end
   end
 
   describe '.with' do
-    context 'when no args given' do
+    context 'when given no args' do
       subject { Sycamore::Tree[] }
       it { is_expected.to be_a Sycamore::Tree }
       it { is_expected.to be_empty }
     end
 
-    context 'when one argument given' do
+    context 'when given one argument' do
       context 'when the argument is not an enumerable' do
         subject(:tree) { Sycamore::Tree[1] }
 
@@ -48,16 +48,25 @@ describe Sycamore::Tree do
       end
     end
 
-    context 'when multiple arguments given' do
-      it 'does initialize the new tree with the given values' do
-        expect( Sycamore::Tree[1, 2]       ).to include_nodes_with 1, 2
-        expect( Sycamore::Tree[1, 2, 2]    ).to include_nodes_with 1, 2
-        expect( Sycamore::Tree[1, 2].size  ).to be 2
-        expect( Sycamore::Tree[1, 2, :foo] ).to include_nodes_with 1, 2, :foo
+    context 'when given multiple arguments' do
+      context 'when none of the arguments is an Enumerable' do
+        it 'does initialize the new tree with the given values' do
+          expect( Sycamore::Tree[1, 2]       ).to include_nodes_with 1, 2
+          expect( Sycamore::Tree[1, 2, 2]    ).to include_nodes_with 1, 2
+          expect( Sycamore::Tree[1, 2].size  ).to be 2
+          expect( Sycamore::Tree[1, 2, :foo] ).to include_nodes_with 1, 2, :foo
+        end
+      end
+
+      context 'when some argument is an Enumerable' do
+        it 'does raise an NestedNodeSet exception' do
+          expect { Sycamore::Tree[[1, 2], [3, 4]] }.to raise_error Sycamore::NestedNodeSet
+          expect { Sycamore::Tree[[1], [2]] }.to raise_error Sycamore::NestedNodeSet
+        end
       end
     end
 
-    context 'when hash arguments given' do
+    context 'when given a hash argument' do
       subject { Sycamore::Tree[a: 1, b: 2] }
       it { is_expected.to include :a }
       it { is_expected.to include :b }
