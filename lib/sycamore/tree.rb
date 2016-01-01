@@ -14,7 +14,7 @@ module Sycamore
     include Enumerable
 
     attr_reader :data
-    private :data
+    protected :data
 
     ################################################################
     # CQS                                                          #
