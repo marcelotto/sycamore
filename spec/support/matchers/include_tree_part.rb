@@ -11,8 +11,9 @@ RSpec::Matchers.define :include_node_with do |node|
   end
 end
 
-RSpec::Matchers.define :include_nodes_with do |nodes|
+RSpec::Matchers.define :include_nodes_with do |*nodes|
   match do |this_tree|
+    nodes = nodes.first if nodes.count == 1
     expect(this_tree).to include_tree_part nodes
   end
 end
@@ -22,4 +23,3 @@ RSpec::Matchers.define :include_tree_with do |tree|
     expect(this_tree).to include_tree_part tree
   end
 end
-

@@ -5,24 +5,7 @@ module Sycamore
   # A Sycamore tree is a set of nodes with links to their child trees,
   # consisting of the child nodes and their child trees etc.
   #
-  # TODO: include the usage demonstrations from the dedicated Markdown documents,
-  #         also included in the {README.md}? If not, add a reference to {README.md}.
-  #
-  # = Usage =
-  #
-  # == Creation
-  #
-  # == Nodes
-  #
-  # == Children
-  #
-  # == Absence and the Nothing tree
-  #
-  # == Equivalence
-  #
-  # == Traversal
-  #
-  # == Enumerable
+  # @see {README.md} for an introduction
   #
   class Tree
 
@@ -83,93 +66,50 @@ module Sycamore
 
 
 
-    ################################################################
-    # factory methods                                              #
-    ################################################################
+    ########################################################################
+    # construction
+    ########################################################################
 
-    # creates a Tree and initializes it, by {#add}ing optional initial nodes
+    # creates a new empty Tree
     #
-    # When arguments and/or a block given, they both get delegated to {#add}.
+    def initialize
+      @treemap = Hash.new
+    end
+
+    # creates a new Tree and initializes it with the given data
     #
-    # TODO: If you want to provide multiple initial leaves as arguments, use Tree[].
-    # (We don't support it here, since we want the possibility to receive
-    # additional arguments, e.g. for options etc.)
+    # @example
+    #   Tree[1]           # => 1
+    #   Tree[1, 2, 3]     # => [1,2,3]
+    #   Tree[1, 2, 2, 3]  # => [1,2,3]
+    #   Tree[x: 1, y: 2]  # => {:x=>1, :y=>2}
     #
     # @param (see #add)
     #
-    def initialize(*args, &block)
-      @treemap = Hash.new
-      add(*args, &block) unless args.empty? # TODO: and not block_given?
+    # @return [Tree] initialized with the given data
+    #
+    def self.with(*args)
+      tree = new
+      tree.add(args.count == 1 ? args.first : args) unless args.empty?
+      tree
     end
 
-    # A convenience method for the constructor. With it, you can write
-    #
-    #     Sycamore::Tree[...] { ... }
-    #
-    # instead of the longer
-    #
-    #     Sycamore::Tree.new(...) { ... }
-    #
-    # If you want to specify a block, you must use the Sycamore.Tree() factory method.
-    #
-    # @return [Tree] created from the given or data, or Nothing if no given or only nil values given
-    #
-    def self.[](*args, &block)
-      args = args.first if args.count == 1
-
-      new(args, &block)
-    end
-
-    # A convenience method for the constructor. With it, you can write
-    #
-    #     Sycamore::Tree.from(...) { ... }
-    #
-    # instead of
-    #
-    #     Sycamore::Tree.new(...) { ... }
-    #
-    # But it will return Nothing, if no args given.
-    #
-    # @return [Tree] created from the given or data, or Nothing if no given or only nil values given
-    #
-    def self.from(*args, &block)
-      args.compact!
-      return Nothing if args.empty? and not block_given?
-
-      new(*args, &block)
-    end
-
-    # A convenience method for the constructor. With it, you can write
-    #
-    #     Sycamore::Tree.from!(...) { ... }
-    #
-    # instead of
-    #
-    #     Sycamore::Tree.new(...) { ... }
-    #
-    # But it will raise an ArgumentError, if no args given.
-    #
-    # @return [Tree] created from the given or data
-    # @raise ArgumentError if no args or only nil values given
-    #
-    def self.from!(*args, &block)
-      args.compact!
-      raise ArgumentError if args.empty? and not block_given?
-
-      new(*args, &block)
+    class << self
+      alias from with
+      alias [] with
     end
 
 
-    ################################################################
-    # Child construction
-    ################################################################
+    ######################
+    # Child construction #
+    ######################
 
-    def new_child(*args, &block)
+    def new_child(*args)
       case
-        when child_constructor.nil? then self.class.new(*args, &block)
-        when child_class            then child_class.new(*args, &block)
+        when child_constructor.nil? then self.class.new(*args)
+        when child_class            then child_class.new(*args)
         # TODO: pending Tree#clone
-        # when child_prototype        then child_prototype.clone.add(*args, &block)
+        # when child_prototype        then child_prototype.clone.add(*args)
         when child_generator        then child_generator.call
         else raise "invalid child constructor: #{child_constructor.inspect}"
       end
@@ -184,7 +124,7 @@ module Sycamore
       end
     end
 
-    def child_constructor(&block)
+    def child_constructor
       @child_constructor
     end
 
@@ -338,11 +278,11 @@ module Sycamore
     #
     # @see #add_nodes
     #
-    def add(nodes_or_struct, &block)
+    def add(nodes_or_struct)
       if Tree.like? nodes_or_struct
-        add_children(nodes_or_struct, &block)
+        add_children(nodes_or_struct)
       else
-        add_nodes(nodes_or_struct, &block)
+        add_nodes(nodes_or_struct)
       end
       command_return
     end
@@ -361,11 +301,11 @@ module Sycamore
     #
     # @see #add_nodes
     #
-    def delete(nodes_or_struct, &block)
+    def delete(nodes_or_struct)
       if Tree.like? nodes_or_struct
-        delete_children(nodes_or_struct, &block)
+        delete_children(nodes_or_struct)
       else
-        delete_nodes(nodes_or_struct, &block)
+        delete_nodes(nodes_or_struct)
       end
       command_return
     end
@@ -454,7 +394,7 @@ module Sycamore
     #
     # @see #add, #add_nodes
     #
-    def add_node(node, &block)
+    def add_node(node)
       return command_return if node.nil? or node.equal? Nothing
       return add_children(node) if Tree.like? node
       raise NestedNodeSet if node.is_a? Enumerable
@@ -493,11 +433,11 @@ module Sycamore
     #
     # @see #add, #add_node
     #
-    def add_nodes(*nodes, &block)
+    def add_nodes(*nodes)
       nodes = nodes.first if nodes.size == 1 and nodes.is_a? Enumerable
-      return add_node(nodes, &block) unless nodes.is_a? Enumerable
+      return add_node(nodes) unless nodes.is_a? Enumerable
 
-      nodes.each { |node| add_node(node, &block) }
+      nodes.each { |node| add_node(node) }
 
       command_return
     end
@@ -511,7 +451,7 @@ module Sycamore
     #
     # @return self as a proper command method (see Sycamore::CQS#command_return)
     #
-    def delete_node(node, &block)
+    def delete_node(node)
       return delete_children(node) if Tree.like? node
       raise NestedNodeSet if node.is_a? Enumerable
 
@@ -520,11 +460,11 @@ module Sycamore
       command_return
     end
 
-    def delete_nodes(*nodes, &block)
+    def delete_nodes(*nodes)
       nodes = nodes.first if nodes.size == 1 and nodes.is_a? Enumerable
-      return delete_node(nodes, &block) unless nodes.is_a? Enumerable
+      return delete_node(nodes) unless nodes.is_a? Enumerable
 
-      nodes.each { |node| delete_node(node, &block) }
+      nodes.each { |node| delete_node(node) }
 
       command_return
     end
@@ -537,7 +477,7 @@ module Sycamore
     #  query interface  #
     #####################
 
-    def child(node, &block)
+    def child(node)
       return query_return Nothing if node.nil? or node.equal? Nothing
       query_return @treemap[node] || Absence.at(self, node)
     end
@@ -563,12 +503,12 @@ module Sycamore
 
     # If the node has no children.
     #
-    def leaf?(node, &block)
+    def leaf?(node)
       query_return @treemap.include?(node) &&
                      ( (child = @treemap[node]).nil? || child.empty? )
     end
 
-    def leaves?(*nodes, &block)
+    def leaves?(*nodes)
       node = nodes.first
       query_return case
         when nodes.empty?           then leaves?(self.nodes)
@@ -583,8 +523,8 @@ module Sycamore
     alias flat? leaves?
     alias external? leaves?
 
-    def internal?(*nodes, &block)
-      not external?(*nodes, &block) and include?(nodes)
+    def internal?(*nodes)
+      not external?(*nodes) and include?(nodes)
     end
 
 
@@ -602,11 +542,11 @@ module Sycamore
     #   leave it like this.
     #
     # TODO: This should be an atomic operation.
-    def add_child(node, children, &block)
+    def add_child(node, children)
       return command_return if node.nil? or node.equal? Nothing
-      return add_node(node, &block) if children.nil? or children.equal?(Nothing) or # TODO: when Absence defined: child.nothing? or child.abent?
-                                      # Enumerable === children
-                                      (Enumerable === children and children.empty?)
+      return add_node(node) if children.nil? or children.equal?(Nothing) or # TODO: when Absence defined: child.nothing? or child.abent?
+                                  # Enumerable === children
+                                  (Enumerable === children and children.empty?)
 
       child = @treemap[node] ||= new_child
       child << children
@@ -615,7 +555,7 @@ module Sycamore
     end
 
     # TODO: This should be an atomic operation.
-    def add_children(tree, &block)
+    def add_children(tree)
       return command_return if tree.respond_to?(:absent?) and tree.absent?
       raise ArgumentError unless Tree.like?(tree) # TODO: Spec this!
 
@@ -625,7 +565,7 @@ module Sycamore
     end
 
     # TODO: This should be an atomic operation.
-    def delete_children(tree, &block)
+    def delete_children(tree)
       return command_return if tree.respond_to?(:absent?) and tree.absent?
       raise ArgumentError unless Tree.like?(tree) # TODO: Spec this!
 
@@ -784,24 +724,5 @@ module Sycamore
     end
 
   end
-
-  ############################################################################
-  #
-  # Tree factory function
-  #
-  # A convenience method for the constructor. With it, you can write
-  #
-  #     Sycamore::Tree { ... }
-  #
-  # instead of the longer
-  #
-  #     Sycamore::Tree.new { ... }
-  #
-  # @see For an even more convenient method, see the unqualified usage with
-  #   the global {::Tree()} function.
-  #
-  # def self.Tree(&block)
-  #   Sycamore::Tree.new(&block)
-  # end
 
 end
