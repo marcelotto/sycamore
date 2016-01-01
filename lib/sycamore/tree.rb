@@ -2,6 +2,8 @@ module Sycamore
 
   ############################################################################
   #
+  # A tree data structure as a recursively nested set of nodes of immutable values.
+  #
   # A Sycamore tree is a set of nodes with links to their child trees,
   # consisting of the child nodes and their child trees etc.
   # The links from a node to its child tree is stored in a Hash,
