@@ -201,7 +201,7 @@ module Sycamore
             # TODO: Extract this into a new method include_tree? or move this into the new method #<=
             elements.all? do |node, child|
               include_node?(node) and ( child.nil? or child.equal?(Nothing) or
-                                          self.child(node).include?(child) )
+                                          self.child_of(node).include?(child) )
             end
           when elements.is_a?(Enumerable)
             elements.all? { |element| include_node? element } # TODO: use include_nodes?
@@ -487,12 +487,12 @@ module Sycamore
     #  query interface  #
     #####################
 
-    def child(node)
+    def child_of(node)
       return query_return Nothing if node.nil? or node.equal? Nothing
       query_return @data[node] || Absence.at(self, node)
     end
 
-    alias [] child
+    alias [] child_of
 
 
     def fetch(*node_and_default, &block)
@@ -581,7 +581,7 @@ module Sycamore
 
       tree.each do |node, child|
         next unless include? node
-        this_child = self.child(node)
+        this_child = self.child_of(node)
         this_child.delete child
         delete_node(node) if this_child.empty?
       end
