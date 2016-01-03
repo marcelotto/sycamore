@@ -161,44 +161,44 @@ module Sycamore
       @child_constructor = block
     end
 
-    ################################################################
-    # general nodes and children API                               #
-    ################################################################
+
+    ########################################################################
+    # Absence and Nothing predicates
+    ########################################################################
+
+    def nothing?
+      query_return false
+    end
+
+    # the negation of {#absent?}
+    def present?
+      query_return true
+    end
+
+    # the negation of {#present?}
+    def absent?
+      query_return false
+    end
+
+
+    ########################################################################
+    # general nodes and children access
+    ########################################################################
 
     #####################
     #  query interface  #
     #####################
 
-    # @return [Boolean] if this tree is empty, meaning including no nodes
-    #
-    def empty?
-      query_return @data.empty?
-    end
-
-    # @todo or Absence?
-    #
-    def nothing?
-      query_return false
-    end
-
-    # the negation of #absent?
-    def present?
-      query_return true
-    end
-
-    # the negation of #present?
-    def absent?
-      query_return false
-    end
-
     # @param [Object] elements to check for, if it is an element of this tree
     #
     # @return [Boolean] if this tree includes the given node
     #
+    # @todo Support paths as arguments by delegating to {#hash_path?} or directly to {Path#in?}
     def include?(elements)
       query_return(
         case
           when Tree.like?(elements)
+            # TODO: Extract this into a new method include_tree? or move this into the new method #<=
             elements.all? do |node, child|
               include_node?(node) and ( child.nil? or child.equal?(Nothing) or
                                           self.child(node).include?(child) )
@@ -258,6 +258,12 @@ module Sycamore
     end
 
     alias path? has_path?
+
+    # @return [Boolean] if the tree is empty
+    #
+    def empty?
+      query_return @data.empty?
+    end
 
     # @return [Fixnum] the number of nodes in this tree
     #
@@ -329,7 +335,7 @@ module Sycamore
 
 
     ################################################################
-    # Nodes API                                                    #
+    # Nodes access
     ################################################################
 
     #####################
@@ -474,7 +480,7 @@ module Sycamore
     end
 
     ################################################################
-    # Children API                                                 #
+    # Child access
     ################################################################
 
     #####################
