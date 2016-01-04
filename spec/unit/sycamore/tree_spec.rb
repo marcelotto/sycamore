@@ -806,29 +806,22 @@ describe Sycamore::Tree do
 
       context 'edge cases' do
         context 'when the argument is nil' do
-          specify { expect( Tree.new.child_of(nil) ).not_to be_a Sycamore::Absence }
           specify { expect( Tree.new.child_of(nil) ).to be Sycamore::Nothing }
-          specify { expect( Tree.new.child_of(nil) ).to be_nothing }
         end
 
         context 'when the argument is Nothing' do
-          specify { expect(Tree.new.child_of(Sycamore::Nothing)).not_to be_a Sycamore::Absence }
           specify { expect(Tree.new.child_of(Sycamore::Nothing)).to be Sycamore::Nothing }
-          specify { expect(Tree.new.child_of(Sycamore::Nothing)).to be_nothing }
         end
 
         context 'when the argument is false' do
-          specify { expect( Tree.new.child_of(false) ).not_to be Sycamore::Nothing }
           specify { expect( Tree.new.child_of(false) ).to be_a Sycamore::Absence }
           specify { expect( Tree.new.child_of(false) ).not_to be_nothing }
           specify { expect( Tree.new.child_of(false) ).to be_absent }
 
-          specify { expect( Tree[false => :foo].child_of(false) ).not_to be_a Sycamore::Absence }
           specify { expect( Tree[false => :foo].child_of(false) ).not_to be Sycamore::Nothing }
           specify { expect( Tree[false => :foo].child_of(false) ).not_to be_absent }
           specify { expect( Tree[false => :foo].child_of(false) ).to include :foo }
 
-          specify { expect( Tree[4 => {false => 2}].child_of(4) ).not_to be_a Sycamore::Absence }
           specify { expect( Tree[4 => {false => 2}].child_of(4) ).to eq Tree[false => 2] }
           specify { expect( Tree[4 => {false => 2}].child_of(4).child_of(false) ).not_to be_a Sycamore::Absence }
           specify { expect( Tree[4 => {false => 2}].child_of(4).child_of(false) ).to eq Tree[2] }
@@ -1153,9 +1146,9 @@ describe Sycamore::Tree do
       end
 
       context 'when the corresponding node is absent' do
-        specify { expect( Sycamore::Tree.new.external?(42)   ).to be false }
+        specify { expect( Sycamore::Tree.new.external?(42) ).to be false }
         specify { expect( Sycamore::Tree[43].external?(42) ).to be false }
-        specify { expect( Sycamore::Tree.new.internal?(42)   ).to be false }
+        specify { expect( Sycamore::Tree.new.internal?(42) ).to be false }
         specify { expect( Sycamore::Tree[43].internal?(42) ).to be false }
       end
     end

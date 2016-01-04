@@ -488,7 +488,7 @@ module Sycamore
     #####################
 
     def child_of(node)
-      return query_return Nothing if node.nil? or node.equal? Nothing
+      return Nothing if node.nil? or node.equal? Nothing
       query_return @data[node] || Absence.at(self, node)
     end
 
@@ -511,13 +511,15 @@ module Sycamore
       end
     end
 
-    # If the node has no children.
+    # @return [Boolean] if the given node has no children
     #
     def leaf?(node)
       query_return @data.include?(node) &&
                      ( (child = @data[node]).nil? || child.empty? )
     end
 
+    # @return [Boolean] if all of the given nodes have no children
+    #
     def leaves?(*nodes)
       node = nodes.first
       query_return case
