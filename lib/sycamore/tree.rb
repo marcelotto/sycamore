@@ -333,7 +333,6 @@ module Sycamore
     end
 
 
-
     ################################################################
     # Nodes access
     ################################################################
@@ -376,8 +375,8 @@ module Sycamore
     # @todo Raise a more specific Exception than TypeError.
     def node
       nodes = self.nodes
-      raise TypeError, "no implicit conversion of node set #{nodes} into a single node" if
-        nodes.size > 1
+      raise TypeError, "no implicit conversion of node set #{nodes} into a single node" if  nodes.size > 1
+
       query_return nodes.first
     end
 
@@ -489,6 +488,7 @@ module Sycamore
 
     def child_of(node)
       return Nothing if node.nil? or node.equal? Nothing
+
       query_return @data[node] || Absence.at(self, node)
     end
 
@@ -514,31 +514,32 @@ module Sycamore
     # @return [Boolean] if the given node has no children
     #
     def leaf?(node)
-      query_return @data.include?(node) &&
-                     ( (child = @data[node]).nil? || child.empty? )
+      raise TypeError, "expected a node, but got #{node}" if node.is_a? Enumerable
+
+      @data.include?(node) && ( (child = @data[node]).nil? || child.empty? )
     end
 
     # @return [Boolean] if all of the given nodes have no children
     #
-    def leaves?(*nodes)
-      node = nodes.first
-      query_return case
-        when nodes.empty?           then leaves?(self.nodes)
-        # if we get multiple arguments, delegate them recursively as an Enumerable
-        when nodes.size > 1         then leaves?(nodes)
-        when Tree.like?(node)       then raise ArgumentError
-        when node.is_a?(Enumerable) then node.all? { |node| leaf?(node) }
-                                    else leaf?(node)
-      end
+    def external?(*nodes)
+      nodes = self.nodes if nodes.empty?
+
+      nodes.all? { |node| leaf?(node) }
     end
 
-    alias flat? leaves?
-    alias external? leaves?
+    alias leaves? external?
+    alias flat? external?
 
+    # @return [Boolean] if all of the given nodes have children
+    #
     def internal?(*nodes)
-      not external?(*nodes) and include?(nodes)
+      return false if self.empty?
+      nodes = self.nodes if nodes.empty?
+
+      nodes.all? { |node| not leaf?(node) and include_node?(node) }
     end
 
+    alias nested? internal?
 
 
     #####################

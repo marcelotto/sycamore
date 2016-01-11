@@ -10,8 +10,26 @@ describe Sycamore::Absence do
       expect { Sycamore::Absence.new(1, 1) }.to raise_error ArgumentError
       expect { Sycamore::Absence.new(Sycamore::Tree[], nil) }.to raise_error ArgumentError
     end
-
   end
+
+  describe '#nothing?' do
+    specify { expect( Sycamore::Absence.new(Sycamore::Tree.new, 42).nothing? ).to be false }
+  end
+
+  # TODO: These must differentiated ...
+
+  # describe '#present?' do
+  #   it 'does return true' do
+  #     expect(example_absence.present?).to be false
+  #   end
+  # end
+  #
+  # describe '#absent?' do
+  #   it 'does return false' do
+  #     expect(example_absence.absent?).to be true
+  #   end
+  # end
+
 
   shared_examples_for 'every absence' do
     # it { is_expected.to be_a Sycamore::Tree }
