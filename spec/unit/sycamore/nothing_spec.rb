@@ -1,7 +1,6 @@
 describe Sycamore::Nothing do
 
   Nothing = Sycamore::Nothing
-  UnhandledNothingAccess = Sycamore::UnhandledNothingAccess
 
   it { is_expected.to be_a Singleton }
   it { is_expected.to be_a Sycamore::Tree }
@@ -45,7 +44,7 @@ describe Sycamore::Nothing do
   describe 'command methods' do
 
     def expect_failing(&block)
-      expect(&block).to raise_error UnhandledNothingAccess
+      expect(&block).to raise_error Sycamore::NothingMutation
     end
 
     it 'does raise an exception on all command methods' do

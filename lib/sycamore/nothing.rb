@@ -21,7 +21,7 @@ module Sycamore
     # TODO: YARD should be informed about this method definitions.
     command_methods.each do |command_method|
       define_method command_method do |*args|
-        raise UnhandledNothingAccess
+        raise NothingMutation, 'attempt to change the Nothing tree'
       end
     end
 
