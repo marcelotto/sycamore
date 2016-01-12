@@ -1,5 +1,3 @@
-require 'set'
-
 describe Sycamore::Tree do
 
   it { is_expected.to be_a Enumerable }
@@ -222,9 +220,6 @@ describe Sycamore::Tree do
           expect( Sycamore::Tree[:foo, :bar, :baz].nodes.to_set )
             .to eql %i[foo bar baz].to_set
         end
-        # TODO: these should be tested in #add
-        specify { expect(Sycamore::Tree[:foo, :bar, :baz, :foo, :bar, :baz].nodes.to_set).to eq  %i[bar baz foo].to_set }
-        specify { expect(Sycamore::Tree['foo', 'bar', 'baz', 'foo', 'bar'].nodes.to_set).to eq  %w[baz foo bar].to_set }
       end
 
       context 'with children' do

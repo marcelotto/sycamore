@@ -1,6 +1,6 @@
 describe Sycamore::Tree do
 
-  describe '#child' do
+  describe '#child_of' do
 
     context 'when given a single argument' do
 
@@ -31,7 +31,7 @@ describe Sycamore::Tree do
       context 'when a corresponding node is present' do
 
         context 'when the node has a child' do
-          let(:root) { Sycamore::Tree.new.add_child(:property, :value) }
+          let(:root) { Sycamore::Tree.new.add(property: :value) }
           let(:child) { root[:property] }
 
           describe 'root' do

@@ -80,10 +80,21 @@ describe Sycamore::Tree do
     # Tree#fetch explicitly does NOT involve Absence, so their is no interaction
   end
 
-  describe '#delete' do
-
+  describe '#add' do
     context 'when given Absence' do
-      pending
+      subject { Sycamore::Tree.new.add Sycamore::Tree.new.child_of(:missing) }
+      it { is_expected.to     be_empty }
+    end
+    # context 'when the given a hash with an Absence' do
+    #   subject { Sycamore::Tree.new.add(42 => Sycamore::Tree.new.child_of(:missing)) }
+    #   it { is_expected.not_to be_empty }
+    # end
+  end
+
+  describe '#delete' do
+    context 'when given Absence' do
+      subject { Sycamore::Tree[42].delete(Sycamore::Tree[].child_of(42)) }
+      it      { is_expected.to include 42 }
     end
 
   end
