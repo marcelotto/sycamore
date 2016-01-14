@@ -18,12 +18,9 @@ module Sycamore
   class NothingTree < Tree
     include Singleton
 
-    # TODO: YARD should be informed about this method definitions.
-    command_methods.each do |command_method|
-      define_method command_method do |*args|
-        raise NothingMutation, 'attempt to change the Nothing tree'
-      end
-    end
+    ########################################################################
+    # Absence and Nothing predicates
+    ########################################################################
 
     # @see {Tree#nothing?}
     def nothing?
@@ -40,18 +37,23 @@ module Sycamore
       query_return true
     end
 
-    # TODO: Destructive commands should be no-ops in general
-    #
-    # as Nothing already is "clear", this command method doesn't do any harm
-    #
-    def clear
-      command_return
+    ########################################################################
+    # CQS element access
+    ########################################################################
+
+    # TODO: YARD should be informed about this method definitions.
+    command_methods.each do |command_method|
+      define_method command_method do |*args|
+        raise NothingMutation, 'attempt to change the Nothing tree'
+      end
     end
 
-    # TODO: Should we also allow #remove, for the same reasons we allow #clear ???
-    # def remove(*args)
-    #   command_return
-    # end
+    # TODO: YARD should be informed about this method definitions.
+    destructive_command_methods.each do |command_method|
+      define_method command_method do |*args|
+        command_return
+      end
+    end
 
     # the unique string representation of the Nothing Singleton
     #
@@ -62,13 +64,13 @@ module Sycamore
     end
 
 
-    ####################################################################
+    ########################################################################
     # Falsiness
     #
     # Sadly, in Ruby we can't do that match to reach this goal.
     #
     # see http://devblog.avdi.org/2011/05/30/null-objects-and-falsiness/
-    ####################################################################
+    ########################################################################
 
     # trying to emulate a falsey value, by negating to true
     #
