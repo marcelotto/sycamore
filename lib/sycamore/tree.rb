@@ -22,8 +22,6 @@ module Sycamore
     # CQS                                                          #
     ################################################################
 
-    include CQS
-
     ADDITIVE_COMMAND_METHODS    = %i[add <<]
     DESTRUCTIVE_COMMAND_METHODS = %i[delete >> clear]
     COMMAND_METHODS = ADDITIVE_COMMAND_METHODS + DESTRUCTIVE_COMMAND_METHODS
@@ -163,17 +161,17 @@ module Sycamore
     ########################################################################
 
     def nothing?
-      query_return false
+      false
     end
 
     # the negation of {#absent?}
     def present?
-      query_return true
+      true
     end
 
     # the negation of {#present?}
     def absent?
-      query_return false
+      false
     end
 
 
@@ -206,7 +204,6 @@ module Sycamore
       else
         add_nodes(nodes_or_struct)
       end
-      command_return
     end
 
     alias << add
@@ -229,13 +226,13 @@ module Sycamore
     # @see #add, #add_nodes
     #
     private def add_node(node)
-      return command_return if node.nil? or node.equal? Nothing
+      return self if node.nil? or node.equal? Nothing
       return add_children(node) if Tree.like? node
       raise NestedNodeSet if node.is_a? Enumerable
 
       @data[node] ||= nil
 
-      command_return
+      self
     end
 
     # TODO: Extract unique content and remove the documentation, since private?
@@ -252,7 +249,7 @@ module Sycamore
     #
     #   If the nodes Enumerable contains other Enumerables, an {NestedNodeSet} exception is raised
     #
-    # @return self as a proper command method (see Sycamore::CQS#command_return)
+    # @return self as a proper command method
     #
     # @raise {NestedNodeSet}
     #
@@ -264,11 +261,11 @@ module Sycamore
 
       nodes.each { |node| add_node(node) }
 
-      command_return
+      self
     end
 
     private def add_child(node, children)
-      return command_return if node.nil? or node.equal? Nothing
+      return self if node.nil? or node.equal? Nothing
       return add_node(node) if children.nil? or children.equal?(Nothing) or # TODO: when Absence defined: child.nothing? or child.abent?
         # Enumerable === children
         (Enumerable === children and children.empty?)
@@ -276,16 +273,16 @@ module Sycamore
       child = @data[node] ||= new_child
       child << children
 
-      command_return
+      self
     end
 
     private def add_children(tree)
-      return command_return if tree.respond_to?(:absent?) and tree.absent?
+      return self if tree.respond_to?(:absent?) and tree.absent?
       raise ArgumentError unless Tree.like?(tree) # TODO: Spec this!
 
       tree.each { |node, child| add_child(node, child) }
 
-      command_return
+      self
     end
 
 
@@ -297,7 +294,7 @@ module Sycamore
     # @param [Object, Hash, Enumerable] nodes_or_struct TODO TODOC
     #
     #
-    # @return self as a proper command method (see Sycamore::CQS#command_return)
+    # @return self as a proper command method
     #
     # @see #add_nodes
     #
@@ -310,7 +307,6 @@ module Sycamore
       else
         delete_nodes(nodes_or_struct)
       end
-      command_return
     end
 
     alias >> delete
@@ -323,7 +319,7 @@ module Sycamore
     #
     # @param [Object] node to delete
     #
-    # @return self as a proper command method (see Sycamore::CQS#command_return)
+    # @return self as a proper command method
     #
     private def delete_node(node)
       return delete_children(node) if Tree.like? node
@@ -331,7 +327,7 @@ module Sycamore
 
       @data.delete(node)
 
-      command_return
+      self
     end
 
     private def delete_nodes(*nodes)
@@ -340,11 +336,11 @@ module Sycamore
 
       nodes.each { |node| delete_node(node) }
 
-      command_return
+      self
     end
 
     private def delete_children(tree)
-      return command_return if tree.respond_to?(:absent?) and tree.absent?
+      return self if tree.respond_to?(:absent?) and tree.absent?
       raise ArgumentError unless Tree.like?(tree) # TODO: Spec this!
 
       tree.each do |node, child|
@@ -354,17 +350,17 @@ module Sycamore
         delete_node(node) if this_child.empty?
       end
 
-      command_return
+      self
     end
 
     # deletes all nodes and their children, resulting in an empty tree
     #
-    # @return self as a proper command method (see Sycamore::CQS#command_return)
+    # @return self as a proper command method
     #
     def clear
       @data.clear
 
-      command_return
+      self
     end
 
 
@@ -383,7 +379,7 @@ module Sycamore
     # @return [Array<Object>] the nodes of this tree (without their children)
     #
     def nodes
-      query_return @data.keys
+      @data.keys
     end
 
     alias keys nodes  # Hash compatibility
@@ -409,14 +405,14 @@ module Sycamore
       nodes = self.nodes
       raise TypeError, "no implicit conversion of node set #{nodes} into a single node" if  nodes.size > 1
 
-      query_return nodes.first
+      nodes.first
     end
 
     # @todo Should we differentiate the case of a leaf and a not present node?
     def child_of(node)
       return Nothing if node.nil? or node.equal? Nothing
 
-      query_return @data[node] || Absence.at(self, node)
+      @data[node] || Absence.at(self, node)
     end
 
     alias [] child_of
@@ -485,19 +481,18 @@ module Sycamore
     #
     # @todo Support paths as arguments by delegating to {#hash_path?} or directly to {Path#in?}
     def include?(elements)
-      query_return(
-        case
-          when Tree.like?(elements)
-            # TODO: Extract this into a new method include_tree? or move this into the new method #<=
-            elements.all? do |node, child|
-              include_node?(node) and ( child.nil? or child.equal?(Nothing) or
-                                          self.child_of(node).include?(child) )
-            end
-          when elements.is_a?(Enumerable)
-            elements.all? { |element| include_node? element } # TODO: use include_nodes?
-          else
-            include_node? elements
-        end)
+      case
+        when Tree.like?(elements)
+          # TODO: Extract this into a new method include_tree? or move this into the new method #<=
+          elements.all? do |node, child|
+            include_node?(node) and ( child.nil? or child.equal?(Nothing) or
+                                        self.child_of(node).include?(child) )
+          end
+        when elements.is_a?(Enumerable)
+          elements.all? { |element| include_node? element } # TODO: use include_nodes?
+        else
+          include_node? elements
+      end
     end
 
     def include_node?(node)
@@ -511,13 +506,13 @@ module Sycamore
     # @return [Fixnum] the number of nodes in this tree
     #
     def size
-      query_return @data.size
+      @data.size
     end
 
     # @return [Boolean] if the tree is empty
     #
     def empty?
-      query_return @data.empty?
+      @data.empty?
     end
 
     # @return [Boolean] if the given node has no children
@@ -549,8 +544,6 @@ module Sycamore
     end
 
     alias nested? internal?
-
-
 
 
     ################################################################

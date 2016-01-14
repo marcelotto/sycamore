@@ -24,17 +24,17 @@ module Sycamore
 
     # @see {Tree#nothing?}
     def nothing?
-      query_return true
+      true
     end
 
     # @see {Tree#present?}
     def present?
-      query_return false
+      false
     end
 
     # @see {Tree#absent?}
     def absent?
-      query_return true
+      true
     end
 
     ########################################################################
@@ -50,9 +50,7 @@ module Sycamore
 
     # TODO: YARD should be informed about this method definitions.
     destructive_command_methods.each do |command_method|
-      define_method command_method do |*args|
-        command_return
-      end
+      define_method(command_method) { |*args| self }
     end
 
     # the unique string representation of the Nothing Singleton
