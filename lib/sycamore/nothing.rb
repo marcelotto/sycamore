@@ -61,6 +61,9 @@ module Sycamore
       '#<Sycamore::Nothing>'
     end
 
+    def freeze
+      super
+    end
 
     ########################################################################
     # Falsiness

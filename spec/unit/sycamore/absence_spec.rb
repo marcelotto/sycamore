@@ -58,8 +58,8 @@ describe Sycamore::Absence do
         specify { expect( example_absence.to_s    ).to eq Sycamore::Tree[].to_s }
         specify { expect( example_absence.inspect ).to eq "Sycamore::Absence.at(#{parent_tree}, #{parent_node})" }
 
-        describe '#child' do
-          subject { example_absence.child(:of_absent_node) }
+        describe '#child_of' do
+          subject { example_absence.child_of(:of_absent_node) }
 
           it { is_expected.to be_a Sycamore::Absence }
           it { is_expected.not_to be example_absence }

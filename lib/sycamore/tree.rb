@@ -24,14 +24,18 @@ module Sycamore
 
     ADDITIVE_COMMAND_METHODS    = %i[add <<]
     DESTRUCTIVE_COMMAND_METHODS = %i[delete >> clear]
-    COMMAND_METHODS = ADDITIVE_COMMAND_METHODS + DESTRUCTIVE_COMMAND_METHODS
+    COMMAND_METHODS = ADDITIVE_COMMAND_METHODS + DESTRUCTIVE_COMMAND_METHODS +
+      %i[child_constructor= child_class= def_child_generator freeze]
 
     PREDICATE_METHODS =
-      %i[empty? nothing? present? absent? include? include_node? has_key?
+      %i[empty? nothing? present? absent?
+         include? include_node? has_key? has_path? path?
+         eql? matches? === ==
          leaf? leaves? internal? external? flat? nested?]
-
-    QUERY_METHODS = PREDICATE_METHODS + %i[size nodes keys child] << :[]
-
+    QUERY_METHODS = PREDICATE_METHODS +
+      %i[size node nodes keys child_of fetch each each_path paths
+         new_child child_constructor child_class child_generator
+         hash to_h to_s inspect] << :[]
 
     # @return [Array<Symbol>] the names of all methods, which can change the state of a Tree
     #

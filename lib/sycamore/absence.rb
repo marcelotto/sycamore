@@ -52,7 +52,6 @@ module Sycamore
         when requested? then :requested
         when created?   then :created
         when installed? then :installed
-        # TODO: when negated?   then :negated
         # TODO: else raise InvalidState, ''
       end
     end
@@ -101,11 +100,11 @@ module Sycamore
 
     alias __getobj__ presence
 
-    def child(node, &block)
+    def child_of(node, &block)
       Absence.at(self, node)
     end
 
-    alias [] child
+    alias [] child_of
 
     def inspect
       "Sycamore::Absence.at(#@parent_tree, #@parent_node)"
@@ -117,28 +116,17 @@ module Sycamore
 
     # TODO: YARD should be informed about this method definitions.
     Tree.command_methods.each do |command_method|
-      case
-        when Tree.additive_command_methods.include?(command_method)
-
-          # TODO: Should differentiate requested and created or
-          #         this method should be undefined to be delegated by Delegator!
-          # TODO: This method should be atomic.
-          define_method command_method do |*args|
-            create_presence.send(command_method, *args) # TODO: Problem: How can we hand over a possible block? With eval etc.?
-            install_presence unless installed?
-            presence
-          end
-
-        when Tree.destructive_command_methods.include?(command_method)
-
-          # TODO: Should differentiate requested and created or
-          #         this method should be undefined to be delegated by Delegator!
-          define_method command_method do |*args|
-            self
-          end
-
-        else
-          fail "Unknown command method: #{command_method}"
+      if Tree.destructive_command_methods.include?(command_method)
+        define_method command_method do |*args|
+          self
+        end
+      else
+        # TODO: This method should be atomic.
+        define_method command_method do |*args|
+          create_presence.send(command_method, *args) # TODO: How can we hand over a possible block? With eval etc.?
+          install_presence unless installed?
+          presence
+        end
       end
     end
 

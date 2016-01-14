@@ -4,6 +4,18 @@ describe Sycamore::Tree do
 
   specify { expect { Sycamore::Tree[].data }.to raise_error NoMethodError }
 
+  describe 'CQS reflection class methods' do
+    specify 'all Tree methods are separated into command and query methods' do
+      # TODO: Should we also separate the inherited methods into commands and queries? At least the command methods are required for proper Absence and Nothing behaviour.
+      tree_methods =
+        Tree.public_instance_methods(false).to_set.to_a.sort
+      command_query_methods =
+        (Tree.command_methods + Tree.query_methods).to_set.to_a.sort
+      expect( tree_methods ).to eq command_query_methods
+    end
+  end
+
+
   ############################################################################
   # construction
   ############################################################################
