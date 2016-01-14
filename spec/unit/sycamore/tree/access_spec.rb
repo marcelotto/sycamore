@@ -2,88 +2,31 @@ describe Sycamore::Tree do
 
   describe '#child_of' do
 
-    context 'when given a single argument' do
-
-      context 'edge cases' do
-        context 'when the argument is nil' do
-          specify { expect( Tree.new.child_of(nil) ).to be Sycamore::Nothing }
-        end
-
-        context 'when the argument is Nothing' do
-          specify { expect(Tree.new.child_of(Sycamore::Nothing)).to be Sycamore::Nothing }
-        end
-
-        context 'when the argument is false' do
-          specify { expect( Tree.new.child_of(false) ).to be_a Sycamore::Absence }
-          specify { expect( Tree.new.child_of(false) ).not_to be_nothing }
-          specify { expect( Tree.new.child_of(false) ).to be_absent }
-
-          specify { expect( Tree[false => :foo].child_of(false) ).not_to be Sycamore::Nothing }
-          specify { expect( Tree[false => :foo].child_of(false) ).not_to be_absent }
-          specify { expect( Tree[false => :foo].child_of(false) ).to include :foo }
-
-          specify { expect( Tree[4 => {false => 2}].child_of(4) ).to eq Tree[false => 2] }
-          specify { expect( Tree[4 => {false => 2}].child_of(4).child_of(false) ).not_to be_a Sycamore::Absence }
-          specify { expect( Tree[4 => {false => 2}].child_of(4).child_of(false) ).to eq Tree[2] }
-        end
-      end
-
-      context 'when a corresponding node is present' do
-
-        context 'when the node has a child' do
-          let(:root) { Sycamore::Tree.new.add(property: :value) }
-          let(:child) { root[:property] }
-
-          describe 'root' do
-            subject { root }
-            it { is_expected.to include :property }
-            it { is_expected.not_to include :value } # This relies on Tree#each
-            it { expect( root.include?(:value) ).to be false }
-          end
-
-          describe 'child' do
-            subject { child }
-            it { is_expected.to be_a Sycamore::Tree }
-            it { is_expected.not_to be Sycamore::Nothing }
-            it { is_expected.not_to be_nothing }
-            it { is_expected.not_to be_absent }
-            it { is_expected.to include :value }
-            it { is_expected.not_to include :property } # This relies on Tree#each
-            it { expect( child.include?(:property) ).to be false }
-          end
-        end
-
-        context 'when the node is a leaf' do
-          let(:root) { Sycamore::Tree[42] }
-          let(:child) { root.child_of(42) }
-
-          # TODO: Really the same behaviour as when node absent?
-
-          describe 'root' do
-            subject { root }
-            it { is_expected.to include 42 }
-          end
-
-          describe 'child' do
-            subject { child }
-            it { is_expected.to be_a Sycamore::Absence }
-            it { is_expected.to be_absent }
-            # it { is_expected.to be_a Sycamore::Tree }
-            # it { is_expected.to be Sycamore::Nothing }
-          end
-
-        end
-      end
-
-      context 'when a corresponding node is absent' do
-
-        # see Tree-Absence interaction spec
-
-        # TODO: Really the same behaviour as when node is a leaf?
-      end
-
+    it 'does return the child tree of the given node, when given the node is present' do
+      expect( Sycamore::Tree[property: :value].child_of(:property).node ).to be :value
+      expect( Sycamore::Tree[false => 42     ].child_of(false).node     ).to be 42
+      expect( Sycamore::Tree[4 => {false=>2} ].child_of(4) ).to eq Sycamore::Tree[false=>2]
     end
 
+    it 'does return an absent tree, when given the node is not present' do
+      expect( Sycamore::Tree.new.child_of(:missing) ).to be_absent.and be_empty
+      expect( Sycamore::Tree.new.child_of(false   ) ).to be_absent.and be_empty
+    end
+
+    it 'does return an absent tree, when the given node is a leaf' do
+      expect( Sycamore::Tree[42   ].child_of(42      ) ).to be_absent
+      expect( Sycamore::Tree[false].child_of(false   ) ).to be_absent
+    end
+
+    context 'edge cases' do
+      it 'does return the Nothing tree, when given nil' do
+        expect( Sycamore::Tree.new.child_of(nil) ).to be Sycamore::Nothing
+      end
+
+      it 'does return the Nothing tree, when given the Nothing tree' do
+        expect( Sycamore::Tree.new.child_of(Sycamore::Nothing) ).to be Sycamore::Nothing
+      end
+    end
   end
 
   ############################################################################

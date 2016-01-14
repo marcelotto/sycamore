@@ -86,6 +86,19 @@ describe Sycamore::Tree do
         it 'does nothing, when given an empty hash' do
           expect( Sycamore::Tree.new >> {} ).to be_empty
         end
+
+      end
+    end
+
+    context 'when given another tree' do
+
+      pending
+
+      context 'edge cases' do
+        it 'does nothing, when given an absent tree' do
+          absent_tree = Sycamore::Tree.new.child_of(42)
+          expect( Sycamore::Tree[42].delete(absent_tree) ).to include_node 42
+        end
       end
     end
 

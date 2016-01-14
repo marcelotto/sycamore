@@ -180,7 +180,15 @@ describe Sycamore::Tree do
     end
 
     context 'when given another tree' do
+
       pending
+
+      context 'edge cases' do
+        it 'does nothing, when given an absent tree' do
+          absent_tree = Sycamore::Tree.new.child_of(:missing)
+          expect( Sycamore::Tree.new.add absent_tree ).to be_empty
+        end
+      end
     end
 
     context 'when given multiple arguments' do

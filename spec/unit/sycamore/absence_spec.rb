@@ -3,8 +3,7 @@ describe Sycamore::Absence do
   subject(:example_absence) { Sycamore::Absence.at(parent_tree, parent_node) }
 
   describe '#initialize' do
-    it 'raises an error, if not given a parent tree and node' do
-      expect { Sycamore::Absence.new }.to raise_error ArgumentError
+    it 'does raise an error, if not given a parent tree and node' do
       expect { Sycamore::Absence.new(nil, nil) }.to raise_error ArgumentError
       expect { Sycamore::Absence.new(1, nil) }.to raise_error ArgumentError
       expect { Sycamore::Absence.new(1, 1) }.to raise_error ArgumentError
@@ -29,11 +28,6 @@ describe Sycamore::Absence do
   #     expect(example_absence.absent?).to be true
   #   end
   # end
-
-
-  shared_examples_for 'every absence' do
-    # it { is_expected.to be_a Sycamore::Tree }
-  end
 
   shared_examples_for 'all Tree method calls on an absence' do
 
@@ -234,7 +228,6 @@ describe Sycamore::Absence do
     let(:parent_node) { symbol }
     let(:parent_tree) { Sycamore::Tree[parent_node] }
 
-    include_examples 'every absence'
     include_examples 'all Tree method calls on an absence'
 
     context 'when requested' do

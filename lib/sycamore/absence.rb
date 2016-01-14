@@ -9,8 +9,8 @@ module Sycamore
       @parent_tree, @parent_node = parent_tree, parent_node
     end
 
-    def self.at(parent_tree, parent_node)
-      Absence.new(parent_tree, parent_node)
+    class << self
+      alias at new
     end
 
 

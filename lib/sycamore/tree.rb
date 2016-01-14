@@ -412,6 +412,7 @@ module Sycamore
       query_return nodes.first
     end
 
+    # @todo Should we differentiate the case of a leaf and a not present node?
     def child_of(node)
       return Nothing if node.nil? or node.equal? Nothing
 
