@@ -8,9 +8,9 @@ describe Sycamore::Tree do
     specify 'all Tree methods are separated into command and query methods' do
       # TODO: Should we also separate the inherited methods into commands and queries? At least the command methods are required for proper Absence and Nothing behaviour.
       tree_methods =
-        Tree.public_instance_methods(false).to_set.to_a.sort
+        Sycamore::Tree.public_instance_methods(false).to_set.to_a.sort
       command_query_methods =
-        (Tree.command_methods + Tree.query_methods).to_set.to_a.sort
+        (Sycamore::Tree.command_methods + Sycamore::Tree.query_methods).to_set.to_a.sort
       expect( tree_methods ).to eq command_query_methods
     end
   end
@@ -92,112 +92,20 @@ describe Sycamore::Tree do
   end
 
 
-  ################################################################
-  # Child construction
-  ################################################################
-
-  describe '#new_child' do
-    let(:tree) { Sycamore::Tree.new }
-    let(:subclass) { Class.new(Sycamore::Tree) }
-
-    subject { tree.new_child }
-
-    context 'when no child constructor defined' do
-
-      it { is_expected.to eql Sycamore::Tree.new }
-
-      context 'on a subclass' do
-        let(:tree) { subclass.new }
-        it { is_expected.to eql subclass.new }
-      end
-    end
-
-    context 'when a child constructor defined' do
-
-      context 'when the child constructor is a Tree class' do
-        let(:tree_class) { Class.new(Sycamore::Tree) }
-
-        before(:each) { tree.child_constructor = tree_class }
-
-        it { is_expected.to eql tree_class.new }
-
-        context 'on a subclass' do
-          let(:tree) { subclass.new }
-          it { is_expected.to eql tree_class.new }
-        end
-
-      end
-
-      context 'when a child prototype Tree instance defined' do
-        pending 'Tree#clone'
-      end
-
-      context 'when a child constructor Proc defined' do
-
-        before(:each) do
-          tree.def_child_generator { Sycamore::Tree[42] }
-        end
-
-        it { is_expected.to be === Sycamore::Tree[42] }
-
-        context 'on a subclass' do
-          let(:tree) { subclass.new }
-          it { is_expected.to be === subclass[42] }
-        end
-
-      end
-
-    end
-
-  end
-
-  describe '#child_constructor' do
-    let(:tree) { Sycamore::Tree.new }
-
-    specify { expect { tree.child_constructor = 'foo' }.to raise_error ArgumentError }
-
-    context 'when a tree class' do
-
-      context 'when not a Tree subclass' do
-        specify { expect { tree.child_constructor = String }.to raise_error ArgumentError }
-      end
-
-      context 'when a Tree subclass' do
-        let(:tree_class) { Class.new(Sycamore::Tree) }
-        before { tree.child_constructor = tree_class }
-        specify { expect(tree.child_constructor).to eql tree_class }
-        specify { expect(tree.child_class).to eql tree_class }
-      end
-
-    end
-
-    context 'when a generator proc' do
-      before(:each) do
-        tree.def_child_generator { Tree[42] }
-      end
-
-      specify { expect(tree.child_constructor).to be_a Proc }
-      specify { expect(tree.child_generator).to be_a Proc }
-      specify { expect(tree.child_constructor.call).to be === Tree[42] }
-    end
-
-  end
-
-
   ############################################################################
   # Absence and Nothing predicates
   ############################################################################
 
   describe '#nothing?' do
-    specify { expect( Tree.new.nothing? ).to be false }
+    specify { expect( Sycamore::Tree.new.nothing? ).to be false }
   end
 
   describe '#present?' do
-    specify { expect( Tree.new.present? ).to be true }
+    specify { expect( Sycamore::Tree.new.present? ).to be true }
   end
 
   describe '#absent?' do
-    specify { expect( Tree.new.absent? ).to be false }
+    specify { expect( Sycamore::Tree.new.absent? ).to be false }
   end
 
 
@@ -326,30 +234,30 @@ describe Sycamore::Tree do
 
   describe '#leaf?' do
     it 'does return true, when the given node is present and has no child tree' do
-      expect( Tree[1                     ].leaf?(1) ).to be true
-      expect( Tree[1 => nil              ].leaf?(1) ).to be true
-      expect( Tree[1 => Sycamore::Nothing].leaf?(1) ).to be true
-      expect( Tree[1 => :foo, 2 => nil   ].leaf?(2) ).to be true
+      expect( Sycamore::Tree[1                     ].leaf?(1) ).to be true
+      expect( Sycamore::Tree[1 => nil              ].leaf?(1) ).to be true
+      expect( Sycamore::Tree[1 => Sycamore::Nothing].leaf?(1) ).to be true
+      expect( Sycamore::Tree[1 => :foo, 2 => nil   ].leaf?(2) ).to be true
     end
 
     it 'does return true, when the given node is present and has an empty child tree' do
-      tree = Tree[1 => :foo]
+      tree = Sycamore::Tree[1 => :foo]
       tree[1].clear
       expect(tree.leaf?(1)).to be true
 
-      tree = Tree[1 => :foo, 2 => nil]
+      tree = Sycamore::Tree[1 => :foo, 2 => nil]
       tree[1].clear
       expect(tree.leaf?(1)).to be true
     end
 
     it 'does return false, when the given node is not present' do
-      expect( Tree.new.leaf?(42) ).to be false
-      expect( Tree[43].leaf?(42) ).to be false
+      expect( Sycamore::Tree.new.leaf?(42) ).to be false
+      expect( Sycamore::Tree[43].leaf?(42) ).to be false
     end
 
     it 'does return false, when the given node has a child' do
-      expect(Tree[1 => :foo          ].leaf?(1)).to be false
-      expect(Tree[1 => :foo, 2 => nil].leaf?(1)).to be false
+      expect( Sycamore::Tree[1 => :foo          ].leaf?(1) ).to be false
+      expect( Sycamore::Tree[1 => :foo, 2 => nil].leaf?(1) ).to be false
     end
 
     context 'when given a hash' do
@@ -367,8 +275,8 @@ describe Sycamore::Tree do
     context 'edge cases' do
       context 'when given nil' do
         pending 'This should not be an edge case.'
-        specify { expect( Tree.new.leaf?(nil)  ).to be false }
-        specify { expect( Tree[nil].leaf?(nil) ).to be false }
+        specify { expect( Sycamore::Tree.new.leaf?(nil)  ).to be false }
+        specify { expect( Sycamore::Tree[nil].leaf?(nil) ).to be false }
       end
 
       # context 'when given Nothing' do
@@ -387,17 +295,17 @@ describe Sycamore::Tree do
 
     context 'without arguments' do
       it 'does return true, when none of the nodes has children' do
-        expect( Tree[].external?                       ).to be true
-        expect( Tree[1].external?                      ).to be true
-        expect( Tree[1 => nil].external?               ).to be true
-        expect( Tree[1 => Sycamore::Nothing].external? ).to be true
-        expect( Tree[1, 2, 3].external?                ).to be true
+        expect( Sycamore::Tree[].external?                       ).to be true
+        expect( Sycamore::Tree[1].external?                      ).to be true
+        expect( Sycamore::Tree[1 => nil].external?               ).to be true
+        expect( Sycamore::Tree[1 => Sycamore::Nothing].external? ).to be true
+        expect( Sycamore::Tree[1, 2, 3].external?                ).to be true
       end
 
       it 'does return false, when some of the nodes have children' do
-        expect( Tree[1 => 2                         ].external? ).to be false
-        expect( Tree[1 => :a, 2 => nil, 3 => nil    ].external? ).to be false
-        expect( Tree[1 => :a, 2 => Sycamore::Nothing].external? ).to be false
+        expect( Sycamore::Tree[1 => 2                         ].external? ).to be false
+        expect( Sycamore::Tree[1 => :a, 2 => nil, 3 => nil    ].external? ).to be false
+        expect( Sycamore::Tree[1 => :a, 2 => Sycamore::Nothing].external? ).to be false
       end
     end
 
@@ -539,11 +447,11 @@ describe Sycamore::Tree do
 
     context 'when given another Tree' do
       pending '#include? with another Tree' # TODO: Should we duplicate all of above specs (for atom, array, hash) with the args converted to a Tree?
-      # specify { expect( Tree[1,2].include? Tree[1] ).to be true }
-      # specify { expect( Tree[1,2].include? Tree[2] ).to be true }
-      # specify { expect( Tree[1,2].include? Tree[1] ).to be true }
-      # specify { expect( Tree[1,2].include? Tree[1, 2] ).to be true }
-      # specify { expect( Tree[1,2].include? Tree[1, 3] ).to be false }
+      # specify { expect( Sycamore::Tree[1,2].include? Sycamore::Tree[1] ).to be true }
+      # specify { expect( Sycamore::Tree[1,2].include? Sycamore::Tree[2] ).to be true }
+      # specify { expect( Sycamore::Tree[1,2].include? Sycamore::Tree[1] ).to be true }
+      # specify { expect( Sycamore::Tree[1,2].include? Sycamore::Tree[1, 2] ).to be true }
+      # specify { expect( Sycamore::Tree[1,2].include? Sycamore::Tree[1, 3] ).to be false }
     end
 
     context 'edge cases' do
@@ -585,7 +493,7 @@ describe Sycamore::Tree do
         end
 
         context 'when having nodes with children' do
-          # specify { expect( Tree[a: 1, b: nil].size ).to be 2 }
+          # specify { expect( Sycamore::Tree[a: 1, b: nil].size ).to be 2 }
         end
 
       end
@@ -633,42 +541,42 @@ describe Sycamore::Tree do
   describe '#path?' do
 
     context 'when given a Path' do
-      specify { expect( Tree[].path? Path[] ).to be true }
-      specify { expect( Tree[].path? Path[42] ).to be false }
-      specify { expect( Tree[].path? Path[1,2,3] ).to be false }
+      specify { expect( Sycamore::Tree[].path? Path[] ).to be true }
+      specify { expect( Sycamore::Tree[].path? Path[42] ).to be false }
+      specify { expect( Sycamore::Tree[].path? Path[1,2,3] ).to be false }
 
-      specify { expect( Tree[1 => 2].path?(Sycamore::Path(1))).to be true }
-      specify { expect( Tree[1 => 2].path?(Sycamore::Path(2))).to be false }
-      specify { expect( Tree[1 => 2].path?(Sycamore::Path(1, 2))).to be true }
+      specify { expect( Sycamore::Tree[1 => 2].path?(Sycamore::Path(1))).to be true }
+      specify { expect( Sycamore::Tree[1 => 2].path?(Sycamore::Path(2))).to be false }
+      specify { expect( Sycamore::Tree[1 => 2].path?(Sycamore::Path(1, 2))).to be true }
     end
 
     context 'when given a single atom' do
-      specify { expect( Tree[1 => 2].path?(1) ).to be true }
-      specify { expect( Tree[1 => 2].path?(2) ).to be false }
+      specify { expect( Sycamore::Tree[1 => 2].path?(1) ).to be true }
+      specify { expect( Sycamore::Tree[1 => 2].path?(2) ).to be false }
     end
 
     context 'when given a sequence of atoms' do
 
       context 'when given a single Enumerable' do
-        specify { expect( Tree[prop1: 1, prop2: [:foo, :bar]].path?(:prop2, :foo) ).to be true }
-        specify { expect( Tree[1 => 2].path?([1, 2])     ).to be true }
-        specify { expect( Tree[1 => 2].path?([1, 2, 3])  ).to be false }
-        specify { expect( Tree[1 => 2].path?([1, 2, 3])  ).to be false }
-        specify { expect( Tree['1' => '2'].path?([1, 2]) ).to be false }
+        specify { expect( Sycamore::Tree[prop1: 1, prop2: [:foo, :bar]].path?(:prop2, :foo) ).to be true }
+        specify { expect( Sycamore::Tree[1 => 2].path?([1, 2])     ).to be true }
+        specify { expect( Sycamore::Tree[1 => 2].path?([1, 2, 3])  ).to be false }
+        specify { expect( Sycamore::Tree[1 => 2].path?([1, 2, 3])  ).to be false }
+        specify { expect( Sycamore::Tree['1' => '2'].path?([1, 2]) ).to be false }
       end
 
       context 'when given multiple arguments' do
-        specify { expect( Tree[prop1: 1, prop2: [:foo, :bar]].path?(:prop2, :foo) ).to be true }
-        specify { expect( Tree[1 => 2].path?(1, 2)     ).to be true }
-        specify { expect( Tree[1 => 2].path?(1, 2, 3)  ).to be false }
-        specify { expect( Tree[1 => 2].path?(1, 2, 3)  ).to be false }
-        specify { expect( Tree['1' => '2'].path?(1, 2) ).to be false }
+        specify { expect( Sycamore::Tree[prop1: 1, prop2: [:foo, :bar]].path?(:prop2, :foo) ).to be true }
+        specify { expect( Sycamore::Tree[1 => 2].path?(1, 2)     ).to be true }
+        specify { expect( Sycamore::Tree[1 => 2].path?(1, 2, 3)  ).to be false }
+        specify { expect( Sycamore::Tree[1 => 2].path?(1, 2, 3)  ).to be false }
+        specify { expect( Sycamore::Tree['1' => '2'].path?(1, 2) ).to be false }
       end
     end
 
     context 'when no arguments given' do
       it 'raises an ArgumentError' do
-        expect { Tree.new.path? }.to raise_error ArgumentError
+        expect { Sycamore::Tree.new.path? }.to raise_error ArgumentError
       end
     end
 
@@ -690,12 +598,12 @@ describe Sycamore::Tree do
   end
 
   # describe '#to_a' do
-  #   specify { expect( Tree[         ].to_a ).to eq( [] ) }
-  #   specify { expect( Tree[ 1       ].to_a ).to eq( [1] ) }
-  #   specify { expect( Tree[ 1, 2, 3 ].to_a ).to eq( [1, 2, 3] ) }
-  #   specify { expect( Tree[ :a => 1 ].to_a ).to eq( [ :a => [1] ] ) }
-  #   specify { expect( Tree[ :a => 1, :b => [2, 3] ].to_a ).to eq(
-  #                         [ :a => [1], :b => [2, 3] ] ) }
+  #   specify { expect( Sycamore::Tree[         ].to_a ).to eq( [] ) }
+  #   specify { expect( Sycamore::Tree[ 1       ].to_a ).to eq( [1] ) }
+  #   specify { expect( Sycamore::Tree[ 1, 2, 3 ].to_a ).to eq( [1, 2, 3] ) }
+  #   specify { expect( Sycamore::Tree[ :a => 1 ].to_a ).to eq( [ :a => [1] ] ) }
+  #   specify { expect( Sycamore::Tree[ :a => 1, :b => [2, 3] ].to_a ).to eq(
+  #                                   [ :a => [1], :b => [2, 3] ] ) }
   # end
 
   describe '#to_h' do

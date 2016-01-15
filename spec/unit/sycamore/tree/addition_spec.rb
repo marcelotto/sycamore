@@ -1,54 +1,5 @@
 describe Sycamore::Tree do
 
-  describe 'child constructor integration' do
-    let(:tree) { Sycamore::Tree.new }
-    let(:subclass) { Class.new(Sycamore::Tree) }
-
-    subject(:new_child) { tree.add(1 => 2)[1] }
-
-    context 'when no child constructor defined' do
-      it { is_expected.to eql Sycamore::Tree[2] }
-
-      context 'on a subclass' do
-        let(:tree) { subclass.new }
-        it { is_expected.to eql subclass.with(2) }
-      end
-    end
-
-    context 'when a child constructor defined' do
-
-      context 'when a child Tree class defined' do
-        let(:tree_class) { Class.new(Sycamore::Tree) }
-
-        before(:each) { tree.child_constructor = tree_class }
-
-        it { is_expected.to eql tree_class.with(2) }
-
-        context 'on a subclass' do
-          let(:tree) { subclass.new }
-          it { is_expected.to eql tree_class.with(2) }
-        end
-      end
-
-      context 'when a child prototype Tree instance defined' do
-        pending 'Tree#clone'
-      end
-
-      context 'when a child constructor Proc defined' do
-        before(:each) do
-          tree.def_child_generator { Sycamore::Tree[42] }
-        end
-
-        it { is_expected.to be === Sycamore::Tree[42, 2] }
-
-        context 'on a subclass' do
-          let(:tree) { subclass.new }
-          it { is_expected.to be === subclass[42, 2] }
-        end
-      end
-    end
-  end
-
   describe '#add' do
     context 'when given a single atomic value' do
       it 'does add the value to the set of nodes' do
