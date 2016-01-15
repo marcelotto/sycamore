@@ -167,4 +167,34 @@ describe Sycamore::Tree do
     end
   end
 
+  ############################################################################
+
+  describe '#reset_child' do
+    context 'when the given the node is present' do
+      it 'does clear a child tree before adding the arguments to it' do
+        expect( Sycamore::Tree[a: 1].reset_child(:a, 2).child_of(:a).node ).to eq 2
+      end
+    end
+
+    context 'when the given the node is not present' do
+      it 'does create the tree and add the arguments' do
+        expect( Sycamore::Tree.new.reset_child(:a, 2) ).to include_tree(a: 2)
+      end
+    end
+
+    context 'edge cases' do
+      it 'does nothing, when the given node is nil' do
+        expect( Sycamore::Tree[].reset_child(nil, 42) ).to be_empty
+      end
+    end
+  end
+
+  describe '#[]=' do
+    it 'does the same as #reset_child, but returns Ruby-assignments-conform the rvalue' do
+      tree = Sycamore::Tree[a: 1]
+      expect( tree[:a] = 2  ).to eq 2
+      expect( tree[:a].node ).to eq 2
+    end
+  end
+
 end

@@ -22,7 +22,7 @@ module Sycamore
     # CQS                                                          #
     ################################################################
 
-    ADDITIVE_COMMAND_METHODS    = %i[add << replace]
+    ADDITIVE_COMMAND_METHODS    = %i[add << replace reset_child] << :[]=
     DESTRUCTIVE_COMMAND_METHODS = %i[delete >> clear]
     COMMAND_METHODS = ADDITIVE_COMMAND_METHODS + DESTRUCTIVE_COMMAND_METHODS +
       %i[child_constructor= child_class= def_child_generator freeze]
@@ -362,9 +362,18 @@ module Sycamore
     #
     def replace(nodes_or_struct)
       clear.add(nodes_or_struct)
+    end
+
+    def reset_child(node, child_nodes_or_struct)
+      return self if node.nil?
+
+      child_of(node).replace(child_nodes_or_struct)
 
       self
     end
+
+    alias []= reset_child
+
 
     # Deletes all nodes and their children
     #
