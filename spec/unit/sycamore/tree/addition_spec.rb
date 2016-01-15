@@ -155,4 +155,16 @@ describe Sycamore::Tree do
 
   end
 
+  ############################################################################
+
+  describe '#replace' do
+    it 'does clear the tree before adding the arguments' do
+      expect( Sycamore::Tree[:foo].replace(nil) ).to be_empty
+      expect( Sycamore::Tree[:foo].replace(:bar).nodes ).to eq [:bar]
+      expect( Sycamore::Tree[:foo].replace([:bar, :baz]).nodes ).to eq %i[bar baz]
+      expect( Sycamore::Tree[a: 1].replace(a: 2) ).to     include_tree(a: 2)
+      expect( Sycamore::Tree[a: 1].replace(a: 2) ).not_to include_tree(a: 1)
+    end
+  end
+
 end
