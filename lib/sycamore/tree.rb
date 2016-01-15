@@ -270,7 +270,7 @@ module Sycamore
 
     private def add_child(node, children)
       return self if node.nil? or node.equal? Nothing
-      return add_node(node) if children.nil? or children.equal?(Nothing) or # TODO: when Absence defined: child.nothing? or child.abent?
+      return add_node(node) if children.nil? or children.equal?(Nothing) or # TODO: when Absence defined: child.nothing? or child.absent?
         # Enumerable === children
         (Enumerable === children and children.empty?)
 
@@ -282,7 +282,6 @@ module Sycamore
 
     private def add_children(tree)
       return self if tree.respond_to?(:absent?) and tree.absent?
-      raise ArgumentError unless Tree.like?(tree) # TODO: Spec this!
 
       tree.each { |node, child| add_child(node, child) }
 
@@ -345,7 +344,6 @@ module Sycamore
 
     private def delete_children(tree)
       return self if tree.respond_to?(:absent?) and tree.absent?
-      raise ArgumentError unless Tree.like?(tree) # TODO: Spec this!
 
       tree.each do |node, child|
         next unless include? node
