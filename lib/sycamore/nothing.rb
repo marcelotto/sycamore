@@ -27,11 +27,6 @@ module Sycamore
       true
     end
 
-    # @see {Tree#present?}
-    def present?
-      false
-    end
-
     # @see {Tree#absent?}
     def absent?
       true

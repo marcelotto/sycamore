@@ -2,6 +2,8 @@ describe Sycamore::Absence do
 
   subject(:example_absence) { Sycamore::Absence.at(parent_tree, parent_node) }
 
+  let(:some_absence) { Sycamore::Absence.new(Sycamore::Tree.new, :missing) }
+
   describe '#initialize' do
     it 'does raise an error, if not given a parent tree and node' do
       expect { Sycamore::Absence.new(nil, nil) }.to raise_error ArgumentError
@@ -12,22 +14,39 @@ describe Sycamore::Absence do
   end
 
   describe '#nothing?' do
-    specify { expect( Sycamore::Absence.new(Sycamore::Tree.new, 42).nothing? ).to be false }
+    specify { expect( some_absence.nothing? ).to be false }
   end
 
-  # TODO: These must differentiated ...
+  describe '#absent?' do
+    specify { expect( some_absence.absent? ).to be true }
 
-  # describe '#present?' do
-  #   it 'does return true' do
-  #     expect(example_absence.present?).to be false
-  #   end
-  # end
-  #
-  # describe '#absent?' do
-  #   it 'does return false' do
-  #     expect(example_absence.absent?).to be true
-  #   end
-  # end
+    context 'when the absent tree was created and installed' do
+      context 'when it is blank' do
+        before(:each) { some_absence.add nil }
+        specify { expect( some_absence.absent? ).to be false }
+      end
+      context 'when it is not blank' do
+        before(:each) { some_absence.add :foo }
+        specify { expect( some_absence.absent? ).to be false }
+      end
+    end
+  end
+
+  describe '#present?' do
+    specify { expect( some_absence.present? ).to be false }
+
+    context 'when the absent tree was created and installed' do
+      context 'when it is blank' do
+        before(:each) { some_absence.add nil }
+        specify { expect( some_absence.present? ).to be false }
+      end
+      context 'when it is not blank' do
+        before(:each) { some_absence.add :foo }
+        specify { expect( some_absence.present? ).to be true }
+      end
+    end
+  end
+
 
   shared_examples_for 'all Tree method calls on an absence' do
 

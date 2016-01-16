@@ -20,21 +20,16 @@ module Sycamore
 
     # @see {Tree#absent?}
     def absent?
-      not present?
-    end
-
-    # @see {Tree#present?}
-    def present?
-      not @tree.nil? # TODO: TDD this: and not @tree.nothing?
+      @tree.nil?
     end
 
     def nothing?
       false
-      # TODO: TDD this: @tree.equal? Nothing
     end
 
+    # TODO: Remove this? It's currently used only in tests.
     def absent_parent?
-      @parent_tree.is_a? Absence
+      @parent_tree.absent?
     end
 
     ###################################################################

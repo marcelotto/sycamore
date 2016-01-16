@@ -100,12 +100,15 @@ describe Sycamore::Tree do
     specify { expect( Sycamore::Tree.new.nothing? ).to be false }
   end
 
-  describe '#present?' do
-    specify { expect( Sycamore::Tree.new.present? ).to be true }
-  end
-
   describe '#absent?' do
     specify { expect( Sycamore::Tree.new.absent? ).to be false }
+  end
+
+  describe '#present?' do
+    specify { expect( Sycamore::Tree.new.present?    ).to be false }
+    specify { expect( Sycamore::Tree[0 ].present?    ).to be true }
+    specify { expect( Sycamore::Tree[''].present?    ).to be true }
+    specify { expect( Sycamore::Tree[false].present? ).to be true }
   end
 
 

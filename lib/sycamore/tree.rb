@@ -28,10 +28,10 @@ module Sycamore
       %i[child_constructor= child_class= def_child_generator freeze]
 
     PREDICATE_METHODS =
-      %i[empty? nothing? present? absent?
+      %i[nothing? absent? present? blank? empty?
          include? include_node? has_key? has_path? path?
-         eql? matches? === ==
-         leaf? leaves? internal? external? flat? nested?]
+         leaf? leaves? internal? external? flat? nested?
+         eql? matches? === ==]
     QUERY_METHODS = PREDICATE_METHODS +
       %i[size node nodes keys child_of fetch each each_path paths
          new_child child_constructor child_class child_generator
@@ -164,18 +164,25 @@ module Sycamore
     # Absence and Nothing predicates
     ########################################################################
 
+    # @return [Boolean] if this is the {Nothing} tree
+    #
     def nothing?
       false
     end
 
-    # the negation of {#absent?}
-    def present?
-      true
-    end
-
-    # the negation of {#present?}
+    # @return [Boolean] if this is an absent tree
+    #
     def absent?
       false
+    end
+
+    # @return [Boolean] if this is not {blank?}, i.e. {empty?}
+    #
+    # @note This is not the negation of {absent?}, since this would result in a
+    #   different behaviour than ActiveSupports present? method.
+    #
+    def present?
+      not blank?
     end
 
 
@@ -536,6 +543,8 @@ module Sycamore
     def empty?
       @data.empty?
     end
+
+    alias blank? empty?
 
     # @return [Boolean] if the given node has no children
     #
