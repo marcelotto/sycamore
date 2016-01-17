@@ -95,11 +95,23 @@ module Sycamore
 
     alias __getobj__ presence
 
-    def child_of(node, &block)
+    def child_of(node)
+      return Nothing if node.nil? or node.equal? Nothing
+
       Absence.at(self, node)
     end
 
-    alias [] child_of
+    # @todo This is duplicate of {Tree#child_at}! How can we remove it, without introducing a module for this single method or inherit from Tree?
+    def child_at(*path)
+      case path.length
+        when 0 then raise ArgumentError, 'wrong number of arguments (given 0, expected 1+)'
+        when 1 then child_of(*path)
+        else child_of(path[0]).child_at(*path[1..-1])
+      end
+    end
+
+    alias [] child_at
+    alias dig child_at
 
     def inspect
       "Sycamore::Absence.at(#@parent_tree, #@parent_node)"

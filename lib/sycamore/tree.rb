@@ -33,7 +33,7 @@ module Sycamore
          leaf? leaves? internal? external? flat? nested?
          eql? matches? === ==]
     QUERY_METHODS = PREDICATE_METHODS +
-      %i[size node nodes keys child_of fetch each each_path paths
+      %i[size node nodes keys child_of child_at dig fetch each each_path paths
          new_child child_constructor child_class child_generator
          hash to_h to_s inspect] << :[]
 
@@ -444,8 +444,16 @@ module Sycamore
       @data[node] || Absence.at(self, node)
     end
 
-    alias [] child_of
+    def child_at(*path)
+      case path.length
+        when 0 then raise ArgumentError, 'wrong number of arguments (given 0, expected 1+)'
+        when 1 then child_of(*path)
+               else child_of(path[0]).child_at(*path[1..-1])
+      end
+    end
 
+    alias [] child_at
+    alias dig child_at
 
     def fetch(*node_and_default, &block)
       case node_and_default.size

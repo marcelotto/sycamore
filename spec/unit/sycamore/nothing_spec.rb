@@ -7,7 +7,9 @@ describe Sycamore::Nothing do
 
   describe 'query methods' do
     describe 'children' do
-      specify { expect( Sycamore::Nothing.child_of(1) ).to be Sycamore::Nothing }
+      specify { expect( Sycamore::Nothing.child_of(1    ) ).to be Sycamore::Nothing }
+      specify { expect( Sycamore::Nothing.child_at(1,2,3) ).to be Sycamore::Nothing }
+      specify { expect( Sycamore::Nothing[:foo, :bar]     ).to be Sycamore::Nothing }
     end
 
     describe '#nothing?' do

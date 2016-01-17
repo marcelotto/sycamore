@@ -9,8 +9,8 @@ describe Sycamore::Tree do
     end
 
     it 'does return an absent tree, when given the node is not present' do
-      expect( Sycamore::Tree.new.child_of(:missing) ).to be_absent.and be_empty
-      expect( Sycamore::Tree.new.child_of(false   ) ).to be_absent.and be_empty
+      expect( Sycamore::Tree.new.child_of(:missing) ).to be_absent
+      expect( Sycamore::Tree.new.child_of(false   ) ).to be_absent
     end
 
     it 'does return an absent tree, when the given node is a leaf' do
@@ -27,6 +27,49 @@ describe Sycamore::Tree do
         expect( Sycamore::Tree.new.child_of(Sycamore::Nothing) ).to be Sycamore::Nothing
       end
     end
+
+  end
+
+  ############################################################################
+
+  describe '#child_at' do
+
+    it 'does return the child tree of the given node, when the node at the given path is present' do
+      expect( Sycamore::Tree[property: :value].child_at(:property).node ).to be :value
+      expect( Sycamore::Tree[false => 42     ].child_at(false).node     ).to be 42
+      expect( Sycamore::Tree[4 => {false=>2} ].child_at(4) ).to eq Sycamore::Tree[false=>2]
+
+      expect( Sycamore::Tree[1 => {2 => 3}].child_at(1, 2).node ).to be 3
+
+    end
+
+    it 'does return an absent tree, when given the node at the given path is not present' do
+      expect( Sycamore::Tree.new.child_at(:missing) ).to be_absent
+      expect( Sycamore::Tree.new.child_at(1, 2, 3 ) ).to be_absent
+
+      tree = Sycamore::Tree.new
+      absent_tree = tree.child_at(1, 2, 3)
+      absent_tree << nil
+      expect(tree).to eq Sycamore::Tree[1=>{2=>3}]
+    end
+
+    it 'does return an absent tree, when the node at the given path is a leaf' do
+      expect( Sycamore::Tree[42   ].child_at(42     ) ).to be_absent
+      expect( Sycamore::Tree[1,2,3].child_at(1, 2, 3) ).to be_absent
+    end
+
+    context 'edge cases' do
+      it 'does raise an ArgumentError, when given no arguments' do
+        expect { Sycamore::Tree.new.child_at() }.to raise_error ArgumentError
+      end
+
+      it 'does return the Nothing tree, when the given path contains nil' do
+        expect( Sycamore::Tree.new.child_at(nil, nil) ).to be Sycamore::Nothing
+        expect( Sycamore::Tree.new.child_at(1, nil  ) ).to be Sycamore::Nothing
+        expect( Sycamore::Tree.new.child_at(nil, 1  ) ).to be Sycamore::Nothing
+      end
+    end
+
   end
 
   ############################################################################
