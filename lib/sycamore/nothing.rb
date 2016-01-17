@@ -48,7 +48,11 @@ module Sycamore
       define_method(command_method) { |*args| self }
     end
 
-    # the unique string representation of the Nothing Singleton
+    def child_of(node)
+      self
+    end
+
+    # the unique string representation of the Nothing tree
     #
     # @return [String] '#<Sycamore::Nothing>'
     #

@@ -6,6 +6,10 @@ describe Sycamore::Nothing do
   it { is_expected.to be_falsey }
 
   describe 'query methods' do
+    describe 'children' do
+      specify { expect( Sycamore::Nothing.child_of(1) ).to be Sycamore::Nothing }
+    end
+
     describe '#nothing?' do
       specify { expect( Sycamore::Nothing.nothing? ).to be true }
     end
