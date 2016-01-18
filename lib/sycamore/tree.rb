@@ -22,7 +22,7 @@ module Sycamore
     # CQS                                                          #
     ################################################################
 
-    ADDITIVE_COMMAND_METHODS    = %i[add << replace reset_child] << :[]=
+    ADDITIVE_COMMAND_METHODS    = %i[add << replace] << :[]=
     DESTRUCTIVE_COMMAND_METHODS = %i[delete >> clear]
     COMMAND_METHODS = ADDITIVE_COMMAND_METHODS + DESTRUCTIVE_COMMAND_METHODS +
       %i[child_constructor= child_class= def_child_generator freeze]
@@ -371,16 +371,18 @@ module Sycamore
       clear.add(nodes_or_struct)
     end
 
-    def reset_child(node, child_nodes_or_struct)
-      return self if node.nil?
+    # Replaces the contents of a child tree
+    #
+    # @param TODO
+    # @return the rvalue as any Ruby assignment
+    #
+    def []=(*args)
+      path, nodes_or_struct = args[0..-2], args[-1]
+      raise ArgumentError, 'wrong number of arguments (given 1, expected 2)' if path.empty?
+      raise IndexError, 'nil is not a valid tree node' if path.include? nil
 
-      child_of(node).replace(child_nodes_or_struct)
-
-      self
+      child_at(*path).replace(nodes_or_struct)
     end
-
-    alias []= reset_child
-
 
     # Deletes all nodes and their children
     #
@@ -439,16 +441,24 @@ module Sycamore
 
     # @todo Should we differentiate the case of a leaf and a not present node?
     def child_of(node)
-      return Nothing if node.nil? or node.equal? Nothing
+      raise IndexError, 'nil is not a valid tree node' if node.nil?
 
       @data[node] || Absence.at(self, node)
     end
 
     def child_at(*path)
+
       case path.length
-        when 0 then raise ArgumentError, 'wrong number of arguments (given 0, expected 1+)'
-        when 1 then child_of(*path)
-               else child_of(path[0]).child_at(*path[1..-1])
+        when 0
+          raise ArgumentError, 'wrong number of arguments (given 0, expected 1+)'
+        when 1
+          if path.first.is_a? Array
+            child_at(*path.first)
+          else
+            child_of(*path)
+          end
+        else
+          child_of(path[0]).child_at(*path[1..-1])
       end
     end
 
@@ -597,23 +607,11 @@ module Sycamore
       other.instance_of?(self.class) and @data.eql?(other.data)
     end
 
-    # TODO: What should be the semantics of #==?
-    #   Currently it is the same as eql?, since Hash
-    #    coerces only the values and not the keys ...
-    #
-    # @todo Use coercion! Like Equalizer#==.  But here or in ===?
-    # @todo Try to convert the other.to_tree ... ? as a coercion? Here or in ===?
     # def ==(other)
     #   other.instance_of?(self.class) and self.@data == other.@data
     # end
 
     alias == eql? # temporary solution. TODO: Remove this.
-
-    # == should be the strictest form of matching?, which gets only applied if other
-    #     is Tree.like?, since these definitely aren't a node of tree.
-    #     Enumerables aren't for sure? What's with a Range node?
-    #     Should we support this? How? ...
-
 
 =begin
     def ===(other)

@@ -1,5 +1,7 @@
 describe Sycamore::Tree do
 
+  subject(:tree) { Sycamore::Tree.new }
+
   describe '#add' do
     context 'when given a single atomic value' do
       it 'does add the value to the set of nodes' do
@@ -169,32 +171,41 @@ describe Sycamore::Tree do
 
   ############################################################################
 
-  describe '#reset_child' do
-    context 'when the given the node is present' do
+  describe '#[]=' do
+
+    context 'when the node at the given path is present' do
       it 'does clear a child tree before adding the arguments to it' do
-        expect( Sycamore::Tree[a: 1].reset_child(:a, 2).child_of(:a).node ).to eq 2
+        tree = Sycamore::Tree[a: 1]
+        expect { tree[:a] = 2      }.to change { tree[:a].node  }.from( 1 ).to(2)
+        expect { tree[:a] = [3, 4] }.to change { tree[:a].nodes }.from([2]).to([3,4])
+
+        tree = Sycamore::Tree[a: {b: 1}]
+        expect { tree[:a] = :b }.to change { tree[:a, :b].nodes }.from([1]).to([])
+
+        tree = Sycamore::Tree[a: {b: 2}]
+        expect { tree[:a, :b] = [3, 4] }.to change { tree[:a, :b].nodes }.from([2]).to([3,4])
       end
     end
 
-    context 'when the given the node is not present' do
+    context 'when the node at the given path is not present' do
       it 'does create the tree and add the arguments' do
-        expect( Sycamore::Tree.new.reset_child(:a, 2) ).to include_tree(a: 2)
+        expect { tree[:a] = 1     }.to change { tree[:a].nodes }.from([]).to([1])
+        expect { tree[:b, :c] = 1 }.to change { tree[:b, :c].nodes }.from([]).to([1])
       end
     end
 
     context 'edge cases' do
-      it 'does nothing, when the given node is nil' do
-        expect( Sycamore::Tree[].reset_child(nil, 42) ).to be_empty
+      it 'does raise an ArgumentError, when the given path is empty' do
+        expect { tree[] = 42 }.to raise_error ArgumentError
+      end
+
+      it 'does raise an IndexError, when the given path contains nil' do
+        expect { tree[nil] = 42    }.to raise_error IndexError
+        expect { tree[nil, 1] = 42 }.to raise_error IndexError
+        expect { tree[1, nil] = 42 }.to raise_error IndexError
       end
     end
-  end
 
-  describe '#[]=' do
-    it 'does the same as #reset_child, but returns Ruby-assignments-conform the rvalue' do
-      tree = Sycamore::Tree[a: 1]
-      expect( tree[:a] = 2  ).to eq 2
-      expect( tree[:a].node ).to eq 2
-    end
   end
 
 end

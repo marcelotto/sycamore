@@ -49,8 +49,8 @@ describe Sycamore::Absence do
 
   describe '#child_of' do
     context 'edge cases' do
-      it 'does return the Nothing tree, when given nil' do
-        expect( some_absence.child_of(nil) ).to be Sycamore::Nothing
+      it 'does raise an IndexError, when given nil' do
+        expect { some_absence.child_of(nil) }.to raise_error IndexError
       end
     end
   end

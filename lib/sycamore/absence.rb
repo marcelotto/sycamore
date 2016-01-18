@@ -96,7 +96,7 @@ module Sycamore
     alias __getobj__ presence
 
     def child_of(node)
-      return Nothing if node.nil? or node.equal? Nothing
+      raise IndexError, 'nil is not a valid tree node' if node.nil?
 
       Absence.at(self, node)
     end
