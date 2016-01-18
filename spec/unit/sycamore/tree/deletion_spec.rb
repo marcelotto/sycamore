@@ -68,8 +68,6 @@ describe Sycamore::Tree do
         expect( Sycamore::Tree[a: [1, 2]].delete(a: 2) ).not_to include_tree a: 2
         expect( Sycamore::Tree[a: [1, 2]].delete(a: 2) ).to     include_tree a: 1
 
-        expect( Sycamore::Tree[a: [1, 2]].delete(a: 1, a: 2) ).to include_node :a
-
         expect( Sycamore::Tree[a: 1, b: 2].delete(:a)  ).not_to include_tree a: 1
         expect( Sycamore::Tree[a: 1, b: 2].delete(:a)  ).to     include_tree b: 2
 
@@ -100,6 +98,7 @@ describe Sycamore::Tree do
           expect( Sycamore::Tree[42].delete(absent_tree) ).to include_node 42
         end
       end
+
     end
 
     context 'when given multiple arguments' do
