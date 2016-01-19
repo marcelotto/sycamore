@@ -127,12 +127,12 @@ describe Sycamore::Tree do
 
     context 'when a generator proc' do
       before(:each) do
-        tree.def_child_generator { Tree[42] }
+        tree.def_child_generator { Sycamore::Tree[42] }
       end
 
       specify { expect(tree.child_constructor).to be_a Proc }
       specify { expect(tree.child_generator).to be_a Proc }
-      specify { expect(tree.child_constructor.call).to be === Tree[42] }
+      specify { expect(tree.child_constructor.call).to be === Sycamore::Tree[42] }
     end
 
   end
