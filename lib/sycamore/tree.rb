@@ -29,7 +29,7 @@ module Sycamore
 
     PREDICATE_METHODS =
       %i[nothing? absent? present? blank? empty?
-         include? include_node? has_key? has_path? path?
+         include? include_node? member? key? has_key? has_path? path?
          leaf? leaves? internal? external? flat? nested?
          eql? matches? === ==]
     QUERY_METHODS = PREDICATE_METHODS +
@@ -546,7 +546,9 @@ module Sycamore
       @data.include?(node)
     end
 
+    alias member?  include_node?  # Hash compatibility
     alias has_key? include_node?  # Hash compatibility
+    alias key?     include_node?  # Hash compatibility
 
     # alias <= include?
 
