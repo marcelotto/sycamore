@@ -1,122 +1,131 @@
 describe Sycamore::Tree do
 
-  describe '#hash' do
-    specify { expect( Sycamore::Tree.new.hash   == Sycamore::Tree.new.hash      ).to be true }
-    specify { expect( Sycamore::Tree[1].hash    == Sycamore::Tree[1].hash       ).to be true }
-    specify { expect( Sycamore::Tree[1].hash    == Sycamore::Tree[2].hash       ).to be false }
-    specify { expect( Sycamore::Tree[1,2].hash  == Sycamore::Tree[2,1].hash     ).to be true }
-    specify { expect( Sycamore::Tree[a: 1].hash == Sycamore::Tree[a: 1].hash    ).to be true }
-    specify { expect( Sycamore::Tree[a: 1].hash == Sycamore::Tree[a: 2].hash    ).to be false }
-    specify { expect( Sycamore::Tree[a: 1].hash == Sycamore::Tree[b: 1].hash    ).to be false }
-    specify { expect( Sycamore::Tree[1].hash    == Sycamore::Tree[1 => nil].hash).to be true }
+  MyTree = Class.new(Sycamore::Tree)
 
-    specify { expect( Sycamore::Tree.new.hash   == Hash.new.hash  ).to be false }
-    specify { expect( Sycamore::Tree[a: 1].hash == Hash[a: 1].hash).to be false }
-  end
+  EQL = [
+    [ Sycamore::Tree.new   , Sycamore::Tree.new ],
+    [ MyTree.new           , MyTree.new ],
+    [ Sycamore::Tree[1]    , Sycamore::Tree[1] ],
+    [ Sycamore::Tree[1, 2] , Sycamore::Tree[2, 1] ],
+    [ Sycamore::Tree[a: 1] , Sycamore::Tree[a: 1] ],
+    [ Sycamore::Tree[foo: 'foo', bar: %w[bar baz]],
+      Sycamore::Tree[foo: 'foo', bar: %w[bar baz]] ],
+  ]
 
-  ############################################################################
+  NOT_EQL_BY_CONTENT = [
+    [ Sycamore::Tree[1]              , Sycamore::Tree[2] ],
+    [ Sycamore::Tree[1]              , Sycamore::Tree[1.0] ],
+    [ Sycamore::Tree[:foo, :bar]     , Sycamore::Tree['foo', 'bar'] ],
+    [ Sycamore::Tree[a: 1]           , Sycamore::Tree[a: 2] ],
+    [ Sycamore::Tree[1=>{2=>{3=>4}}] , Sycamore::Tree[1=>{2=>{3=>1}}] ],
+  ]
+
+  NOT_EQL_BY_TYPE = [
+    [ Sycamore::Tree[a: 1] , Hash[a: 1] ],
+    [ Sycamore::Tree.new   , Sycamore::Nothing ],
+    [ Sycamore::Tree.new   , MyTree.new ],
+    [ MyTree.new           , Sycamore::Tree.new ],
+  ]
+
+  NOT_EQL = NOT_EQL_BY_CONTENT + NOT_EQL_BY_TYPE
 
   describe '#eql?' do
-    specify { expect( Sycamore::Tree.new   ).to eql     Sycamore::Tree.new }
-    specify { expect( Sycamore::Tree[1]    ).to eql     Sycamore::Tree[1] }
-    specify { expect( Sycamore::Tree[1]    ).not_to eql Sycamore::Tree[2] }
-    specify { expect( Sycamore::Tree[1,2]  ).to eql     Sycamore::Tree[2,1] }
-    specify { expect( Sycamore::Tree[a: 1] ).to eql     Sycamore::Tree[a: 1] }
+    it 'does return true, if other is of the same type and has eql content' do
+      EQL.each do |tree, other|
+        expect(tree).to eql(other),
+          "expected #{tree.inspect} to eql #{other.inspect}"
+      end
+    end
 
-    specify { expect( Sycamore::Tree[a: 1] ).not_to eql Hash[a: 1] }
-    specify { expect( Sycamore::Tree[1]    ).not_to eql Hash[1 => nil] }
+    it 'does return false, if the content is not eql' do
+      NOT_EQL_BY_CONTENT.each do |tree, other|
+        expect(tree).not_to eql(other),
+          "expected #{tree.inspect} not to eql #{other.inspect}"
+      end
+    end
+
+    it 'does return false, if the other is not an instance of the same class' do
+      NOT_EQL_BY_TYPE.each do |tree, other|
+        expect(tree).not_to eql(other),
+          "expected #{tree.inspect} not to eql #{other.inspect}"
+      end
+    end
   end
 
   ############################################################################
 
-  describe '#==' do
+  describe '#hash' do
+    it 'does produce equal values, when the tree is eql' do
+      EQL.each do |tree, other|
+        expect( tree.hash ).to be(other.hash),
+                               "expected the hash of #{tree.inspect} to be also the hash of #{other.inspect}"
+      end
+    end
 
-    pending 'What should be the semantics of #==?'
-
-    #   Currently it is the same as eql?, since Hash
-    #    coerces only the values and not the keys ...
-
-    specify { expect( Sycamore::Tree.new   ).to eq     Sycamore::Tree.new }
-    specify { expect( Sycamore::Tree[1]    ).to eq     Sycamore::Tree[1] }
-    specify { pending ; expect( Sycamore::Tree[1]    ).to eq     Sycamore::Tree[1.0] }
-    specify { expect( Sycamore::Tree[1]    ).not_to eq Sycamore::Tree[2] }
-    specify { expect( Sycamore::Tree[1,2]  ).to eq     Sycamore::Tree[2,1] }
-    specify { expect( Sycamore::Tree[2]    ).to eq     Sycamore::Tree[1 => 2][1]   }
-    specify { expect( Sycamore::Tree[a: 1] ).to eq     Sycamore::Tree[a: 1] }
-
-    specify { expect( Sycamore::Tree[a: 1] ).not_to eq Hash[a: 1] }
-    specify { expect( Sycamore::Tree[1]    ).not_to eq Hash[1 => nil] }
+    it 'does produce different values, when the tree is not eql' do
+      NOT_EQL.each do |tree, other|
+        expect(tree.hash).not_to eq(other.hash),
+                                 "expected the hash of #{tree.inspect} not to equal the hash of #{other.inspect}"
+      end
+    end
   end
 
+  ############################################################################
+
+  MATCH = EQL + [
+    [ Sycamore::Tree.new    , Sycamore::Nothing ],
+    [ Sycamore::Nothing     , Sycamore::Tree.new ],
+    [ Sycamore::Tree.new    , MyTree.new ],
+    [ MyTree.new            , Sycamore::Tree.new ],
+    [ Sycamore::Tree.new    , Hash.new ],
+    [ Sycamore::Tree.new    , Array.new ],
+    [ Sycamore::Tree.new    , Set.new ],
+    [ Sycamore::Tree.new    , nil ],
+
+    [ Sycamore::Tree[:a ]   , :a  ],
+    [ Sycamore::Tree['a']   , 'a' ],
+    [ Sycamore::Tree[ 1 ]   , 1 ],
+    [ Sycamore::Tree[ 1 ]   , 1.0 ],    # TODO: This is not consistent with the fact that
+    [ Sycamore::Tree[ 1 ]   , [1.0] ],  # TODO: not Sycamore::Tree[1] === Sycamore::Tree[1.0]
+    [ Sycamore::Tree[:a]    , Hash[a: nil] ],
+    [ Sycamore::Tree[1,2,3] , [1,2,3]  ],
+    [ Sycamore::Tree[1,2,3] , Set[1,2,3] ],
+    [ Sycamore::Tree[:a,:b] , [:b, :a] ],
+    [ Sycamore::Tree[a: 1]  , Hash[a: 1] ],
+    [ Sycamore::Tree[foo: 'foo', bar: %w[bar baz]],
+                Hash[foo: 'foo', bar: %w[bar baz]] ],
+  ]
+
+  NO_MATCH = NOT_EQL_BY_CONTENT + [
+    [ Sycamore::Tree[ 1 ]            ,  2  ],
+    [ Sycamore::Tree[ 1 ]            , '1' ],
+    [ Sycamore::Tree['a']            , :a  ],
+    [ Sycamore::Tree[:foo, :bar]     , ['foo', 'bar'] ],
+    [ Sycamore::Tree[1,2,3]          , [1,2] ],
+    [ Sycamore::Tree[1,2]            , [1,2,3]   ],
+    [ Sycamore::Tree[1,2,3]          , [1,2,[3]] ],
+    [ Sycamore::Tree[a: 1]           , {a: 2} ],
+    [ Sycamore::Tree[1=>{2=>{3=>4}}] , {1=>{2=>{3=>1}}} ],
+
+    [ Sycamore::Tree.new        , { nil => nil } ],
+    [ Sycamore::Tree[:foo]      , { foo: :bar } ],
+    [ Sycamore::Tree[foo: :bar] , [:foo] ],
+    [ Sycamore::Tree[1=>[2,3] ] , {1=>{2=>3}} ],
+    [ Sycamore::Tree[1=>{2=>3}] , {1=>[2,3]} ],
+  ]
+
   describe '#===' do
-    context 'when the other is an atom' do
-      context 'when it matches the other' do
-        specify { expect( Sycamore::Tree[1]    ===  1   ).to be true }
-        specify { expect( Sycamore::Tree[:a]   === :a   ).to be true }
-        specify { expect( Sycamore::Tree['a']  === 'a'  ).to be true }
-      end
-
-      context 'when it not matches the other' do
-        specify { expect( Sycamore::Tree[1]  === 2   ).to be false }
-        specify { expect( Sycamore::Tree[1]  === '1' ).to be false }
-        specify { expect( Sycamore::Tree[:a] === 'a' ).to be false }
+    it 'does return true, if the other is structurally equivalent and has equal content' do
+      MATCH.each do |tree, other|
+        expect( tree === other ).to be(true),
+          "expected #{tree.inspect} === #{other.inspect}"
       end
     end
 
-    context 'when the other is an Enumerable' do
-      context 'when it matches the other' do
-        specify { expect( Sycamore::Tree[1] === [1]               ).to be true }
-        specify { expect( Sycamore::Tree[1,2,3] === [1,2,3]       ).to be true }
-        specify { expect( Sycamore::Tree[:a,:b,:c] === [:c,:a,:b] ).to be true }
-      end
-
-      context 'when it not matches the other' do
-        specify { expect( Sycamore::Tree[1,2]   === [1,2,3]   ).to be false }
-        specify { expect( Sycamore::Tree[1,2,3] === [1,2]     ).to be false }
-        specify { expect( Sycamore::Tree[1,2,3] === [1,2,[3]] ).to be false }
-      end
-    end
-
-    context 'when the other is Tree-like' do
-      context 'when it matches the other' do
-        specify { expect( Sycamore::Tree.new   === Sycamore::Tree.new ).to be true }
-        specify { expect( Sycamore::Tree.new   === Hash.new ).to be true }
-        specify { expect( Sycamore::Tree.new   === Sycamore::Tree[nil] ).to be true }
-        specify { expect( Sycamore::Tree.new   === Sycamore::Tree[nil => nil] ).to be true }
-        specify { expect( Sycamore::Tree.new   ===
-                            Sycamore::Tree[Sycamore::Nothing => Sycamore::Nothing] ).to be true }
-        specify { expect( Sycamore::Tree[1]    === Sycamore::Tree[1] ).to be true }
-        specify { expect( Sycamore::Tree[1]    === Sycamore::Tree[1 => nil] ).to be true }
-        specify { expect( Sycamore::Tree[1]    === Hash[1 => nil] ).to be true }
-        specify { expect( Sycamore::Tree[1]    ===
-                            Sycamore::Tree[1 => Sycamore::Nothing] ).to be true }
-        specify { expect( Sycamore::Tree[1]    ===
-                            Hash[1 => Sycamore::Nothing] ).to be true }
-        specify { expect( Sycamore::Tree[1,2]  === Sycamore::Tree[2,1] ).to be true }
-        specify { expect( Sycamore::Tree[a: 1] === Sycamore::Tree[a: 1] ).to be true }
-        specify { expect( Sycamore::Tree[a: 1] === Hash[a: 1] ).to be true }
-        specify { expect( Sycamore::Tree[foo: 'foo', bar: ['bar', 'baz']] ===
-                            Sycamore::Tree[foo: 'foo', bar: ['bar', 'baz']] ).to be true }
-        specify { expect( Sycamore::Tree[foo: 'foo', bar: ['bar', 'baz']] ===
-                            Hash[foo: 'foo', bar: ['bar', 'baz']] ).to be true }
-        specify { expect( Sycamore::Tree[1=>{2=>{3=>4}}] ===
-                            Sycamore::Tree[1=>{2=>{3=>4}}] ).to be true }
-        specify { expect( Sycamore::Tree[1=>{2=>{3=>4}}] ===
-                            Hash[1=>{2=>{3=>4}}] ).to be true }
-        specify { expect( Sycamore::Tree[a: 1] === Hash[a: 1] ).to be true }
-      end
-
-      context 'when it not matches the other' do
-        specify { expect( Sycamore::Tree.new   ===
-                            Hash[nil => nil] ).to be false }
-        specify { expect( Sycamore::Tree.new   ===
-                            Hash[Sycamore::Nothing => Sycamore::Nothing] ).to be false }
-        specify { expect( Sycamore::Tree[1]    ===
-                            Sycamore::Tree[2]).to be false }
-        specify { expect( Sycamore::Tree[1=>{2=>{3=>4}}] ===
-                            Sycamore::Tree[1=>{2=>{3=>1}}] ).to be false }
-        specify { expect( Sycamore::Tree[1=>{2=>{3=>4}}] ===
-                            Hash[1=>{2=>{4=>4}}] ).to be false }
+    it 'does return false, if the other is structurally different and has different content in terms of ==' do
+      NO_MATCH.each do |tree, other|
+        expect( tree === other ).to be(false),
+          "expected not #{tree.inspect} === #{other.inspect}"
       end
     end
   end

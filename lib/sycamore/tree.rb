@@ -607,47 +607,31 @@ module Sycamore
       other.instance_of?(self.class) and @data.eql?(other.data)
     end
 
-    # def ==(other)
-    #   other.instance_of?(self.class) and self.@data == other.@data
-    # end
+    alias == eql?
 
-    alias == eql? # temporary solution. TODO: Remove this.
-
-=begin
-    def ===(other)
-      self.include?(other) and
-        if other.is_a? Tree
-          raise NotImplementedError # other.include?(self)
-        else
-          Tree.new(other).include?(self)
-        end
-    end
-=end
-
-    def matches?(other, comparator = :===)
+    def matches?(other)
       case
-        when Tree.like?(other)       then matches_tree?(other, comparator)
-        when other.is_a?(Enumerable) then matches_enumerable?(other, comparator)
-                                     else matches_atom?(other, comparator)
+        when Tree.like?(other)       then matches_tree?(other)
+        when other.is_a?(Enumerable) then matches_enumerable?(other)
+                                     else matches_atom?(other)
       end
     end
 
     alias === matches?
 
-    private def matches_atom?(other, comparator = :===)
-      (self.empty? and (other.nil? or other == Nothing)) or
-        (self.size == 1 and nodes.first.send(comparator, other))
+    private def matches_atom?(other)
+      (empty? and (other.nil? or other == Nothing)) or
+        (size == 1 and nodes.first == other)
     end
 
-    private def matches_enumerable?(other, comparator = :===)
-      self.size == other.size and
-        self.nodes.all? { |node| other.include?(node) }
+    private def matches_enumerable?(other)
+      size == other.size and
+        all? { |node, child| (child.nil? or child.empty?) and other.include?(node) }
     end
 
-    private def matches_tree?(other, comparison = :===)
-      self.size == other.size and
-        self.all? { |node, child|
-          # TODO: Optimize this!
+    private def matches_tree?(other)
+      size == other.size and
+        all? { |node, child|
           if child.nil?
             other.include?(node) and
               ( other[node].nil? or other[node] == Nothing )
