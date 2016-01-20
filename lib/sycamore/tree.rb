@@ -18,9 +18,9 @@ module Sycamore
     attr_reader :data
     protected :data
 
-    ################################################################
-    # CQS                                                          #
-    ################################################################
+    ########################################################################
+    # CQS
+    ########################################################################
 
     ADDITIVE_COMMAND_METHODS    = %i[add << replace] << :[]=
     DESTRUCTIVE_COMMAND_METHODS = %i[delete >> clear]
@@ -29,7 +29,7 @@ module Sycamore
 
     PREDICATE_METHODS =
       %i[nothing? absent? present? blank? empty?
-         include? include_node? member? key? has_key? has_path? path?
+         include? include_node? member? key? has_key? has_path? path? >= > < <=
          leaf? leaves? internal? external? flat? nested?
          eql? matches? === ==]
     QUERY_METHODS = PREDICATE_METHODS +
@@ -69,7 +69,7 @@ module Sycamore
 
 
     ########################################################################
-    # construction
+    # Construction
     ########################################################################
 
     # creates a new empty Tree
@@ -187,11 +187,11 @@ module Sycamore
 
 
     ########################################################################
-    # element access
+    # Element access
     ########################################################################
 
     #####################
-    # command interface #
+    #  command methods  #
     #####################
 
     # The universal method to add nodes with or without children.
@@ -396,7 +396,7 @@ module Sycamore
 
 
     #####################
-    #  query interface  #
+    #   query methods   #
     #####################
 
     # The set of child nodes of the parent.
@@ -522,6 +522,14 @@ module Sycamore
     alias path? has_path?
 
 
+    def include_node?(node)
+      @data.include?(node)
+    end
+
+    alias member?  include_node?  # Hash compatibility
+    alias has_key? include_node?  # Hash compatibility
+    alias key?     include_node?  # Hash compatibility
+
     # @param [Object] elements to check for, if it is an element of this tree
     #
     # @return [Boolean] if this tree includes the given node
@@ -542,15 +550,22 @@ module Sycamore
       end
     end
 
-    def include_node?(node)
-      @data.include?(node)
+    def >=(other)
+      other.is_a?(Tree) and self.include?(other)
     end
 
-    alias member?  include_node?  # Hash compatibility
-    alias has_key? include_node?  # Hash compatibility
-    alias key?     include_node?  # Hash compatibility
+    def >(other)
+      other.is_a?(Tree) and self.include?(other) and self != other
+    end
 
-    # alias <= include?
+    def <(other)
+      other.is_a?(Tree) and other.include?(self) and self != other
+    end
+
+    def <=(other)
+      other.is_a?(Tree) and other.include?(self)
+    end
+
 
     # @return [Fixnum] the number of nodes in this tree
     #
@@ -597,9 +612,9 @@ module Sycamore
     alias nested? internal?
 
 
-    ################################################################
-    # equality and equivalence                                     #
-    ################################################################
+    ########################################################################
+    # Equality
+    ########################################################################
 
     def hash
       [@data, self.class].hash
@@ -622,8 +637,7 @@ module Sycamore
     alias === matches?
 
     private def matches_atom?(other)
-      (empty? and (other.nil? or other == Nothing)) or
-        (size == 1 and nodes.first == other)
+      not other.nil? and (size == 1 and nodes.first == other)
     end
 
     private def matches_enumerable?(other)
@@ -643,9 +657,9 @@ module Sycamore
     end
 
 
-    ################################################################
-    # conversion                                                   #
-    ################################################################
+    ########################################################################
+    # Conversion
+    ########################################################################
 
     # def to_a
     #   map { |node, child| child.nil? ? node : { node => child.to_a } }
@@ -695,9 +709,9 @@ module Sycamore
     end
 
 
-    ################################################################
-    # Various other Ruby protocols                                 #
-    ################################################################
+    ########################################################################
+    # Various other Ruby protocols
+    ########################################################################
 
     # overrides {Object#freeze} by delegating it to the internal hash {@data}
     #

@@ -1,5 +1,88 @@
 describe Sycamore::Tree do
 
+  describe '#nodes' do
+    context 'when empty' do
+      it 'does return an empty array' do
+        expect( Sycamore::Tree.new.nodes ).to eql []
+      end
+    end
+
+    context 'when containing a single node' do
+      context 'without children' do
+        it 'does return an array with the node' do
+          expect( Sycamore::Tree[1].nodes ).to eql [1]
+        end
+      end
+
+      context 'with children' do
+        it 'does return an array with the node only' do
+          expect( Sycamore::Tree[1 => [2,3]].nodes ).to eql [1]
+        end
+      end
+    end
+
+    context 'when containing multiple nodes' do
+      context 'without children' do
+        it 'does return an array with the nodes' do
+          expect( Sycamore::Tree[:foo, :bar, :baz].nodes.to_set )
+            .to eql %i[foo bar baz].to_set
+        end
+      end
+
+      context 'with children' do
+        it 'does return an array with the nodes only' do
+          expect( Sycamore::Tree[foo: 1, bar: 2, baz: nil].nodes.to_set )
+            .to eql %i[foo bar baz].to_set
+        end
+      end
+    end
+  end
+
+  ############################################################################
+
+  describe '#node' do
+    context 'when empty' do
+      it 'does return nil' do
+        expect( Sycamore::Tree.new.node ).to eql nil
+      end
+    end
+
+    context 'when containing a single node' do
+      context 'without children' do
+        it 'does return the node' do
+          expect( Sycamore::Tree[1].node ).to eql 1
+        end
+      end
+
+      context 'with children' do
+        it 'does return the node' do
+          expect( Sycamore::Tree[1 => [2,3]].node ).to eql 1
+        end
+      end
+    end
+
+    context 'when containing multiple nodes' do
+      context 'when no reduce function specified' do
+        it 'does raise a TypeError' do
+          expect { Sycamore::Tree[:foo, :bar].node }.to raise_error TypeError
+          expect { Sycamore::Tree[foo: 1, bar: 2, baz: nil].node }.to raise_error TypeError
+        end
+      end
+
+      context 'when a reducer or selector function specified' do
+        it 'does return the application of reduce function on the node set' do
+          pending
+          expect( Sycamore::Tree[1,2,3].node(&:max) ).to eq 3
+          expect( Sycamore::Tree[1,2,3]
+                    .node { |nodes| nodes.reduce { |value, sum| sum += value } }
+          ).to eq 6
+        end
+      end
+    end
+  end
+
+  ############################################################################
+
   describe '#child_of' do
 
     it 'does return the child tree of the given node, when given the node is present' do
