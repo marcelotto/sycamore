@@ -468,16 +468,16 @@ module Sycamore
     def fetch(*node_and_default, &block)
       case node_and_default.size
         when 1 then node = node_and_default.first
-        tree = @data.fetch(node, &block)
-        tree.nil? ? Nothing : tree
+          tree = @data.fetch(node, &block)
+          tree.nil? ? Nothing : tree
         when 2 then node, default = *node_and_default
-        if block_given?
-          warn "block supersedes default value argument"
-          fetch(node, &block)
-        else
-          @data.fetch(node, default) or Nothing
-        end
-        else raise ArgumentError, "wrong number of arguments (0 for 1)"
+          if block_given?
+            warn "block supersedes default value argument"
+            fetch(node, &block)
+          else
+            @data.fetch(node, default) or Nothing
+          end
+        else raise ArgumentError, "wrong number of arguments (given #{node_and_default.size}, expected 1..2)"
       end
     end
 
@@ -505,7 +505,7 @@ module Sycamore
     alias paths each_path
 
     def has_path?(*args)
-      raise ArgumentError, "wrong number of arguments (0 for 1)" if args.count == 0
+      raise ArgumentError, 'wrong number of arguments (given 0, expected 1+)' if args.count == 0
 
       if args.count == 1
         arg = args.first
