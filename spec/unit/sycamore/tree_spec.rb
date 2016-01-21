@@ -152,6 +152,22 @@ describe Sycamore::Tree do
 
   ############################################################################
 
+  describe '#height' do
+    it 'does return 0, when empty' do
+      expect( Sycamore::Tree.new.height ).to be 0
+      expect( Sycamore::Tree.new.add(:foo).delete(:foo).height ).to be 0
+    end
+
+    it 'does return the length of the longest path' do
+      expect( Sycamore::Tree[42        ].height ).to be 1
+      expect( Sycamore::Tree[1,2,3     ].height ).to be 1
+      expect( Sycamore::Tree[a: [1,2,3]].height ).to be 2
+      expect( Sycamore::Tree[:a, b: 1  ].height ).to be 2
+    end
+  end
+
+  ############################################################################
+
   describe '#leaf?' do
     it 'does return true, when the given node is present and has no child tree' do
       expect( Sycamore::Tree[1                     ].leaf?(1) ).to be true

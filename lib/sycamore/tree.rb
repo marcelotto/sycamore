@@ -33,7 +33,7 @@ module Sycamore
          leaf? leaves? internal? external? flat? nested?
          eql? matches? === ==]
     QUERY_METHODS = PREDICATE_METHODS +
-      %i[size node nodes keys child_of child_at dig fetch each each_path paths
+      %i[size height node nodes keys child_of child_at dig fetch each each_path paths
          new_child child_constructor child_class child_generator
          hash to_h to_s inspect] << :[]
 
@@ -571,6 +571,13 @@ module Sycamore
     #
     def size
       @data.size
+    end
+
+    # @return [Fixnum] the length of the longest path
+    #
+    def height
+      return 0 if empty?
+      paths.map(&:length).max
     end
 
     # @return [Boolean] if the tree is empty
