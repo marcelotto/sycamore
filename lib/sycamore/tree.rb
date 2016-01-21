@@ -661,40 +661,37 @@ module Sycamore
     # Conversion
     ########################################################################
 
-    # def to_a
-    #   map { |node, child| child.nil? ? node : { node => child.to_a } }
-    # end
-
-    # @todo Rename this: It doesn't behave consistently according
-    #   the Ruby 2 protocol, by not returning a hash consistently
-    #   (when consisting of leaves only).
-    #   Generalize this ...
-    def to_h
+    def to_h(flattened: false)
       case
-        when empty?   then {}
-        when leaves?  then ( size == 1 ? nodes.first : nodes )
+        when empty?
+          {}
+        when leaves?
+          if flattened
+            size == 1 ? nodes.first : nodes
+          else
+            map{ |node, _| [node, {}] }.to_h
+          end
         else
+          # not the prettiest, but the fastest way to inject on hashes, as noted
+          # here: http://stackoverflow.com/questions/3230863/ruby-rails-inject-on-hashes-good-style
           hash = {}
           @data.each do |node, child|
-            hash[node] = child.to_h
+            hash[node] = child&.to_h(flattened: true) || {}
           end
           hash
       end
     end
 
     def to_s
-      to_h.to_s
+      "#<Tree: #{to_h(flattened: true)}>"
     end
 
     # @return a developer-friendly representation of `self` in the usual Ruby Object#inspect style.
     #
     def inspect
-      "#<Sycamore::Tree:0x#{object_id.to_s(16)}(#{to_h.inspect})>".freeze
+      "#<Sycamore::Tree:0x#{object_id.to_s(16)}(#{to_h(flattened: true).inspect})>".freeze
     end
 
-
-    # @todo This method should be defined as a Refinement of Object, Hash, Array, Enumerable, JSON::Object etc.
-    # or tree_like? (and an alias #structured?)
     def self.tree_like?(object)
       case object
         when Hash, Tree, Absence # ... ?!
@@ -725,6 +722,5 @@ module Sycamore
       super
     end
 
-  end
-
-end
+  end  # Tree
+end  # Sycamore

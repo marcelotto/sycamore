@@ -114,7 +114,7 @@ module Sycamore
     alias dig child_at
 
     def inspect
-      "Sycamore::Absence.at(#@parent_tree, #@parent_node)"
+      "#<Sycamore::Absence.at(#@parent_tree, #@parent_node)>"
     end
 
     #####################
