@@ -683,7 +683,7 @@ module Sycamore
           # here: http://stackoverflow.com/questions/3230863/ruby-rails-inject-on-hashes-good-style
           hash = {}
           @data.each do |node, child|
-            hash[node] = child&.to_h(flattened: true) || {}
+            hash[node] = (child.nil? ? {} : child.to_h(flattened: true))
           end
           hash
       end
