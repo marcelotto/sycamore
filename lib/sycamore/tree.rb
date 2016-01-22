@@ -33,8 +33,9 @@ module Sycamore
          leaf? leaves? internal? external? flat? nested?
          eql? matches? === ==]
     QUERY_METHODS = PREDICATE_METHODS +
-      %i[size height node nodes keys child_of child_at dig fetch each each_path paths
-         new_child child_constructor child_class child_generator
+      %i[new_child child_constructor child_class child_generator
+         size height node nodes keys child_of child_at dig fetch
+         each each_path paths each_node each_key each_pair
          hash to_h to_s inspect] << :[]
 
     # @return [Array<Symbol>] the names of all methods, which can change the state of a Tree
@@ -463,7 +464,7 @@ module Sycamore
     end
 
     alias [] child_at
-    alias dig child_at
+    alias dig child_at  # Hash compatibility
 
     def fetch(*node_and_default, &block)
       case node_and_default.size
@@ -481,14 +482,18 @@ module Sycamore
       end
     end
 
-    def each(&block)
-      # return enum_for(__callee__) unless block_given? # TODO spec this in
-      case block.arity
-        when 1 then @data.keys.each(&block)
-        else @data.each(&block)
-      end
-      # @data.each(&block)
+    def each_node(&block)
+      @data.each_key(&block)
     end
+
+    alias each_key each_node  # Hash compatibility
+
+    # @todo Should we yield the {Nothing} tree as the child of leaves?
+    def each_pair(&block)
+      @data.each_pair(&block)
+    end
+
+    alias each each_pair
 
     def each_path(with_ancestor: Path::ROOT, &block)
       return enum_for(__callee__) unless block_given?
