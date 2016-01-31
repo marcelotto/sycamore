@@ -7,6 +7,8 @@ SPEC_DIR = File.dirname(__FILE__)
 Dir[File.join(SPEC_DIR, 'scratch/support/**/*.rb')].each {|f| require f }
 Dir[File.join(SPEC_DIR, 'support/**/*.rb')].each {|f| require f }
 
+RSpec::Matchers.define_negated_matcher :be_different_to, :be
+
 # TODO: How can we implement this without global variables with RSpec?
 
 $last_number = 0

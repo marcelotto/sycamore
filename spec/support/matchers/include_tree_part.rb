@@ -1,6 +1,6 @@
 RSpec::Matchers.define :include_tree_part do |part|
   match do |this_tree|
-    expect(this_tree).to be_a Sycamore::Tree
+    expect(this_tree).to be_a(Sycamore::Tree).or be_a(Sycamore::Absence)
     expect(this_tree).to include part
   end
 end

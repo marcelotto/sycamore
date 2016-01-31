@@ -1,7 +1,10 @@
 describe Sycamore::Tree do
 
+  let(:tree) { Sycamore::Tree.new }
+
+  ############################################################################
+
   describe 'child constructor integration' do
-    let(:tree) { Sycamore::Tree.new }
     let(:subclass) { Class.new(Sycamore::Tree) }
 
     subject(:new_child) { tree.add(1 => 2)[1] }
@@ -49,9 +52,9 @@ describe Sycamore::Tree do
     end
   end
 
+  ############################################################################
 
   describe '#new_child' do
-    let(:tree) { Sycamore::Tree.new }
     let(:subclass) { Class.new(Sycamore::Tree) }
 
     subject { tree.new_child }
@@ -105,8 +108,9 @@ describe Sycamore::Tree do
 
   end
 
+  ############################################################################
+
   describe '#child_constructor' do
-    let(:tree) { Sycamore::Tree.new }
 
     specify { expect { tree.child_constructor = 'foo' }.to raise_error ArgumentError }
 

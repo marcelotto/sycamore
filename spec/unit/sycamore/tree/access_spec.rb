@@ -91,14 +91,14 @@ describe Sycamore::Tree do
       expect( Sycamore::Tree[4 => {false=>2} ].child_of(4) ).to eq Sycamore::Tree[false=>2]
     end
 
-    it 'does return an absent tree, when given the node is not present' do
-      expect( Sycamore::Tree.new.child_of(:missing) ).to be_absent
-      expect( Sycamore::Tree.new.child_of(false   ) ).to be_absent
+    it 'does return an absent tree, when the given node is a leaf' do
+      expect( Sycamore::Tree[42   ].child_of(42   ) ).to be_a Sycamore::Absence
+      expect( Sycamore::Tree[false].child_of(false) ).to be_a Sycamore::Absence
     end
 
-    it 'does return an absent tree, when the given node is a leaf' do
-      expect( Sycamore::Tree[42   ].child_of(42      ) ).to be_absent
-      expect( Sycamore::Tree[false].child_of(false   ) ).to be_absent
+    it 'does return an absent tree, when given the node is not present' do
+      expect( Sycamore::Tree.new.child_of(:missing) ).to be_a Sycamore::Absence
+      expect( Sycamore::Tree.new.child_of(false   ) ).to be_a Sycamore::Absence
     end
 
     context 'edge cases' do
@@ -122,21 +122,26 @@ describe Sycamore::Tree do
       expect( Sycamore::Tree[1 => {2 => 3}].child_at([1, 2]).node ).to be 3
     end
 
-    it 'does return an absent tree, when given the node at the given path is not present' do
-      expect( Sycamore::Tree.new.child_at(:missing ) ).to be_absent
-      expect( Sycamore::Tree.new.child_at( 1, 2, 3 ) ).to be_absent
-      expect( Sycamore::Tree.new.child_at([1, 2, 3]) ).to be_absent
-
-      tree = Sycamore::Tree.new
-      absent_tree = tree.child_at(1, 2, 3)
-      absent_tree << nil
-      expect(tree).to eq Sycamore::Tree[1=>{2=>3}]
+    it 'does return an absent tree, when the node at the given path is a leaf' do
+      expect( Sycamore::Tree[42   ].child_at(42     )   ).to be_a Sycamore::Absence
+      expect( Sycamore::Tree[1,2,3].child_at(1, 2, 3)   ).to be_a Sycamore::Absence
+      expect( Sycamore::Tree[1,2,3].child_at([1, 2, 3]) ).to be_a Sycamore::Absence
     end
 
-    it 'does return an absent tree, when the node at the given path is a leaf' do
-      expect( Sycamore::Tree[42   ].child_at(42     ) ).to be_absent
-      expect( Sycamore::Tree[1,2,3].child_at(1, 2, 3) ).to be_absent
-      expect( Sycamore::Tree[1,2,3].child_at([1, 2, 3]) ).to be_absent
+    context 'when the node at the given path is not present' do
+      it 'does return an absent tree' do
+        expect( Sycamore::Tree.new.child_at(:missing ) ).to be_a Sycamore::Absence
+        expect( Sycamore::Tree.new.child_at( 1, 2, 3 ) ).to be_a Sycamore::Absence
+        expect( Sycamore::Tree.new.child_at([1, 2, 3]) ).to be_a Sycamore::Absence
+      end
+
+      it 'does return a correctly configured absent tree' do
+        pending 'eql? does ignore empty child trees'
+        tree = Sycamore::Tree.new
+        absent_tree = tree.child_at(1, 2, 3)
+        absent_tree << []
+        expect(tree).to eq Sycamore::Tree[1=>{2=>3}]
+      end
     end
 
     context 'edge cases' do
@@ -155,6 +160,7 @@ describe Sycamore::Tree do
 
   ############################################################################
 
+  # TODO: Clean this up!
   describe '#fetch' do
 
     context 'when given a single atom' do
@@ -164,7 +170,7 @@ describe Sycamore::Tree do
       end
 
       context 'when the given atom is Nothing' do
-        specify { expect { Sycamore::Tree[].fetch(Nothing) }.to raise_error KeyError }
+        specify { expect { Sycamore::Tree[].fetch(Sycamore::Nothing) }.to raise_error KeyError }
       end
 
       context 'when the given atom is a boolean' do
@@ -196,7 +202,7 @@ describe Sycamore::Tree do
       end
 
       context 'when the given atom is Nothing' do
-        specify { expect( Sycamore::Tree[].fetch(Nothing, :default) ).to eq :default }
+        specify { expect( Sycamore::Tree[].fetch(Sycamore::Nothing, :default) ).to eq :default }
       end
 
       context 'when the given atom is a boolean' do
@@ -229,7 +235,7 @@ describe Sycamore::Tree do
       end
 
       context 'when the given atom is Nothing' do
-        specify { expect( Sycamore::Tree[].fetch(Nothing) { 42 } ).to eq 42 }
+        specify { expect( Sycamore::Tree[].fetch(Sycamore::Nothing) { 42 } ).to eq 42 }
       end
 
       context 'when the given atom is a boolean' do
@@ -262,7 +268,7 @@ describe Sycamore::Tree do
       end
 
       context 'when the given atom is Nothing' do
-        specify { expect( Sycamore::Tree[].fetch(Nothing, :default) { 42 } ).to eq 42 }
+        specify { expect( Sycamore::Tree[].fetch(Sycamore::Nothing, :default) { 42 } ).to eq 42 }
       end
 
       context 'when the given atom is a boolean' do

@@ -2,6 +2,39 @@ describe Sycamore::Tree do
 
   subject(:tree) { Sycamore::Tree.new }
 
+  ############################################################################
+
+  describe '#create_child' do
+    it 'does add the given node' do
+      expect( tree.create_child(:foo) ).to include_node :foo
+    end
+
+    it 'does add an empty tree as a child of the given node' do
+      expect( tree.create_child(:foo).child_of(:foo) ).to be_a Sycamore::Tree
+      expect( tree.create_child(:foo).child_of(:foo) ).not_to be Sycamore::Nothing
+      expect( tree.create_child(:foo).child_of(:foo) ).not_to be_absent
+      expect( tree.create_child(:foo).child_of(:foo) ).to be_empty
+
+      expect( Sycamore::Tree[:foo].create_child(:foo).child_of(:foo) ).to be_a Sycamore::Tree
+      expect( Sycamore::Tree[:foo].create_child(:foo).child_of(:foo) ).not_to be Sycamore::Nothing
+      expect( Sycamore::Tree[:foo].create_child(:foo).child_of(:foo) ).not_to be_absent
+      expect( Sycamore::Tree[:foo].create_child(:foo).child_of(:foo) ).to be_empty
+    end
+
+    it 'does nothing, when the given node is already present' do
+      tree = Sycamore::Tree[foo: :bar]
+      expect { tree.create_child(:foo) }.not_to change { tree.child_of(:foo) }
+    end
+
+    context 'edge cases' do
+      it 'does raise an IndexError, when given nil' do
+        expect { tree.create_child(nil) }.to raise_error IndexError
+      end
+    end
+  end
+
+  ############################################################################
+
   describe '#add' do
     context 'when given a single atomic value' do
       it 'does add the value to the set of nodes' do

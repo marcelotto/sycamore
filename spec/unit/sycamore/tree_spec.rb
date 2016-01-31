@@ -180,10 +180,6 @@ describe Sycamore::Tree do
       tree = Sycamore::Tree[1 => :foo]
       tree[1].clear
       expect(tree.leaf?(1)).to be true
-
-      tree = Sycamore::Tree[1 => :foo, 2 => nil]
-      tree[1].clear
-      expect(tree.leaf?(1)).to be true
     end
 
     it 'does return false, when the given node is not present' do
@@ -210,7 +206,6 @@ describe Sycamore::Tree do
 
     context 'edge cases' do
       context 'when given nil' do
-        pending 'This should not be an edge case.'
         specify { expect( Sycamore::Tree.new.leaf?(nil)  ).to be false }
         specify { expect( Sycamore::Tree[nil].leaf?(nil) ).to be false }
       end

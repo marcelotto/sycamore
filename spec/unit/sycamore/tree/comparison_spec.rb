@@ -53,6 +53,13 @@ describe Sycamore::Tree do
           "expected #{tree.inspect} not to eql #{other.inspect}"
       end
     end
+
+    it 'does ignore empty child trees' do
+      pending
+      tree = Sycamore::Tree[foo: :bar]
+      tree[:foo].clear
+      expect(tree).to eq Sycamore::Tree[:foo]
+    end
   end
 
   ############################################################################
@@ -138,6 +145,13 @@ describe Sycamore::Tree do
         expect( tree === other ).to be(false),
           "expected not #{tree.inspect} === #{other.inspect}"
       end
+    end
+
+    it 'does ignore empty child trees' do
+      tree = Sycamore::Tree[foo: :bar]
+      tree[:foo].clear
+
+      expect( tree === Sycamore::Tree[:foo] ).to be true
     end
   end
 
@@ -375,9 +389,9 @@ describe Sycamore::Tree do
   # TODO: Clean this up!
   describe '#path?' do
     context 'when given a Path' do
-      specify { expect( Sycamore::Tree[].path? Path[] ).to be true }
-      specify { expect( Sycamore::Tree[].path? Path[42] ).to be false }
-      specify { expect( Sycamore::Tree[].path? Path[1,2,3] ).to be false }
+      specify { expect( Sycamore::Tree[].path? Sycamore::Path[] ).to be true }
+      specify { expect( Sycamore::Tree[].path? Sycamore::Path[42] ).to be false }
+      specify { expect( Sycamore::Tree[].path? Sycamore::Path[1,2,3] ).to be false }
 
       specify { expect( Sycamore::Tree[1 => 2].path?(Sycamore::Path(1))).to be true }
       specify { expect( Sycamore::Tree[1 => 2].path?(Sycamore::Path(2))).to be false }

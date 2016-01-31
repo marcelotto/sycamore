@@ -22,7 +22,7 @@ module Sycamore
     # CQS
     ########################################################################
 
-    ADDITIVE_COMMAND_METHODS    = %i[add << replace] << :[]=
+    ADDITIVE_COMMAND_METHODS    = %i[add << replace create_child] << :[]=
     DESTRUCTIVE_COMMAND_METHODS = %i[delete >> clear]
     COMMAND_METHODS = ADDITIVE_COMMAND_METHODS + DESTRUCTIVE_COMMAND_METHODS +
       %i[child_constructor= child_class= def_child_generator freeze]
@@ -113,7 +113,7 @@ module Sycamore
         when child_class            then child_class.new(*args)
         # TODO: pending Tree#clone
         # when child_prototype        then child_prototype.clone.add(*args)
-        when child_generator        then child_generator.call
+        when child_generator        then child_generator.call # TODO: pass *args
         else raise "invalid child constructor: #{child_constructor.inspect}"
       end
     end
@@ -276,10 +276,17 @@ module Sycamore
       self
     end
 
+    def create_child(node)
+      raise IndexError, 'nil is not a valid tree node' if node.nil?
+
+      @data[node] ||= new_child
+
+      self
+    end
+
     private def add_child(node, children)
-      return self if node.nil? or node.equal? Nothing
+      return self if node.nil? or node.equal? Nothing # TODO: raise IndexError
       return add_node(node) if children.nil? or children.equal?(Nothing) or # TODO: when Absence defined: child.nothing? or child.absent?
-        # Enumerable === children
         (Enumerable === children and children.empty?)
 
       child = @data[node] ||= new_child
@@ -633,7 +640,8 @@ module Sycamore
     end
 
     def eql?(other)
-      other.instance_of?(self.class) and @data.eql?(other.data)
+      (other.instance_of?(self.class) and @data.eql?(other.data)) or
+        (other.instance_of?(Absence) and other.eql?(self))
     end
 
     alias == eql?
