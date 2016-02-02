@@ -109,6 +109,7 @@ describe Sycamore::Tree do
 
   end
 
+
   ############################################################################
 
   describe '#child_at' do
@@ -136,7 +137,6 @@ describe Sycamore::Tree do
       end
 
       it 'does return a correctly configured absent tree' do
-        pending 'eql? does ignore empty child trees'
         tree = Sycamore::Tree.new
         absent_tree = tree.child_at(1, 2, 3)
         absent_tree << []

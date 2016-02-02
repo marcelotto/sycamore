@@ -32,9 +32,9 @@ describe Sycamore::Tree do
 
       it 'does yield nil as the child of leaves' do
         expect { |b| Sycamore::Tree[1, 2, 3].each(&b) }
-          .to yield_successive_args([1, nil], [2, nil], [3, nil])
+          .to yield_successive_args([1, Sycamore::Nothing], [2, Sycamore::Nothing], [3, Sycamore::Nothing])
         expect { |b| Sycamore::Tree[1, 4=>5].each(&b) }
-          .to yield_successive_args([1, nil], [4, Sycamore::Tree[5]])
+          .to yield_successive_args([1, Sycamore::Nothing], [4, Sycamore::Tree[5]])
       end
     end
 
@@ -44,7 +44,7 @@ describe Sycamore::Tree do
       end
 
       it 'does return an enumerator over the node-child-pairs' do
-        expect( Sycamore::Tree[1, 2=>3].each.to_a ).to eql [[1, nil], [2, Sycamore::Tree[3]]]
+        expect( Sycamore::Tree[1, 2=>3].each.to_a ).to eql [[1, Sycamore::Nothing], [2, Sycamore::Tree[3]]]
       end
     end
   end

@@ -23,6 +23,7 @@ describe Sycamore::Tree do
     [ Sycamore::Tree[1]              , Sycamore::Tree[2] ],
     [ Sycamore::Tree[1]              , Sycamore::Tree[1.0] ],
     [ Sycamore::Tree[:foo, :bar]     , Sycamore::Tree['foo', 'bar'] ],
+    [ Sycamore::Tree[a: 1]           , Sycamore::Tree[:a] ],
     [ Sycamore::Tree[a: 1]           , Sycamore::Tree[a: 2] ],
     [ Sycamore::Tree[1=>{2=>{3=>4}}] , Sycamore::Tree[1=>{2=>{3=>1}}] ],
   ]
@@ -56,7 +57,6 @@ describe Sycamore::Tree do
     end
 
     it 'does ignore empty child trees' do
-      pending
       tree = Sycamore::Tree[foo: :bar]
       tree[:foo].clear
       expect(tree).to eq Sycamore::Tree[:foo]
@@ -97,6 +97,8 @@ describe Sycamore::Tree do
     [ Sycamore::Tree['a']   , 'a' ],
     [ Sycamore::Tree[ 1 ]   , 1 ],
     [ Sycamore::Tree[:a]    , Hash[a: nil] ],
+    [ Sycamore::Tree[:a]    , Hash[a: []] ],
+    [ Sycamore::Tree[:a]    , Hash[a: {}] ],
     [ Sycamore::Tree[1,2,3] , [1,2,3]  ],
     [ Sycamore::Tree[1,2,3] , Set[1,2,3] ],
     [ Sycamore::Tree[:a,:b] , [:b, :a] ],
@@ -114,11 +116,16 @@ describe Sycamore::Tree do
     [ Sycamore::Tree[ 1 ]            ,  2  ],
     [ Sycamore::Tree[ 1 ]            , '1' ],
     [ Sycamore::Tree['a']            , :a  ],
+    [ Sycamore::Tree[:a]             , {a: 1} ],
+    [ Sycamore::Tree[:foo, :bar]     , {foo: 1, bar: 2} ],
     [ Sycamore::Tree[:foo, :bar]     , ['foo', 'bar'] ],
     [ Sycamore::Tree[1,2,3]          , [1,2] ],
     [ Sycamore::Tree[1,2]            , [1,2,3]   ],
     [ Sycamore::Tree[1,2,3]          , [1,2,[3]] ],
+    [ Sycamore::Tree[a: 1]           , :a ],
+    [ Sycamore::Tree[a: 1, b: 2]     , [:a, :b] ],
     [ Sycamore::Tree[a: 1]           , {a: 2} ],
+    [ Sycamore::Tree[a: 1]           , {a: {1=>2}} ],
     [ Sycamore::Tree[1=>{2=>{3=>4}}] , {1=>{2=>{3=>1}}} ],
     [ Sycamore::Tree.new        , { nil => nil } ],
     [ Sycamore::Tree[:foo]      , { foo: :bar } ],

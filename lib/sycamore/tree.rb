@@ -242,7 +242,7 @@ module Sycamore
       return add_children(node) if Tree.like? node
       raise NestedNodeSet if node.is_a? Enumerable
 
-      @data[node] ||= nil
+      @data[node] ||= Nothing
 
       self
     end
@@ -279,7 +279,9 @@ module Sycamore
     def create_child(node)
       raise IndexError, 'nil is not a valid tree node' if node.nil?
 
-      @data[node] ||= new_child
+      if @data.fetch(node, Nothing).nothing?
+        @data[node] = new_child
+      end
 
       self
     end
@@ -289,8 +291,8 @@ module Sycamore
       return add_node(node) if children.nil? or children.equal?(Nothing) or # TODO: when Absence defined: child.nothing? or child.absent?
         (Enumerable === children and children.empty?)
 
-      child = @data[node] ||= new_child
-      child << children
+      @data[node] = new_child if @data.fetch(node, Nothing).nothing?
+      @data[node] << children
 
       self
     end
@@ -451,7 +453,8 @@ module Sycamore
     def child_of(node)
       raise IndexError, 'nil is not a valid tree node' if node.nil?
 
-      @data[node] || Absence.at(self, node)
+      child = @data[node]
+      (child.nil? || child.nothing?) ? Absence.at(self, node) : child
     end
 
     def child_at(*path)
@@ -495,7 +498,6 @@ module Sycamore
 
     alias each_key each_node  # Hash compatibility
 
-    # @todo Should we yield the {Nothing} tree as the child of leaves?
     def each_pair(&block)
       @data.each_pair(&block)
     end
@@ -505,10 +507,10 @@ module Sycamore
     def each_path(with_ancestor: Path::ROOT, &block)
       return enum_for(__callee__) unless block_given?
       each do |node, child|
-        if child
-          child.each_path(with_ancestor: with_ancestor.branch(node), &block)
-        else
+        if child.nothing?
           yield Path[with_ancestor, node]
+        else
+          child.each_path(with_ancestor: with_ancestor.branch(node), &block)
         end
       end
       self
@@ -657,20 +659,22 @@ module Sycamore
     alias === matches?
 
     private def matches_atom?(other)
-      not other.nil? and (size == 1 and nodes.first == other)
+      not other.nil? and (size == 1 and nodes.first == other and leaf? other)
     end
 
     private def matches_enumerable?(other)
       size == other.size and
-        all? { |node, child| (child.nil? or child.empty?) and other.include?(node) }
+        all? { |node, child| child.empty? and other.include?(node) }
     end
 
     private def matches_tree?(other)
       size == other.size and
         all? { |node, child|
-          if child.nil?
+          if child.nothing?
             other.include?(node) and
-              ( other[node].nil? or other[node] == Nothing )
+              # TODO: cache other[node] in a local variable
+              ( other[node].nil? or other[node] == Nothing or
+                (other[node].respond_to?(:empty?) and other[node].empty?) )
           else
             child.matches? other[node]
           end }
@@ -696,7 +700,7 @@ module Sycamore
           # here: http://stackoverflow.com/questions/3230863/ruby-rails-inject-on-hashes-good-style
           hash = {}
           @data.each do |node, child|
-            hash[node] = (child.nil? ? {} : child.to_h(flattened: true))
+            hash[node] = child.to_h(flattened: true)
           end
           hash
       end
