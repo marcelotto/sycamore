@@ -65,6 +65,17 @@ module Sycamore
     end
 
     ########################################################################
+    # Equality
+    ########################################################################
+
+    def eql?(other)
+      (other.is_a?(Tree) or other.is_a?(Absence)) and other.empty?
+    end
+
+    alias == eql?
+
+
+    ########################################################################
     # Falsiness
     #
     # Sadly, in Ruby we can't do that match to reach this goal.

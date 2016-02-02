@@ -636,12 +636,12 @@ module Sycamore
     ########################################################################
 
     def hash
-      [@data, self.class].hash
+      @data.hash ^ Tree.hash
     end
 
     def eql?(other)
       (other.instance_of?(self.class) and @data.eql?(other.data)) or
-        (other.instance_of?(Absence) and other.eql?(self))
+        ((other.equal?(Nothing) or other.instance_of?(Absence)) and other.eql?(self))
     end
 
     alias == eql?

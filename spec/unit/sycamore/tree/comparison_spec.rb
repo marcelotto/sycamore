@@ -9,6 +9,8 @@ describe Sycamore::Tree do
   EQL = [
     [ Sycamore::Tree.new   , Sycamore::Tree.new ],
     [ MyTree.new           , MyTree.new ],
+    [ Sycamore::Tree.new   , Sycamore::Nothing ],
+    [ MyTree.new           , Sycamore::Nothing ],
     [ Sycamore::Tree[1]    , Sycamore::Tree[1] ],
     [ Sycamore::Tree[1, 2] , Sycamore::Tree[1, 2] ],
     [ Sycamore::Tree[1, 2] , Sycamore::Tree[2, 1] ],
@@ -26,7 +28,6 @@ describe Sycamore::Tree do
   ]
   NOT_EQL_BY_TYPE = [
     [ Sycamore::Tree[a: 1] , Hash[a: 1] ],
-    [ Sycamore::Tree.new   , Sycamore::Nothing ],
     [ Sycamore::Tree.new   , MyTree.new ],
     [ MyTree.new           , Sycamore::Tree.new ],
   ]
@@ -73,6 +74,8 @@ describe Sycamore::Tree do
     end
 
     it 'does produce different values, when the tree is not eql' do
+      pending 'Currently, we accept the collision of different tree types with the same content. ' +
+              'It is the simplest way to hold account of the special equivalence behaviour of thre Nothing tree.'
       NOT_EQL.each do |tree, other|
         expect(tree.hash).not_to eq(other.hash),
           "expected the hash of #{tree.inspect} not to equal the hash of #{other.inspect}"
