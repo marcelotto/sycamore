@@ -713,7 +713,7 @@ module Sycamore
     # @return a developer-friendly representation of `self` in the usual Ruby Object#inspect style.
     #
     def inspect
-      "#<Sycamore::Tree:0x#{object_id.to_s(16)}(#{to_h(flattened: true).inspect})>".freeze
+      "#<#{self.class}:0x#{object_id.to_s(16)}(#{to_h(flattened: true).inspect})>".freeze
     end
 
     def self.tree_like?(object)

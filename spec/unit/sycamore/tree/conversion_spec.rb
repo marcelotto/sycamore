@@ -40,7 +40,10 @@ describe Sycamore::Tree do
   describe '#inspect' do
     shared_examples_for 'every inspect string' do |tree|
       it 'is in the usual Ruby inspect style' do
-        expect( tree.inspect ).to match /^#<Sycamore::Tree:0x/
+        expect( tree.inspect ).to match /^#</
+      end
+      it 'contains the class' do
+        expect( tree.inspect ).to include tree.class.to_s
       end
       it 'contains the object identity' do
         expect( tree.inspect ).to include tree.object_id.to_s(16)
@@ -52,6 +55,7 @@ describe Sycamore::Tree do
     include_examples 'every inspect string', Sycamore::Tree.new
     include_examples 'every inspect string', Sycamore::Tree[1,2,3]
     include_examples 'every inspect string', Sycamore::Tree[foo: 1, bar: [2,3]]
+    include_examples 'every inspect string', (MyClass = Class.new(Sycamore::Tree)).new
   end
 
 end
