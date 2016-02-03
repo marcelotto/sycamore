@@ -1,2 +1,4 @@
-require 'sycamore/extension/tree_class'
-# require 'sycamore/extension/tree_function'
+require 'sycamore'
+
+# optional global shortcut constant for Sycamore::Tree
+Tree = Sycamore::Tree

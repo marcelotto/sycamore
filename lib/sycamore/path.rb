@@ -1,24 +1,4 @@
 module Sycamore
-
-  ############################################################################
-  #
-  # Path factory function
-  #
-  # A convenience method for the constructor. With it, you can write
-  #
-  #     Sycamore::Path(...) { ... }
-  #
-  # instead of the longer
-  #
-  #     Sycamore::Path.new(...) { ... }
-  #
-  # @see For an even more convenient method, see the unqualified usage with
-  #   the global {::Path()} function.
-  #
-  def self.Path(*args, &block)
-    Sycamore::Path.of(*args, &block)
-  end
-
   class Path
 
     attr_reader :node, :parent

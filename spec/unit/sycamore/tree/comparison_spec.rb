@@ -403,9 +403,9 @@ describe Sycamore::Tree do
       specify { expect( Sycamore::Tree[].path? Sycamore::Path[42] ).to be false }
       specify { expect( Sycamore::Tree[].path? Sycamore::Path[1,2,3] ).to be false }
 
-      specify { expect( Sycamore::Tree[1 => 2].path?(Sycamore::Path(1))).to be true }
-      specify { expect( Sycamore::Tree[1 => 2].path?(Sycamore::Path(2))).to be false }
-      specify { expect( Sycamore::Tree[1 => 2].path?(Sycamore::Path(1, 2))).to be true }
+      specify { expect( Sycamore::Tree[1 => 2].path?(Sycamore::Path[1])).to be true }
+      specify { expect( Sycamore::Tree[1 => 2].path?(Sycamore::Path[2])).to be false }
+      specify { expect( Sycamore::Tree[1 => 2].path?(Sycamore::Path[1, 2])).to be true }
     end
 
     context 'when given a single atom' do

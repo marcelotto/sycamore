@@ -1,2 +1,7 @@
-require 'sycamore/extension/path_class'
-require 'sycamore/extension/path_function'
+require 'sycamore'
+
+# optional global shortcut constant for Sycamore::Path
+Path = Sycamore::Path
+
+# optional global shortcut constant for Sycamore::Path
+TreePath = Sycamore::Path
