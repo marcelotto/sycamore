@@ -49,7 +49,7 @@ module Sycamore
 
     def child_of(node)
       if absent?
-        raise IndexError, 'nil is not a valid tree node' if node.nil?
+        raise InvalidNode, "#{node} is not a valid tree node" if node.nil? or node.is_a? Enumerable
 
         Absence.at(self, node)
       else

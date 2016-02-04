@@ -23,7 +23,7 @@ describe Sycamore::Path do
     end
 
     context 'when given nil' do
-      specify { expect { Sycamore::Path[nil] }.to raise_error IndexError }
+      specify { expect { Sycamore::Path[nil] }.to raise_error Sycamore::InvalidNode }
     end
 
     context 'when given a single node only' do
@@ -35,7 +35,12 @@ describe Sycamore::Path do
     context 'when given a collection of nodes only' do
 
       context 'when the collection contains nil values' do
-        specify { expect { Sycamore::Path[1, nil, 3] }.to raise_error IndexError }
+        specify { expect { Sycamore::Path[1, nil, 3] }.to raise_error Sycamore::InvalidNode }
+      end
+
+      context 'when the collection contains other collections' do
+        specify { expect { Sycamore::Path[1, [2], 3] }.to raise_error Sycamore::InvalidNode }
+        specify { expect { Sycamore::Path[:foo, {bar: :baz}] }.to raise_error Sycamore::InvalidNode }
       end
 
       context 'when the collection is given as multiple arguments' do

@@ -15,11 +15,12 @@ module Sycamore
 
     include Enumerable
 
+    # the internal hash representation of the tree
     attr_reader :data
     protected :data
 
     ########################################################################
-    # CQS
+    # @group CQS reflection
     ########################################################################
 
     ADDITIVE_COMMAND_METHODS    = %i[add << replace create_child] << :[]=
@@ -70,7 +71,7 @@ module Sycamore
 
 
     ########################################################################
-    # Construction
+    # @group Construction
     ########################################################################
 
     # creates a new empty Tree
@@ -162,7 +163,7 @@ module Sycamore
 
 
     ########################################################################
-    # Absence and Nothing predicates
+    # @group Absence and Nothing predicates
     ########################################################################
 
     # @return [Boolean] if this is the {Nothing} tree
@@ -188,96 +189,75 @@ module Sycamore
 
 
     ########################################################################
-    # Element access
+    # @group Element access
     ########################################################################
 
     #####################
     #  command methods  #
     #####################
 
-    # The universal method to add nodes with or without children.
+    # adds nodes with or without children
     #
-    # Depending on the argument, this method only delegates appropriately to one
-    # of the other more specific `add` methods.
+    # @overload add(node)
+    #   adds a single node
+    #   @param [Object] node to add
     #
-    # @param [Object, Hash, Enumerable] nodes_or_struct TODO TODOC
+    # @overload add(node_collection)
+    #   adds multiple nodes
+    #   @param [Enumerable] node_collection to be added
     #
+    # @overload add(tree_structure)
+    #   adds a tree structure of nodes
+    #   @param [Hash, Tree] tree_structure to be added
     #
-    # @return self as a proper command method (see Sycamore::CQS#command_return)
+    # @return self as a proper command method
     #
-    # @see #add_nodes
+    # @raise [InvalidNode]
     #
-    # @todo Can we optimize this method, by reducing the checks in the other
-    #   add_* methods (which were public previously)?
+    # @note nil values are ignored, which includes children
+    #   But this might be subject to change in the future.
     #
-    def add(nodes_or_struct)
-      if Tree.like? nodes_or_struct
-        add_children(nodes_or_struct)
-      else
-        add_nodes(nodes_or_struct)
+    def add(nodes_or_tree)
+      case
+        when Tree.like?(nodes_or_tree)       then add_tree(nodes_or_tree)
+        when nodes_or_tree.is_a?(Enumerable) then add_nodes(nodes_or_tree)
+                                             else add_node(nodes_or_tree)
       end
+
+      self
     end
 
     alias << add
 
-    # TODO: Extract unique content and remove the documentation, since private?
     # adds a single leaf
     #
-    # @todo https://www.pivotaltracker.com/story/show/94733228
-    #   reasons for the NestedNodeSet exception
-    #
-    # @todo https://www.pivotaltracker.com/story/show/94733114
-    #   What should we use as the default value for the hash entry of a leaf?
-    #
-    # @param [Object] node to add
-    #
-    #   If node is an Enumerable, an {NestedNodeSet} exception is raised
-    #
-    # @return self as a proper command method (see Sycamore::CQS#command_return)
-    #
-    # @see #add, #add_nodes
-    #
     private def add_node(node)
-      return self if node.nil? or node.equal? Nothing
-      return add_children(node) if Tree.like? node
-      raise NestedNodeSet if node.is_a? Enumerable
+      return self if Nothing.like? node
+      return add_tree(node) if Tree.like? node
+      raise InvalidNode if node.is_a? Enumerable
 
       @data[node] ||= Nothing
 
       self
     end
 
-    # TODO: Extract unique content and remove the documentation, since private?
     # adds multiple leaves
     #
-    # It delegates every single leaf to {$add_node}. Although this isn't the
-    # fastest way, adding the nodes directly to the hash would be a premature
-    # optimization and is deferred until the API has settled.
-    #
-    # As it delegates to {add_node}, if one the given values it itself an Enumerable,
-    # a {NestedNodeException} gets raised.
-    #
-    # @param [Object] nodes to add
-    #
-    #   If the nodes Enumerable contains other Enumerables, an {NestedNodeSet} exception is raised
-    #
-    # @return self as a proper command method
-    #
-    # @raise {NestedNodeSet}
-    #
-    # @see #add, #add_node
-    #
-    private def add_nodes(*nodes)
-      nodes = nodes.first if nodes.size == 1 and nodes.is_a? Enumerable
-      return add_node(nodes) unless nodes.is_a? Enumerable
-
+    private def add_nodes(nodes)
       nodes.each { |node| add_node(node) }
 
       self
     end
 
+    # adds a node with an empty child
+    #
+    # @return self as a proper command method
+    # @raise [InvalidNode]
+    #
+    # @todo Rename this! And make it private?
+    #
     def create_child(node)
-      raise IndexError, 'nil is not a valid tree node' if node.nil?
+      raise InvalidNode, "#{node} is not a valid tree node" if node.nil? or node.is_a? Enumerable
 
       if @data.fetch(node, Nothing).nothing?
         @data[node] = new_child
@@ -287,86 +267,79 @@ module Sycamore
     end
 
     private def add_child(node, children)
-      return self if node.nil? or node.equal? Nothing # TODO: raise IndexError
-      return add_node(node) if children.nil? or children.equal?(Nothing) or # TODO: when Absence defined: child.nothing? or child.absent?
-        (Enumerable === children and children.empty?)
+      return self if node.nil?
+      return add_node(node) if Nothing.like?(children) or
+                             (children.respond_to?(:empty?) and children.empty?)
 
-      @data[node] = new_child if @data.fetch(node, Nothing).nothing?
+      create_child(node)
       @data[node] << children
 
       self
     end
 
-    private def add_children(tree)
-      return self if tree.respond_to?(:absent?) and tree.absent?
-
+    private def add_tree(tree)
       tree.each { |node, child| add_child(node, child) }
 
       self
     end
 
 
-    # The universal method to remove nodes with or without children.
+    # remove nodes with or without children
     #
-    # Depending on the argument, this method only delegates appropriately to one
-    # of the other more specific `delete` methods.
+    # If a given node is in the {#nodes} set, it gets deleted, otherwise
+    # nothing happens.
     #
-    # @param [Object, Hash, Enumerable] nodes_or_struct TODO TODOC
+    # non-greediness ...
     #
+    # @overload delete(node)
+    #   @param [Object] node to delete
+    #
+    # @overload delete(node_collection)
+    #   @param [Enumerable] node_collection to be deleted
+    #
+    # @overload delete(tree_structure)
     #
     # @return self as a proper command method
     #
-    # @see #add_nodes
-    #
-    # @todo Can we optimize this method, by reducing the checks in the other
-    #   delete_* methods (which were public previously)?
-    #
-    def delete(nodes_or_struct)
-      if Tree.like? nodes_or_struct
-        delete_children(nodes_or_struct)
-      else
-        delete_nodes(nodes_or_struct)
+    def delete(nodes_or_tree)
+      case
+        when Tree.like?(nodes_or_tree)       then delete_tree(nodes_or_tree)
+        when nodes_or_tree.is_a?(Enumerable) then delete_nodes(nodes_or_tree)
+                                             else delete_node(nodes_or_tree)
       end
+
+      self
     end
 
     alias >> delete
 
-    # TODO: Extract unique content and remove the documentation, since private?
-    # removes a node with its child
-    #
-    # If the given node is in the {#nodes} set, it gets deleted, otherwise
-    # nothing happens.
-    #
-    # @param [Object] node to delete
-    #
-    # @return self as a proper command method
-    #
     private def delete_node(node)
-      return delete_children(node) if Tree.like? node
-      raise NestedNodeSet if node.is_a? Enumerable
+      return delete_tree(node) if Tree.like? node
+      raise InvalidNode if node.is_a? Enumerable
 
       @data.delete(node)
 
       self
     end
 
-    private def delete_nodes(*nodes)
-      nodes = nodes.first if nodes.size == 1 and nodes.is_a? Enumerable
-      return delete_node(nodes) unless nodes.is_a? Enumerable
-
+    private def delete_nodes(nodes)
       nodes.each { |node| delete_node(node) }
 
       self
     end
 
-    private def delete_children(tree)
-      return self if tree.respond_to?(:absent?) and tree.absent?
-
+    private def delete_tree(tree)
       tree.each do |node, child|
+        raise InvalidNode if node.is_a? Enumerable
         next unless include? node
-        this_child = self.child_of(node)
-        this_child.delete child
-        delete_node(node) if this_child.empty?
+        if Nothing.like?(child) or (child.respond_to?(:empty?) and child.empty?)
+          delete_node node
+        else
+          child_of(node).tap do |this_child|
+            this_child.delete child
+            delete_node(node) if this_child.empty?
+          end
+        end
       end
 
       self
@@ -375,23 +348,22 @@ module Sycamore
     # Replaces the contents of the tree
     #
     # @param (see #add)
+    #
     # @return self as a proper command method
     #
-    def replace(nodes_or_struct)
-      clear.add(nodes_or_struct)
+    def replace(nodes_or_tree)
+      clear.add(nodes_or_tree)
     end
 
     # Replaces the contents of a child tree
     #
-    # @param TODO
     # @return the rvalue as any Ruby assignment
     #
     def []=(*args)
-      path, nodes_or_struct = args[0..-2], args[-1]
+      path, nodes_or_tree = args[0..-2], args[-1]
       raise ArgumentError, 'wrong number of arguments (given 1, expected 2)' if path.empty?
-      raise IndexError, 'nil is not a valid tree node' if path.include? nil
 
-      child_at(*path).replace(nodes_or_struct)
+      child_at(*path).replace(nodes_or_tree)
     end
 
     # Deletes all nodes and their children
@@ -412,8 +384,7 @@ module Sycamore
     # The set of child nodes of the parent.
     #
     # @example
-    #   child = [:bar, :baz]
-    #   tree = Tree[foo: child]
+    #   tree = Tree[foo: [:bar, :baz]]
     #   tree.nodes        # => [:foo]
     #   tree[:foo].nodes  # => [:bar, :baz]
     #
@@ -435,30 +406,26 @@ module Sycamore
     #   matz = Tree[birthday: DateTime.parse('1965-04-14')]
     #   matz[:birthday].node  # => #<DateTime: 1965-04-14T00:00:00+00:00 ((2438865j,0s,0n),+0s,2299161j)>
     #
-    #   Tree[1,2].node  # => TypeError: no implicit conversion of node set [1, 2] into a single node
+    #   Tree[1,2].node  # => NonUniqueNodeSet: no implicit conversion of node set [1, 2] into a single node
     #
     # @return [Object] the single present node or nil, if no nodes present
-    # @raise [TypeError] if more than one node present
+    # @raise [NonUniqueNodeSet] if more than one node present
     #
-    # @todo Provide support for selector and reducer functions.
-    # @todo Raise a more specific Exception than TypeError.
     def node
       nodes = self.nodes
-      raise TypeError, "no implicit conversion of node set #{nodes} into a single node" if  nodes.size > 1
+      raise NonUniqueNodeSet, "multiple nodes present: #{nodes}" if nodes.size > 1
 
       nodes.first
     end
 
     # @todo Should we differentiate the case of a leaf and a not present node?
     def child_of(node)
-      raise IndexError, 'nil is not a valid tree node' if node.nil?
+      raise InvalidNode, "#{node} is not a valid tree node" if node.nil? or node.is_a? Enumerable
 
-      child = @data[node]
-      (child.nil? || child.nothing?) ? Absence.at(self, node) : child
+      Nothing.like?(child = @data[node]) ? Absence.at(self, node) : child
     end
 
     def child_at(*path)
-
       case path.length
         when 0
           raise ArgumentError, 'wrong number of arguments (given 0, expected 1+)'
@@ -535,7 +502,7 @@ module Sycamore
 
     alias path? has_path?
 
-
+    # @todo Should we raise InvalidNode, when not given a valid node?
     def include_node?(node)
       @data.include?(node)
     end
@@ -605,9 +572,7 @@ module Sycamore
     # @return [Boolean] if the given node has no children
     #
     def leaf?(node)
-      raise TypeError, "expected a node, but got #{node}" if node.is_a? Enumerable
-
-      @data.include?(node) && ( (child = @data[node]).nil? || child.empty? )
+      include_node?(node) && @data.fetch(node, Nothing).empty?
     end
 
     # @return [Boolean] if all of the given nodes have no children
@@ -634,7 +599,7 @@ module Sycamore
 
 
     ########################################################################
-    # Equality
+    # @group Equality
     ########################################################################
 
     def hash
@@ -682,7 +647,7 @@ module Sycamore
 
 
     ########################################################################
-    # Conversion
+    # @group Conversion
     ########################################################################
 
     def to_h(flattened: false)
@@ -716,6 +681,17 @@ module Sycamore
       "#<#{self.class}:0x#{object_id.to_s(16)}(#{to_h(flattened: true).inspect})>".freeze
     end
 
+    ########################################################################
+    # @group Some helpers
+    #
+    # Ideally these would be implemented with Refinements, but since they
+    # aren't available anywhere (I'm looking at you, JRuby), we have to be
+    # content with this.
+    #
+    ########################################################################
+
+    # @return [Boolean] can the given object be interpreted as a Tree
+    #
     def self.tree_like?(object)
       case object
         when Hash, Tree, Absence # ... ?!
@@ -729,17 +705,14 @@ module Sycamore
       alias like? tree_like?
     end
 
-
     ########################################################################
-    # Various other Ruby protocols
+    # @group Standard Ruby protocols
     ########################################################################
 
-    # overrides {Object#freeze} by delegating it to the internal hash {@data}
+    # overrides {http://ruby-doc.org/core-2.2.2/Object.html#method-i-freeze Object#freeze}
+    # by delegating it to the internal hash {@data}
     #
-    # TODO: How to do proper links with YARD and markdown support?
-    #
-    # @see Ruby's [Object#freeze](http://ruby-doc.org/core-2.2.2/Object.html#method-i-freeze)
-    # @see Ruby's {http://ruby-doc.org/core-2.2.2/Object.html#method-i-freeze Object#freeze}
+    # @see http://ruby-doc.org/core-2.2.2/Object.html#method-i-freeze
     #
     def freeze
       @data.freeze

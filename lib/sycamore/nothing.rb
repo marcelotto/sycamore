@@ -96,6 +96,20 @@ module Sycamore
     #   true
     # end
 
+
+    ########################################################################
+    # Some helpers
+    #
+    # Ideally these would be implemented with Refinements, but since they
+    # aren't available anywhere (I'm looking at you, JRuby), we have to be
+    # content with this.
+    #
+    ########################################################################
+
+    def like?(object)
+      object.nil? or object.equal? self
+    end
+
   end
 
   ############################################################################

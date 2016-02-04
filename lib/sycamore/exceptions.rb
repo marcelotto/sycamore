@@ -1,6 +1,8 @@
 module Sycamore
-  # raised when trying to add an Enumerable to the nodes of a tree
-  class NestedNodeSet < StandardError ; end
+  # raised when a value is not a valid node
+  class InvalidNode < ArgumentError ; end
   # raised when trying to call a additive command method of the {Nothing} tree
   class NothingMutation < StandardError ; end
+  # raised when calling {Tree#node} on a Tree with multiple nodes
+  class NonUniqueNodeSet < StandardError ; end
 end

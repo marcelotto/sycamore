@@ -314,6 +314,23 @@ describe Sycamore::Absence do
           .and be_absent
           .and be_different_to absent_tree
       end
+
+      context 'edge cases' do
+        it 'does raise an error, when given nil' do
+          expect { absent_tree.child_of(nil) }.to raise_error Sycamore::InvalidNode
+        end
+
+        it 'does raise an error, when given the Nothing tree' do
+          expect { absent_tree.child_of(Sycamore::Nothing) }.to raise_error Sycamore::InvalidNode
+        end
+
+        it 'does raise an error, when given an Enumerable' do
+          expect { absent_tree.child_of([1]) }.to raise_error Sycamore::InvalidNode
+          expect { absent_tree.child_of([1, 2]) }.to raise_error Sycamore::InvalidNode
+          expect { absent_tree.child_of(foo: :bar) }.to raise_error Sycamore::InvalidNode
+          expect { absent_tree.child_of(Sycamore::Tree[1]) }.to raise_error Sycamore::InvalidNode
+        end
+      end
     end
 
     context 'when the absent tree has been created' do
@@ -323,14 +340,6 @@ describe Sycamore::Absence do
       it 'does delegate to the created tree' do
         expect(created_tree).to receive(:child_of)
         absent_tree.child_of(:something)
-      end
-    end
-
-    context 'edge cases' do
-      context 'when given nil' do
-        it 'does raise an IndexError' do
-          expect { absent_tree.child_of(nil) }.to raise_error IndexError
-        end
       end
     end
   end

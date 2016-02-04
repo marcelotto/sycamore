@@ -38,7 +38,8 @@ module Sycamore
       return branch(*path.first) if path.size == 1 and path.first.is_a? Enumerable
       parent = self
       path.each do |node|
-        raise IndexError, "nil value in path of #{path}" if node.nil?
+        raise InvalidNode, "#{node} in Path #{path.inspect} is not a valid tree node" if
+          node.nil? or node.is_a? Enumerable
         parent = Path.__send__(:new, parent, node)
       end
       parent

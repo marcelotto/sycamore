@@ -27,8 +27,8 @@ describe Sycamore::Tree do
     end
 
     context 'edge cases' do
-      it 'does raise an IndexError, when given nil' do
-        expect { tree.create_child(nil) }.to raise_error IndexError
+      it 'does raise an error, when given nil' do
+        expect { tree.create_child(nil) }.to raise_error Sycamore::InvalidNode
       end
     end
   end
@@ -36,12 +36,12 @@ describe Sycamore::Tree do
   ############################################################################
 
   describe '#add' do
-    context 'when given a single atomic value' do
+    context 'when given an atomic value' do
       it 'does add the value to the set of nodes' do
         expect( Sycamore::Tree.new.add 1 ).to include_node 1
       end
 
-      context 'when a given value is already present' do
+      context 'when the given value is already present' do
         it 'does nothing' do
           expect( Sycamore::Tree[1].add(1).size ).to be 1
         end
@@ -66,7 +66,7 @@ describe Sycamore::Tree do
       end
     end
 
-    context 'when given a single array' do
+    context 'when given an array' do
       it 'does add all values to the set of nodes' do
         expect( Sycamore::Tree.new.add [1,2] ).to include_nodes 1, 2
       end
@@ -81,7 +81,7 @@ describe Sycamore::Tree do
       end
 
       context 'when the array is nested' do
-        it 'does treat hashes as nodes with children' do
+        it 'does treat hashes as trees' do
           expect( Sycamore::Tree.new.add [:a, b: 1]         ).to include_tree({a: nil, b: 1})
           expect( Sycamore::Tree.new.add [:b,  a: 1, c: 2 ] ).to include_tree({a: 1, b: nil, c: 2})
           expect( Sycamore::Tree.new.add [:b, {a: 1, c: 2}] ).to include_tree({a: 1, b: nil, c: 2})
@@ -95,7 +95,7 @@ describe Sycamore::Tree do
         end
 
         it 'raises an error, when the nested enumerable is not Tree-like' do
-          expect { Sycamore::Tree.new.add([1, [2, 3]]) }.to raise_error Sycamore::NestedNodeSet
+          expect { Sycamore::Tree.new.add([1, [2, 3]]) }.to raise_error Sycamore::InvalidNode
         end
       end
 
@@ -114,36 +114,35 @@ describe Sycamore::Tree do
       end
     end
 
+    ADD_TREE_EXAMPLES = [
+      { foo: :bar },
+      { foo: [:bar, :baz] },
+      { a: 1, b: 2 },
+      { a: 1, b: [2,3] },
+      { a: [1, 'foo'], b: {2 => 3} },
+      { foo: {bar: :baz} },
+    ]
+
+    MERGE_TREE_EXAMPLES = [
+      { before: {foo: [1, 2]}, add: {foo: [2, 3]}, after: {foo: [1, 2, 3]} },
+      { before: {foo: {1=>2}}, add: {foo: {1=>3}}, after: {foo: {1=>[2, 3]}} },
+      { before: {noah: { shem: :elam }},
+        add:    {noah: { shem: :asshur, japeth: :gomer}},
+        after:  {noah: { shem: [:elam, :asshur], japeth: :gomer}} },
+    ]
+
     context 'when given a hash' do
-      it 'does add a similar tree structure' do
-        expect( Sycamore::Tree.new << { foo: :bar } ).to include_tree foo: :bar
-        expect( Sycamore::Tree.new << { foo: [:bar, :baz] } ).to include_tree foo: [:bar, :baz]
-        expect( Sycamore::Tree.new << { a: 1, b: 2 } ).to include_tree a: 1, b: 2
-        expect( Sycamore::Tree.new << { a: 1, b: [2,3] } ).to include_tree a: 1, b: [2,3]
-        expect( Sycamore::Tree.new << { a: [1, 'foo'], b: {2 => 3} } )
-          .to include_tree a: [1, 'foo'], b: {2 => 3}
-        expect( Sycamore::Tree.new << { noah: { shem: :elam } } )
-          .to include_tree noah: { shem: :elam }
+      it 'does add the given tree structure' do
+        ADD_TREE_EXAMPLES.each do |example|
+          expect( Sycamore::Tree.new.add(example) ).to include_tree example
+        end
       end
 
-      it 'does merge the hash with the existing tree structure' do
-        expect( Sycamore::Tree[foo: [1,2]].add(foo: [2,3]) ).to include_tree foo: [1,2,3]
-        expect( Sycamore::Tree[foo: {1=>2}].add(foo: {1=>3}) ).to include_tree foo: {1=>[2,3]}
-        expect( Sycamore::Tree[noah: { shem: :elam }].add(
-                          noah: {shem: :asshur,
-                                 japeth: :gomer,
-                                 ham: [:cush, :mizraim, :put, :canaan] })
-        ).to include_tree noah: {:shem   => [:elam, :asshur]}
-                                {:japeth => :gomer}
-                                {:ham    => [:cush, :mizraim, :put, :canaan]}
-      end
-
-      context 'with null values' do
-        pending 'Ticket: support empty child trees'
-        specify { expect(Sycamore::Tree.new.add([1 => Sycamore::Nothing, 2 => Sycamore::Nothing]).leaves?(1,2)).to be true }
-        specify { expect(Sycamore::Tree.new.add([1 => nil, 2 => nil]).leaves?(1,2)).to be true }
-        specify { expect(Sycamore::Tree.new.add([1 => [], 2 => []]).leaves?(1,2)).to be true }
-        specify { expect(Sycamore::Tree.new.add([1 => {}, 2 => {}]).leaves?(1,2)).to be true }
+      it 'does merge the given hash with the existing tree structure' do
+        MERGE_TREE_EXAMPLES.each do |example|
+          expect( Sycamore::Tree[example[:before]].add(example[:add]) )
+            .to eql Sycamore::Tree[example[:after]]
+        end
       end
 
       context 'edge cases' do
@@ -159,33 +158,57 @@ describe Sycamore::Tree do
           expect( Sycamore::Tree.new << {nil => 42} ).to be_empty
         end
 
-        it 'does nothing, when the key is the Nothing tree' do
-          expect( Sycamore::Tree.new << {Sycamore::Nothing => 42} ).to be_empty
+        it 'does ignore null values as children' do
+          expect(Sycamore::Tree.new.add({1 => Sycamore::Nothing, 2 => Sycamore::Nothing}).leaves?(1,2)).to be true
+          expect(Sycamore::Tree.new.add({1 => nil, 2 => nil}).leaves?(1,2)).to be true
+          expect(Sycamore::Tree.new.add({1 => [], 2 => []}).leaves?(1,2)).to be true
+          expect(Sycamore::Tree.new.add({1 => {}, 2 => {}}).leaves?(1,2)).to be true
+        end
+
+        it 'does raise an error, when given a tree with an enumerable key' do
+          expect { Sycamore::Tree.new.add([1,2] => 3) }.to raise_error Sycamore::InvalidNode
+          expect { Sycamore::Tree.new.add({1 => 2} => 3) }.to raise_error Sycamore::InvalidNode
+          expect { Sycamore::Tree.new.add(Sycamore::Tree[1] => 42) }.to raise_error Sycamore::InvalidNode
+          expect { Sycamore::Tree.new.add(Sycamore::Nothing => 42) }.to raise_error Sycamore::InvalidNode
         end
       end
     end
 
-    context 'when given another tree' do
+    context 'when given a tree' do
+      it 'does add the tree structure' do
+        ADD_TREE_EXAMPLES.each do |example|
+          expect( Sycamore::Tree.new.add(example) ).to include_tree example
+        end
+      end
 
-      pending
+      it 'does merge the tree with the existing tree structure' do
+        MERGE_TREE_EXAMPLES.each do |example|
+          expect( Sycamore::Tree[example[:before]] .add(Sycamore::Tree[example[:add]]) )
+            .to eql Sycamore::Tree[example[:after]]
+        end
+      end
 
       context 'edge cases' do
-        it 'does nothing, when given an absent tree' do
-          absent_tree = Sycamore::Tree.new.child_of(:missing)
-          expect( Sycamore::Tree.new.add absent_tree ).to be_empty
+        it 'does nothing, when given an empty tree' do
+          expect( Sycamore::Tree.new << Sycamore::Tree.new ).to be_empty
         end
-      end
-    end
 
-    context 'when given multiple arguments' do
-      context 'when all arguments are atomic' do
-        it 'does add all values to the set of nodes' do
-          pending 'Can/should we support multiple arguments?'
-          expect( Sycamore::Tree.new.add(1, 2) ).to include_nodes 1, 2
+        context 'when given an Absence' do
+          let(:absent_tree) { Sycamore::Tree.new.child_of(:missing) }
+
+          it 'does ignore it, when it is absent' do
+            expect( Sycamore::Tree.new.add absent_tree ).to be_empty
+            expect( Sycamore::Tree.new.add(1 => absent_tree).leaf?(1) ).to be true
+          end
+
+          it 'does treat it like a normal tree, when it was created' do
+            absent_tree << 42
+
+            expect( Sycamore::Tree.new.add absent_tree ).to eq Sycamore::Tree[42]
+            expect( Sycamore::Tree.new.add 1 => absent_tree ).to eq Sycamore::Tree[1 => 42]
+          end
         end
       end
-      context 'when all arguments are atomic or tree-like'
-      context 'when some arguments are non-tree-like enumerables'
     end
 
   end
@@ -228,14 +251,14 @@ describe Sycamore::Tree do
     end
 
     context 'edge cases' do
-      it 'does raise an ArgumentError, when the given path is empty' do
+      it 'does raise an error, when the given path is empty' do
         expect { tree[] = 42 }.to raise_error ArgumentError
       end
 
-      it 'does raise an IndexError, when the given path contains nil' do
-        expect { tree[nil] = 42    }.to raise_error IndexError
-        expect { tree[nil, 1] = 42 }.to raise_error IndexError
-        expect { tree[1, nil] = 42 }.to raise_error IndexError
+      it 'does raise an error, when the given path contains nil' do
+        expect { tree[nil] = 42    }.to raise_error Sycamore::InvalidNode
+        expect { tree[nil, 1] = 42 }.to raise_error Sycamore::InvalidNode
+        expect { tree[1, nil] = 42 }.to raise_error Sycamore::InvalidNode
       end
     end
 

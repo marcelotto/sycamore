@@ -62,21 +62,9 @@ describe Sycamore::Tree do
     end
 
     context 'when containing multiple nodes' do
-      context 'when no reduce function specified' do
-        it 'does raise a TypeError' do
-          expect { Sycamore::Tree[:foo, :bar].node }.to raise_error TypeError
-          expect { Sycamore::Tree[foo: 1, bar: 2, baz: nil].node }.to raise_error TypeError
-        end
-      end
-
-      context 'when a reducer or selector function specified' do
-        it 'does return the application of reduce function on the node set' do
-          pending
-          expect( Sycamore::Tree[1,2,3].node(&:max) ).to eq 3
-          expect( Sycamore::Tree[1,2,3]
-                    .node { |nodes| nodes.reduce { |value, sum| sum += value } }
-          ).to eq 6
-        end
+      it 'does raise a TypeError' do
+        expect { Sycamore::Tree[:foo, :bar].node }.to raise_error Sycamore::NonUniqueNodeSet
+        expect { Sycamore::Tree[foo: 1, bar: 2, baz: nil].node }.to raise_error Sycamore::NonUniqueNodeSet
       end
     end
   end
@@ -102,8 +90,19 @@ describe Sycamore::Tree do
     end
 
     context 'edge cases' do
-      it 'does raise an IndexError, when given nil' do
-        expect { Sycamore::Tree.new.child_of(nil) }.to raise_error IndexError
+      it 'does raise an error, when given nil' do
+        expect { Sycamore::Tree.new.child_of(nil) }.to raise_error Sycamore::InvalidNode
+      end
+
+      it 'does raise an error, when given the Nothing tree' do
+        expect { Sycamore::Tree.new.child_of(Sycamore::Nothing) }.to raise_error Sycamore::InvalidNode
+      end
+
+      it 'does raise an error, when given an Enumerable' do
+        expect { Sycamore::Tree.new.child_of([1]) }.to raise_error Sycamore::InvalidNode
+        expect { Sycamore::Tree.new.child_of([1, 2]) }.to raise_error Sycamore::InvalidNode
+        expect { Sycamore::Tree.new.child_of(foo: :bar) }.to raise_error Sycamore::InvalidNode
+        expect { Sycamore::Tree.new.child_of(Sycamore::Tree[1]) }.to raise_error Sycamore::InvalidNode
       end
     end
 
@@ -149,10 +148,10 @@ describe Sycamore::Tree do
         expect { Sycamore::Tree.new.child_at() }.to raise_error ArgumentError
       end
 
-      it 'does raise an IndexError, when the given path contains nil' do
-        expect { Sycamore::Tree.new.child_at(nil, nil) }.to raise_error IndexError
-        expect { Sycamore::Tree.new.child_at(1, nil  ) }.to raise_error IndexError
-        expect { Sycamore::Tree.new.child_at(nil, 1  ) }.to raise_error IndexError
+      it 'does raise an error, when the given path contains nil' do
+        expect { Sycamore::Tree.new.child_at(nil, nil) }.to raise_error Sycamore::InvalidNode
+        expect { Sycamore::Tree.new.child_at(1, nil  ) }.to raise_error Sycamore::InvalidNode
+        expect { Sycamore::Tree.new.child_at(nil, 1  ) }.to raise_error Sycamore::InvalidNode
       end
     end
 

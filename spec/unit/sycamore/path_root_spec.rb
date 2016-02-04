@@ -37,7 +37,7 @@ describe Sycamore::Path::ROOT do
     context 'when given a collection of nodes' do
 
       context 'when the collection contains nil values' do
-        specify { expect { Sycamore::Path[1, nil, 3] }.to raise_error IndexError }
+        specify { expect { Sycamore::Path[1, nil, 3] }.to raise_error Sycamore::InvalidNode }
       end
 
       context 'when the collection is given as multiple arguments' do

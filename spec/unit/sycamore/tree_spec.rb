@@ -82,9 +82,9 @@ describe Sycamore::Tree do
       end
 
       context 'when some arguments are non-tree-like enumerables' do
-        it 'does raise an NestedNodeSet exception' do
-          expect { Sycamore::Tree[1, [2]] }.to raise_error Sycamore::NestedNodeSet
-          expect { Sycamore::Tree[[1, 2], [3, 4]] }.to raise_error Sycamore::NestedNodeSet
+        it 'does raise an error' do
+          expect { Sycamore::Tree[1, [2]] }.to raise_error Sycamore::InvalidNode
+          expect { Sycamore::Tree[[1, 2], [3, 4]] }.to raise_error Sycamore::InvalidNode
         end
       end
     end
@@ -192,18 +192,6 @@ describe Sycamore::Tree do
       expect( Sycamore::Tree[1 => :foo, 2 => nil].leaf?(1) ).to be false
     end
 
-    context 'when given a hash' do
-      it 'raises a TypeError' do
-        expect { Sycamore::Tree.new.leaf?(a: 1) }.to raise_error TypeError
-      end
-    end
-
-    context 'when given a nested array' do
-      it 'raises a TypeError' do
-        expect { Sycamore::Tree.new.leaf?([:foo, 1]) }.to raise_error TypeError
-      end
-    end
-
     context 'edge cases' do
       context 'when given nil' do
         specify { expect( Sycamore::Tree.new.leaf?(nil)  ).to be false }
@@ -214,6 +202,19 @@ describe Sycamore::Tree do
       #   specify { expect(Tree[].leaf?(Sycamore::Nothing)).to be false }
       #   specify { expect(Tree[Sycamore::Nothing].leaf?(Sycamore::Nothing)).to be false }
       # end
+
+      # context 'when given a hash' do
+      #   it 'raises an error' do
+      #     expect { Sycamore::Tree.new.leaf?(a: 1) }.to raise_error Sycamore::InvalidNode
+      #   end
+      # end
+      #
+      # context 'when given a nested array' do
+      #   it 'raises an error' do
+      #     expect { Sycamore::Tree.new.leaf?([:foo, 1]) }.to raise_error Sycamore::InvalidNode
+      #   end
+      # end
+
     end
   end
 
