@@ -74,8 +74,15 @@ module Sycamore
     alias dig child_at
 
     def inspect
-      "#<Sycamore::Absence.at(#@parent_tree, #@parent_node)>"
       "#{absent? ? 'absent' : 'present'} child tree of node #{@parent_node.inspect} in #{@parent_tree.inspect}"
+    end
+
+    def dup
+      presence.dup
+    end
+
+    def clone
+      presence.clone
     end
 
     #####################

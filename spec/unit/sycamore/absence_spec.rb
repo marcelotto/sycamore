@@ -258,7 +258,7 @@ describe Sycamore::Absence do
   let(:nothing) { spy('nothing') }
 
   UNSUPPORTED_TEST_DOUBLE_METHODS = %i[hash to_s]
-  EXCLUDE_QUERY_METHODS = %i[== === eql?] + UNSUPPORTED_TEST_DOUBLE_METHODS +
+  EXCLUDE_QUERY_METHODS = %i[== === eql? dup clone] + UNSUPPORTED_TEST_DOUBLE_METHODS +
     Sycamore::Absence.instance_methods(false)
 
   (Sycamore::Tree.query_methods - EXCLUDE_QUERY_METHODS).each do |query_method|
@@ -290,6 +290,56 @@ describe Sycamore::Absence do
       end
     end
 
+  end
+
+  describe '#dup' do
+    context 'when the absent tree has not been created' do
+      it 'does raise an error' do
+        expect { absent_tree.dup }.to raise_error TypeError
+      end
+    end
+
+    context 'when the absent tree has been created' do
+      before(:each) { absent_tree.add :something }
+      let(:created_tree) { absent_tree.presence }
+
+      it 'does return a duplicate of the present tree, not the Absence' do
+        duplicate = absent_tree.dup
+        expect(duplicate).not_to be_a Sycamore::Absence
+        expect(duplicate).to be_a Sycamore::Tree
+      end
+
+      it 'does delegate to the created tree' do
+        expect(created_tree).to be_present
+        expect(created_tree).to receive(:dup)
+        absent_tree.dup
+      end
+    end
+  end
+
+  describe '#clone' do
+    context 'when the absent tree has not been created' do
+      it 'does raise an error' do
+        expect { absent_tree.clone }.to raise_error TypeError
+      end
+    end
+
+    context 'when the absent tree has been created' do
+      before(:each) { absent_tree.add :something }
+      let(:created_tree) { absent_tree.presence }
+
+      it 'does return a duplicate of the present tree, not the Absence' do
+        klone = absent_tree.clone
+        expect(klone).not_to be_a Sycamore::Absence
+        expect(klone).to be_a Sycamore::Tree
+      end
+
+      it 'does delegate to the created tree' do
+        expect(created_tree).to be_present
+        expect(created_tree).to receive(:clone)
+        absent_tree.clone
+      end
+    end
   end
 
   describe '#frozen?' do

@@ -313,6 +313,115 @@ describe Sycamore::Tree do
 
   ############################################################################
 
+  describe '#dup' do
+    it 'does returns a different but equal Tree' do
+      tree = Sycamore::Tree[foo: :bar]
+      duplicate = tree.dup
+
+      expect( duplicate ).not_to be tree
+      expect( duplicate ).to eql tree
+      expect( tree[:foo] ).not_to be duplicate[:foo]
+    end
+
+    it 'does copy any defined child constructor' do
+      tree = Sycamore::Tree.new
+      tree.child_class = Class.new(Sycamore::Tree)
+      duplicate = tree.dup
+
+      expect( duplicate.child_class ).to be tree.child_class
+    end
+
+    it 'does return an independent Tree' do
+      tree = Sycamore::Tree[foo: {bar: :baz}]
+      duplicate = tree.dup
+      tree.add :more
+
+      expect( duplicate ).not_to eql tree
+
+      duplicate = tree.dup
+      tree[:foo] << :more
+
+      expect( duplicate ).not_to eql tree
+    end
+
+    it 'returns an unfrozen tree, even if the original was frozen' do
+      tree = Sycamore::Tree.new
+      tree.freeze
+      duplicate = tree.dup
+
+      expect( duplicate ).not_to be_frozen
+    end
+
+    it 'returns a tainted tree, if the original was tainted' do
+      tree = Sycamore::Tree.new
+      tree.taint
+      duplicate = tree.dup
+
+      expect( duplicate ).to be_tainted
+    end
+  end
+
+  ############################################################################
+
+  describe '#clone' do
+    it 'does returns a different but equal Tree' do
+      tree = Sycamore::Tree[foo: :bar]
+      klone = tree.clone
+
+      expect( klone ).not_to be tree
+      expect( klone ).to eql tree
+      expect( klone[:foo] ).not_to be tree[:foo]
+    end
+
+    it 'does copy any defined child constructor' do
+      tree = Sycamore::Tree.new
+      tree.child_class = Class.new(Sycamore::Tree)
+      klone = tree.clone
+
+      expect( klone.child_class ).to be tree.child_class
+    end
+
+    it 'does return an independent Tree' do
+      tree = Sycamore::Tree[foo: {bar: :baz}]
+      klone = tree.clone
+      tree.add :more
+
+      expect( klone ).not_to eql tree
+
+      klone = tree.clone
+      tree[:foo] << :more
+
+      expect( klone ).not_to eql tree
+    end
+
+    it 'returns a frozen tree, if the original was frozen' do
+      tree = Sycamore::Tree.new
+      tree.freeze
+      klone = tree.clone
+
+      expect( klone ).to be_frozen
+    end
+
+    it 'returns a tainted tree, if the original was tainted' do
+      tree = Sycamore::Tree.new
+      tree.taint
+      klone = tree.clone
+
+      expect( klone ).to be_tainted
+    end
+
+    it 'does copy singleton methods' do
+      tree = Sycamore::Tree.new
+      def tree.some_method ; end
+
+      klone = tree.clone
+      expect(klone).to respond_to :some_method
+    end
+
+  end
+
+  ############################################################################
+
   describe '#freeze' do
 
     it 'behaves Object#freeze conform' do

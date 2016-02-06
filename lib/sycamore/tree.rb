@@ -34,7 +34,7 @@ module Sycamore
          leaf? leaves? internal? external? flat? nested?
          eql? matches? === ==]
     QUERY_METHODS = PREDICATE_METHODS +
-      %i[new_child child_constructor child_class child_generator
+      %i[new_child child_constructor child_class child_generator dup
          size height node nodes keys child_of child_at dig fetch
          each each_path paths each_node each_key each_pair
          hash to_h to_s inspect] << :[]
@@ -112,8 +112,8 @@ module Sycamore
       case
         when child_constructor.nil? then self.class.new(*args)
         when child_class            then child_class.new(*args)
-        # TODO: pending Tree#clone
-        # when child_prototype        then child_prototype.clone.add(*args)
+        # TODO: pending Tree#dup
+        # when child_prototype        then child_prototype.dup.add(*args)
         when child_generator        then child_generator.call # TODO: pass *args
         else raise "invalid child constructor: #{child_constructor.inspect}"
       end
@@ -122,7 +122,7 @@ module Sycamore
     def child_constructor=(prototype_or_class)
       case prototype_or_class
         when Class then self.child_class = prototype_or_class
-        # TODO: pending Tree#clone
+        # TODO: next
         # when Tree  then self.child_prototype = prototype_or_class
         else raise ArgumentError, "expected a Sycamore::Tree object or subclass, but got a #{prototype_or_class}"
       end
@@ -142,7 +142,7 @@ module Sycamore
     end
 
 
-    # TODO: pending Tree#clone
+    # TODO: next
     # def child_prototype
     #   @child_constructor if @child_constructor.is_a? Tree
     # end
@@ -708,6 +708,19 @@ module Sycamore
     ########################################################################
     # @group Standard Ruby protocols
     ########################################################################
+
+    def dup
+      duplicate = self.class.new.add(self)
+      duplicate.taint if tainted?
+      duplicate.child_constructor = @child_constructor if @child_constructor
+      duplicate
+    end
+
+    def initialize_clone(other)
+      super
+      @data = Hash.new
+      add other
+    end
 
     # overrides {http://ruby-doc.org/core-2.2.2/Object.html#method-i-freeze Object#freeze}
     # by delegating it to the internal hash {@data}
