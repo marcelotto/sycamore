@@ -26,7 +26,7 @@ module Sycamore
     ADDITIVE_COMMAND_METHODS    = %i[add << replace create_child] << :[]=
     DESTRUCTIVE_COMMAND_METHODS = %i[delete >> clear]
     COMMAND_METHODS = ADDITIVE_COMMAND_METHODS + DESTRUCTIVE_COMMAND_METHODS +
-      %i[child_constructor= child_class= def_child_generator freeze]
+      %i[freeze]
 
     PREDICATE_METHODS =
       %i[nothing? absent? present? blank? empty?
@@ -34,10 +34,9 @@ module Sycamore
          leaf? leaves? internal? external? flat? nested?
          eql? matches? === ==]
     QUERY_METHODS = PREDICATE_METHODS +
-      %i[new_child child_constructor child_class child_generator dup
+      %i[new_child dup hash to_h to_s inspect
          size height node nodes keys child_of child_at dig fetch
-         each each_path paths each_node each_key each_pair
-         hash to_h to_s inspect] << :[]
+         each each_path paths each_node each_key each_pair] << :[]
 
     # @return [Array<Symbol>] the names of all methods, which can change the state of a Tree
     #
@@ -103,62 +102,8 @@ module Sycamore
       alias [] with
     end
 
-
-    ######################
-    # Child construction #
-    ######################
-
-    def new_child(*args)
-      case
-        when child_constructor.nil? then self.class.new(*args)
-        when child_class            then child_class.new(*args)
-        # TODO: pending Tree#dup
-        # when child_prototype        then child_prototype.dup.add(*args)
-        when child_generator        then child_generator.call # TODO: pass *args
-        else raise "invalid child constructor: #{child_constructor.inspect}"
-      end
-    end
-
-    def child_constructor=(prototype_or_class)
-      case prototype_or_class
-        when Class then self.child_class = prototype_or_class
-        # TODO: next
-        # when Tree  then self.child_prototype = prototype_or_class
-        else raise ArgumentError, "expected a Sycamore::Tree object or subclass, but got a #{prototype_or_class}"
-      end
-    end
-
-    def child_constructor
-      @child_constructor
-    end
-
-    def child_class
-      @child_constructor if @child_constructor.is_a? Class
-    end
-
-    def child_class=(tree_class)
-      raise ArgumentError, "expected a Tree subclass, but got a #{tree_class}" unless tree_class <= Tree
-      @child_constructor = tree_class
-    end
-
-
-    # TODO: next
-    # def child_prototype
-    #   @child_constructor if @child_constructor.is_a? Tree
-    # end
-    #
-    # def child_prototype=(tree)
-    #   raise ArgumentError, "expected a Tree object, but got a #{tree}" unless tree.is_a? Tree
-    #   @child_constructor = tree
-    # end
-
-
-    def child_generator
-      @child_constructor if @child_constructor.is_a? Proc
-    end
-
-    def def_child_generator(&block)
-      @child_constructor = block
+    def new_child(parent_node, *args)
+      self.class.new(*args)
     end
 
 
@@ -260,7 +205,7 @@ module Sycamore
       raise InvalidNode, "#{node} is not a valid tree node" if node.nil? or node.is_a? Enumerable
 
       if @data.fetch(node, Nothing).nothing?
-        @data[node] = new_child
+        @data[node] = new_child(node)
       end
 
       self
@@ -712,7 +657,6 @@ module Sycamore
     def dup
       duplicate = self.class.new.add(self)
       duplicate.taint if tainted?
-      duplicate.child_constructor = @child_constructor if @child_constructor
       duplicate
     end
 

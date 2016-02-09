@@ -2,6 +2,9 @@ describe Sycamore::Tree do
 
   it { is_expected.to be_a Enumerable }
 
+  let(:subclass) { Class.new(Sycamore::Tree) }
+
+
   specify { expect { Sycamore::Tree[].data }.to raise_error NoMethodError }
 
   describe 'CQS reflection class methods' do
@@ -20,7 +23,7 @@ describe Sycamore::Tree do
   # construction
   ############################################################################
 
-  describe '#initialize' do
+  describe '.new' do
     context 'when given no arguments and no block' do
       specify { expect( Sycamore::Tree.new ).to be_a Sycamore::Tree }
       specify { expect( Sycamore::Tree.new ).to be_empty }
@@ -89,6 +92,13 @@ describe Sycamore::Tree do
       end
     end
 
+  end
+
+  describe '#new_child' do
+    it 'does create a tree of the same type as the parent' do
+      expect( Sycamore::Tree.new.new_child(1) ).to be_instance_of Sycamore::Tree
+      expect(       subclass.new.new_child(1) ).to be_instance_of subclass
+    end
   end
 
 
@@ -323,14 +333,6 @@ describe Sycamore::Tree do
       expect( tree[:foo] ).not_to be duplicate[:foo]
     end
 
-    it 'does copy any defined child constructor' do
-      tree = Sycamore::Tree.new
-      tree.child_class = Class.new(Sycamore::Tree)
-      duplicate = tree.dup
-
-      expect( duplicate.child_class ).to be tree.child_class
-    end
-
     it 'does return an independent Tree' do
       tree = Sycamore::Tree[foo: {bar: :baz}]
       duplicate = tree.dup
@@ -371,14 +373,6 @@ describe Sycamore::Tree do
       expect( klone ).not_to be tree
       expect( klone ).to eql tree
       expect( klone[:foo] ).not_to be tree[:foo]
-    end
-
-    it 'does copy any defined child constructor' do
-      tree = Sycamore::Tree.new
-      tree.child_class = Class.new(Sycamore::Tree)
-      klone = tree.clone
-
-      expect( klone.child_class ).to be tree.child_class
     end
 
     it 'does return an independent Tree' do

@@ -9,6 +9,11 @@ describe Sycamore::Tree do
       expect( tree.create_child(:foo) ).to include_node :foo
     end
 
+    it 'does create the new child with #new_child' do
+      expect( tree ).to receive(:new_child)
+      tree.create_child(:foo)
+    end
+
     it 'does add an empty tree as a child of the given node' do
       expect( tree.create_child(:foo).child_of(:foo) ).to be_a Sycamore::Tree
       expect( tree.create_child(:foo).child_of(:foo) ).not_to be Sycamore::Nothing

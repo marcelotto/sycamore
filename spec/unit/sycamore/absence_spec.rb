@@ -157,13 +157,7 @@ describe Sycamore::Absence do
     let(:parent_node)       { root_node }
     let(:absent_tree)       { Sycamore::Absence.new(parent_tree, parent_node) }
 
-    context 'when the root has no child constructor defined' do
-      include_examples 'with and without the parent node'
-    end
-
-    context 'when the root has a child constructor defined' do
-      pending
-    end
+    include_examples 'with and without the parent node'
   end
 
 
