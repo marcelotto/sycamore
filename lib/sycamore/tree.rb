@@ -547,6 +547,10 @@ module Sycamore
     # @group Equality
     ########################################################################
 
+    # Currently, we accept the hash collision of different tree types with the
+    # same content. It is the simplest way to hold account of the special
+    # equivalence behaviour of the Nothing tree.
+    #
     def hash
       @data.hash ^ Tree.hash
     end

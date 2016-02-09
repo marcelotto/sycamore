@@ -73,14 +73,13 @@ describe Sycamore::Tree do
       end
     end
 
-    it 'does produce different values, when the tree is not eql' do
-      pending 'Currently, we accept the collision of different tree types with the same content. ' +
-              'It is the simplest way to hold account of the special equivalence behaviour of thre Nothing tree.'
-      NOT_EQL.each do |tree, other|
-        expect(tree.hash).not_to eq(other.hash),
-          "expected the hash of #{tree.inspect} not to equal the hash of #{other.inspect}"
-      end
-    end
+    # see comment on Tree#hash
+    # it 'does produce different values, when the tree is not eql' do
+    #   NOT_EQL.each do |tree, other|
+    #     expect(tree.hash).not_to eq(other.hash),
+    #       "expected the hash of #{tree.inspect} not to equal the hash of #{other.inspect}"
+    #   end
+    # end
   end
 
   ############################################################################
