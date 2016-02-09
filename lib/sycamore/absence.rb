@@ -85,6 +85,14 @@ module Sycamore
       presence.clone
     end
 
+    def frozen?
+      if absent?
+        false
+      else
+        presence.frozen?
+      end
+    end
+
     #####################
     #  command methods  #
     #####################

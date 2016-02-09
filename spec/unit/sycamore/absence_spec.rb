@@ -197,8 +197,11 @@ describe Sycamore::Absence do
   describe '#freeze' do
     include_examples 'command method calls under different circumstances', :freeze
 
-    it 'does execute the #freeze on the created tree' do
-      expect( absent_tree.freeze ).to be_frozen
+    it 'does freeze the Absence object and the created tree' do
+      absent_tree.freeze
+
+      expect( absent_tree.presence.freeze ).to be_frozen
+      expect( absent_tree ).to be_frozen
     end
   end
 
@@ -338,13 +341,17 @@ describe Sycamore::Absence do
 
   describe '#frozen?' do
     context 'when the absent tree has not been created' do
-      pending
+      it 'does return false' do
+        expect( absent_tree ).not_to be_frozen
+      end
     end
 
     context 'when the absent tree has been created' do
       before(:each) { absent_tree.add :something }
 
-      it 'does delegate to the created tree'
+      it 'does delegate to the created tree' do
+        expect( absent_tree ).not_to be_frozen
+      end
     end
   end
 
