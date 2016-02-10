@@ -1,13 +1,17 @@
 require 'singleton'
 
 module Sycamore
-
   class Path
     class Root < Path
       include Singleton
 
       def initialize
-        @parent, @node = nil, :root
+        @parent, @node = nil, nil
+      end
+
+      def up(distance = 1)
+        super unless distance.is_a? Integer
+        self
       end
 
       def root?
@@ -18,22 +22,19 @@ module Sycamore
         0
       end
 
-      def up(distance = 1)
-        self
+      def join(delimiter = '/')
+        ''
       end
 
       def to_s
-        "#<Sycamore::Path::Root>"
+        '#<Path:Root>'
       end
 
       def inspect
-        to_s
-        # TODO: "???"
+        '#<Sycamore::Path::Root>'
       end
-
     end
 
     ROOT = Root.instance
   end
-
 end

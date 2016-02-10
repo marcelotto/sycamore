@@ -68,7 +68,6 @@ module Sycamore
       PREDICATE_METHODS
     end
 
-
     ########################################################################
     # @group Construction
     ########################################################################
@@ -418,6 +417,7 @@ module Sycamore
 
     def each_path(with_ancestor: Path::ROOT, &block)
       return enum_for(__callee__) unless block_given?
+
       each do |node, child|
         if child.nothing?
           yield Path[with_ancestor, node]
@@ -430,18 +430,20 @@ module Sycamore
 
     alias paths each_path
 
+    # @return [Boolean] if a path with the given nodes exists
+    #
     def has_path?(*args)
       raise ArgumentError, 'wrong number of arguments (given 0, expected 1+)' if args.count == 0
+      first = args.first
+      if first.is_a? Enumerable
+        return has_path?(*first) if args.count == 1
+        raise InvalidNode
+      end
 
       if args.count == 1
-        arg = args.first
-        if arg.is_a? Path
-          arg.in? self
-        else
-          Path.of(arg).in? self
-        end
+        include? first
       else
-        Path.of(*args).in? self
+        include?(first) and child_of(first).has_path?(args[1..-1])
       end
     end
 
@@ -460,7 +462,7 @@ module Sycamore
     #
     # @return [Boolean] if this tree includes the given node
     #
-    # @todo Support paths as arguments by delegating to {#hash_path?} or directly to {Path#in?}
+    # @todo Support paths as arguments by delegating to {#has_path?} or directly to {Path#in?}
     def include?(elements)
       case
         when Tree.like?(elements)

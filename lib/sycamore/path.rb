@@ -1,13 +1,26 @@
 module Sycamore
+
+  # A compact, immutable representation of Tree paths, i.e. node sequences.
+  #
+  # This class is optimized for its usage in {Tree@each_path}, where it
+  # can efficiently represent the whole tree as a set of paths by sharing the
+  # parent paths.
+  #
+  # This class is not intended to be instantiated by the user.
+  # Tree methods which accept paths, always accept them always as arrays of nodes.
+  #
+  # @todo Measure the performance and memory consumption in comparison with a
+  #   pure Array-based implementation (where tree nodes are duplicated), esp. in
+  #   the most common use case of property-value structures.
+  #
   class Path
+    include Enumerable
 
     attr_reader :node, :parent
 
-    include Enumerable
-
-    ################################################################
-    # Creation and factories
-    ################################################################
+    ########################################################################
+    # @group Construction
+    ########################################################################
 
     class << self
 
@@ -17,45 +30,44 @@ module Sycamore
         ROOT
       end
 
-      def of(*args, &block)
+      def of(*args)
         if (parent = args.first).is_a? Path
-          parent.branch(*args[1..-1], &block)
+          parent.branch(*args[1..-1])
         else
-          root.branch(*args, &block)
+          root.branch(*args)
         end
       end
 
       alias [] of
     end
 
-
-    def initialize(parent, node, &block)
+    def initialize(parent, node)
       @parent, @node = parent, node
     end
 
+    ########################################################################
+    # @group Element access
+    ########################################################################
 
-    def branch(*path, &block)
+    def branch(*path)
       return branch(*path.first) if path.size == 1 and path.first.is_a? Enumerable
+
       parent = self
       path.each do |node|
         raise InvalidNode, "#{node} in Path #{path.inspect} is not a valid tree node" if
           node.nil? or node.is_a? Enumerable
         parent = Path.__send__(:new, parent, node)
       end
+
       parent
     end
 
-    alias [] branch
+    alias +  branch
     alias /  branch
-    # TODO: alias +  branch ???
-    alias with branch
-
-
-    ################################################################
-    # Element access
-    ################################################################
 
     def up(distance = 1)
+      raise TypeError, "expected an integer, but got #{distance.inspect}" unless distance.is_a? Integer
+
       case distance
         when 1 then @parent
         when 0 then self
@@ -63,24 +75,14 @@ module Sycamore
       end
     end
 
-
+    # @return [Boolean] if this is the root
+    #
     def root?
       false
     end
 
-
-    # TODO: each_node or each_component or each ... ?
-    def each_node(&block)
-      return enum_for(__callee__) unless block_given?
-      if @parent
-        @parent.each_node(&block)
-        yield @node
-      end
-    end
-
-    alias each each_node
-
-
+    # @return [Integer] the number of nodes on this path
+    #
     def length
       i, parent = 1, self
       i += 1 until (parent = parent.parent).root?
@@ -89,40 +91,42 @@ module Sycamore
 
     alias size length
 
+    # enumerates over akk
+    def each_node(&block)
+      return enum_for(__callee__) unless block_given?
 
+      if @parent
+        @parent.each_node(&block)
+        yield @node
+      end
+    end
 
-    ################################################################
-    # general integration with object supporting the
-    #   Tree-structure-protocol (incl. Hash)
-    ################################################################
+    alias each each_node
 
     def present_in?(struct)
       each do |node|
-        return false unless struct
-        next struct = nil if node == struct
-        struct = struct.fetch(node) { return false }
+        case
+          when struct.nil?
+            return false
+          when struct.is_a?(Enumerable)
+            return false unless struct.include? node
+            struct = (Tree.like?(struct) ? struct[node] : nil )
+          else
+            return false unless struct.eql? node
+            struct = nil
+        end
       end
       true
     end
 
     alias in? present_in?
 
+    ########################################################################
+    # @group Equality
+    ########################################################################
 
-    # TODO: Spec this ...
-    # def fetch_from(struct)
-    # end
-
-    # TODO: alias ??? fetch
-
-
-    ################################################################
-    # equality and equivalence
-    ################################################################
-
-    def ==(other)
-      self.length == other.length and begin
-        i = other.each ; all? { |node| node == i.next }
-      end
+    def hash
+      to_a.hash ^ self.class.hash
     end
 
     def eql?(other)
@@ -132,37 +136,27 @@ module Sycamore
         end
     end
 
-    def hash
-      [to_a, self.class].hash
+    def ==(other)
+      other.is_a?(Enumerable) and self.length == other.length and begin
+        i = other.each ; all? { |node| node == i.next }
+      end
     end
 
+    ########################################################################
+    # @group Conversion
+    ########################################################################
 
-    ################################################################
-    # conversion
-    ################################################################
+    def join(delimiter = '/')
+      @parent.join(delimiter) + delimiter + node.to_s
+    end
 
-    # Generalize to a serialization, which can be decoded via #from ...
     def to_s
-      to_a.join '/' # TODO: extract the delimiter symbol into a ... ?
-      # each
-      #  .map {|node| node.is_a? Symbol ? ":#{node}" }
-      #  .join self.class.delimiter
+      "#<Path: #{join}>"
     end
 
     def inspect
       "#<Sycamore::Path[#{each_node.map(&:inspect).join(',')}]>"
     end
-
-
-    ################################################################
-    # Various other Ruby protocols
-    ################################################################
-
-    # Should we freeze Paths by default?
-    # def freeze
-    #   raise NotImplementedError
-    # end
-
   end
 
 end
