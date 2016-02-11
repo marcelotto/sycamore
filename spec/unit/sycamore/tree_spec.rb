@@ -417,7 +417,6 @@ describe Sycamore::Tree do
   ############################################################################
 
   describe '#freeze' do
-
     it 'behaves Object#freeze conform' do
       # stolen from Ruby's tests of set.rb (test_freeze) adapted to RSpec and with Trees
       # see https://www.omniref.com/ruby/2.2.0/files/test/test_set.rb
@@ -430,6 +429,15 @@ describe Sycamore::Tree do
       expect(tree.size).to be 4
     end
 
+    it 'does freeze all children' do
+      frozen_tree = Sycamore::Tree[foo: :bar].freeze
+      expect( frozen_tree[:foo] ).to be_frozen
+    end
+
+    it 'does freeze all children recursively' do
+      frozen_tree = Sycamore::Tree[foo: {bar: :baz}].freeze
+      expect( frozen_tree[:foo, :bar] ).to be_frozen
+    end
   end
 
 end

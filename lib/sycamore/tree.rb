@@ -679,6 +679,7 @@ module Sycamore
     #
     def freeze
       @data.freeze
+      each { |_, child| child.freeze }
       super
     end
 

@@ -115,9 +115,6 @@ module Sycamore
   ############################################################################
   # The Nothing Tree Singleton object
   #
-  # @todo Use Adamantium (or something similar) to make the nothing tree immutable?
-  #   Optionally. Configurable. We won't have any other dependencies.
-  #
   Nothing = NothingTree.instance.freeze
 
 end
