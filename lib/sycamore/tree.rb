@@ -227,7 +227,6 @@ module Sycamore
       self
     end
 
-
     # remove nodes with or without children
     #
     # If a given node is in the {#nodes} set, it gets deleted, otherwise
@@ -387,19 +386,19 @@ module Sycamore
     alias [] child_at
     alias dig child_at  # Hash compatibility
 
-    def fetch(*node_and_default, &block)
-      case node_and_default.size
-        when 1 then node = node_and_default.first
-          tree = @data.fetch(node, &block)
-          tree.nil? ? Nothing : tree
-        when 2 then node, default = *node_and_default
+    def fetch(node, *default, &block)
+      raise InvalidNode, "#{node} is not a valid tree node" if node.nil? or node.is_a? Enumerable
+
+      case default.size
+        when 0
+          @data.fetch(node, &block)
+        when 1
           if block_given?
-            warn "block supersedes default value argument"
-            fetch(node, &block)
+            warn 'block supersedes default value argument'
+            @data.fetch(node, &block)
           else
-            @data.fetch(node, default) or Nothing
+            @data.fetch(node, *default)
           end
-        else raise ArgumentError, "wrong number of arguments (given #{node_and_default.size}, expected 1..2)"
       end
     end
 
@@ -519,7 +518,7 @@ module Sycamore
     # @return [Boolean] if the given node has no children
     #
     def leaf?(node)
-      include_node?(node) && @data.fetch(node, Nothing).empty?
+      include_node?(node) && child_of(node).empty?
     end
 
     # @return [Boolean] if all of the given nodes have no children
