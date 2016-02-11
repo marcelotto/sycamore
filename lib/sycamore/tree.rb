@@ -30,7 +30,7 @@ module Sycamore
 
     PREDICATE_METHODS =
       %i[nothing? absent? present? blank? empty?
-         include? include_node? member? key? has_key? has_path? path? >= > < <=
+         include? include_node? member? key? has_key? include_path? path? >= > < <=
          leaf? leaves? internal? external? flat? nested?
          eql? matches? === ==]
     QUERY_METHODS = PREDICATE_METHODS +
@@ -432,22 +432,22 @@ module Sycamore
 
     # @return [Boolean] if a path with the given nodes exists
     #
-    def has_path?(*args)
+    def include_path?(*args)
       raise ArgumentError, 'wrong number of arguments (given 0, expected 1+)' if args.count == 0
       first = args.first
       if first.is_a? Enumerable
-        return has_path?(*first) if args.count == 1
+        return include_path?(*first) if args.count == 1
         raise InvalidNode
       end
 
       if args.count == 1
         include? first
       else
-        include?(first) and child_of(first).has_path?(args[1..-1])
+        include?(first) and child_of(first).include_path?(args[1..-1])
       end
     end
 
-    alias path? has_path?
+    alias path? include_path?
 
     # @todo Should we raise InvalidNode, when not given a valid node?
     def include_node?(node)
@@ -462,7 +462,7 @@ module Sycamore
     #
     # @return [Boolean] if this tree includes the given node
     #
-    # @todo Support paths as arguments by delegating to {#has_path?} or directly to {Path#in?}
+    # @todo Support paths as arguments by delegating to {#include_path?} or directly to {Path#in?}
     def include?(elements)
       case
         when Tree.like?(elements)

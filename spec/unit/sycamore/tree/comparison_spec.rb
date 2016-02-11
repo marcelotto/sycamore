@@ -392,7 +392,7 @@ describe Sycamore::Tree do
 
   ############################################################################
 
-  describe '#has_path?' do
+  describe '#include_path?' do
     HAS_PATH_EXAMPLES = [
       # Path    , Tree
       [ [1]     , [1] ],
@@ -415,7 +415,7 @@ describe Sycamore::Tree do
       it 'does return true, if the given nodes path is present' do
         HAS_PATH_EXAMPLES.each do |path_nodes, struct|
           tree = Sycamore::Tree[struct]
-          expect( tree.has_path?(*path_nodes) ).to be(true),
+          expect( tree.include_path?(*path_nodes) ).to be(true),
             "expected #{tree.inspect} to include path #{path_nodes.inspect}"
         end
       end
@@ -423,7 +423,7 @@ describe Sycamore::Tree do
       it 'does return false, if the given nodes path is present' do
         NOT_HAS_PATH_EXAMPLES.each do |path_nodes, struct|
           tree = Sycamore::Tree[struct]
-          expect( tree.has_path?(*path_nodes) ).to be(false),
+          expect( tree.include_path?(*path_nodes) ).to be(false),
             "expected #{tree.inspect} to not include path #{path_nodes.inspect}"
         end
       end
@@ -433,7 +433,7 @@ describe Sycamore::Tree do
       it 'does return true, if the given nodes path is present' do
         HAS_PATH_EXAMPLES.each do |path_nodes, struct|
           tree = Sycamore::Tree[struct]
-          expect( tree.has_path?(path_nodes) ).to be(true),
+          expect( tree.include_path?(path_nodes) ).to be(true),
             "expected #{tree.inspect} to include path #{path_nodes.inspect}"
         end
       end
@@ -441,7 +441,7 @@ describe Sycamore::Tree do
       it 'does return false, if the given nodes path is present' do
         NOT_HAS_PATH_EXAMPLES.each do |path_nodes, struct|
           tree = Sycamore::Tree[struct]
-          expect( tree.has_path?(path_nodes) ).to be(false),
+          expect( tree.include_path?(path_nodes) ).to be(false),
             "expected #{tree.inspect} to not include path #{path_nodes.inspect}"
         end
       end
@@ -451,7 +451,7 @@ describe Sycamore::Tree do
       it 'does return true, if the given nodes path is present' do
         HAS_PATH_EXAMPLES.each do |path_nodes, struct|
           tree = Sycamore::Tree[struct]
-          expect( tree.has_path?(Sycamore::Path[path_nodes]) ).to be(true),
+          expect( tree.include_path?(Sycamore::Path[path_nodes]) ).to be(true),
             "expected #{tree.inspect} to include path #{path_nodes.inspect}"
         end
       end
@@ -459,7 +459,7 @@ describe Sycamore::Tree do
       it 'does return false, if the given nodes path is present' do
         NOT_HAS_PATH_EXAMPLES.each do |path_nodes, struct|
           tree = Sycamore::Tree[struct]
-          expect( tree.has_path?(Sycamore::Path[path_nodes]) ).to be(false),
+          expect( tree.include_path?(Sycamore::Path[path_nodes]) ).to be(false),
             "expected #{tree.inspect} to not include path #{path_nodes.inspect}"
         end
       end
