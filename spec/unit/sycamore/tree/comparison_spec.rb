@@ -296,6 +296,15 @@ describe Sycamore::Tree do
       end
     end
 
+    context 'when given a Path' do
+      it 'does delegate to include_path?' do
+        tree = Sycamore::Tree[foo: :bar]
+        path = Sycamore::Path[:foo, :bar]
+        expect( tree ).to receive(:include_path?).with(path)
+        tree.include?(path)
+      end
+    end
+
     context 'edge cases' do
       context 'when given a single value' do
         specify { expect( Sycamore::Tree[false].include? false).to be true }

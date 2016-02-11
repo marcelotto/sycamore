@@ -462,17 +462,17 @@ module Sycamore
     #
     # @return [Boolean] if this tree includes the given node
     #
-    # @todo Support paths as arguments by delegating to {#include_path?} or directly to {Path#in?}
     def include?(elements)
       case
         when Tree.like?(elements)
-          # TODO: Extract this into a new method include_tree? or move this into the new method #<=
           elements.all? do |node, child|
             include_node?(node) and ( child.nil? or child.equal?(Nothing) or
                                         self.child_of(node).include?(child) )
           end
+        when elements.is_a?(Path)
+          include_path? elements
         when elements.is_a?(Enumerable)
-          elements.all? { |element| include_node? element } # TODO: use include_nodes?
+          elements.all? { |element| include_node? element }
         else
           include_node? elements
       end
