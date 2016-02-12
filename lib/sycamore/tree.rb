@@ -563,6 +563,9 @@ module Sycamore
 
     alias == eql?
 
+    # @todo This should apply a less strict equivalence comparison on the nodes.
+    #   Problem: Requires a solution which doesn't use {Hash#include?}.
+    #
     def matches?(other)
       case
         when Tree.like?(other)       then matches_tree?(other)
@@ -586,15 +589,14 @@ module Sycamore
       size == other.size and
         all? { |node, child|
           if child.nothing?
-            other.include?(node) and
-              # TODO: cache other[node] in a local variable
-              ( other[node].nil? or other[node] == Nothing or
-                (other[node].respond_to?(:empty?) and other[node].empty?) )
+            other.include?(node) and begin other_child = other.fetch(node, nil)
+              not other_child or
+                (other_child.respond_to?(:empty?) and other_child.empty?)
+            end
           else
             child.matches? other[node]
           end }
     end
-
 
     ########################################################################
     # @group Conversion

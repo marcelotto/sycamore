@@ -138,13 +138,14 @@ describe Sycamore::Tree do
       end
     end
 
-    it 'does return true, when the given value is structurally equivalent and has equal content' do
-      TREE_MATCH_BY_COERCION.each do |tree, other|
-        pending 'matching by coercion'
-        expect( tree === other ).to be(true),
-          "expected #{tree.inspect} === #{other.inspect}"
-      end
-    end
+    # see comment on Tree#matches?
+    # it 'does return true, when the given value is structurally equivalent and has equal content' do
+    #   TREE_MATCH_BY_COERCION.each do |tree, other|
+    #     pending 'matching by coercion'
+    #     expect( tree === other ).to be(true),
+    #       "expected #{tree.inspect} === #{other.inspect}"
+    #   end
+    # end
 
     it 'does return false, when the given value is structurally different and has different content in terms of ==' do
       TREE_NO_MATCH.each do |tree, other|
