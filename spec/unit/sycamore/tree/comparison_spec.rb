@@ -130,6 +130,8 @@ describe Sycamore::Tree do
     [ Sycamore::Tree[1=>{2=>3}] , {1=>[2,3]} ],
   ]
 
+  ############################################################################
+
   describe '#===' do
     it 'does return true, when the given value is structurally equivalent and has equal content' do
       TREE_MATCH.each do |tree, other|
@@ -212,6 +214,7 @@ describe Sycamore::Tree do
     Sycamore::Tree[*tree_or_data]
   end
 
+  ############################################################################
 
   describe '#include?' do
     it 'does return true, when the given value matches the tree in terms of ===' do
@@ -325,7 +328,13 @@ describe Sycamore::Tree do
       end
     end
 
-    it 'does return true, when the given value is to this equal' do
+    it 'considers Absence to be a tree' do
+      absence = Sycamore::Absence.at(Sycamore::Tree.new, :missing)
+      absence << :a
+      expect( Sycamore::Tree[a: :b] >= absence ).to be true
+    end
+
+    it 'does return true, when the given tree is equal' do
       TREE_EQL.each do |tree, other_tree|
         expect( tree >= other_tree ).to be(true),
           "expected #{tree.inspect} >= #{other_tree.inspect}"
@@ -337,6 +346,8 @@ describe Sycamore::Tree do
     end
   end
 
+  ############################################################################
+
   describe '#>' do
     it 'does return true, when the given value is a tree and this tree includes it' do
       TREE_INCLUDES.each do |data, other|
@@ -346,7 +357,13 @@ describe Sycamore::Tree do
       end
     end
 
-    it 'does return false, when the given value is to this equal' do
+    it 'considers Absence to be a tree' do
+      absence = Sycamore::Absence.at(Sycamore::Tree.new, :missing)
+      absence << :a
+      expect( Sycamore::Tree[a: :b] > absence ).to be true
+    end
+
+    it 'does return false, when the given tree is equal' do
       TREE_EQL.each do |tree, other_tree|
         expect( tree > other_tree ).to be(false),
           "expected #{tree.inspect} > #{other_tree.inspect} to be false"
@@ -358,6 +375,8 @@ describe Sycamore::Tree do
     end
   end
 
+  ############################################################################
+
   describe '#<' do
     it 'does return true, when the given value is a tree and includes this tree' do
       TREE_INCLUDES.each do |data, other|
@@ -367,7 +386,13 @@ describe Sycamore::Tree do
       end
     end
 
-    it 'does return false, when the given value is to this equal' do
+    it 'considers Absence to be a tree' do
+      absence = Sycamore::Absence.at(Sycamore::Tree.new, :missing)
+      absence << {a: :b}
+      expect( Sycamore::Tree[:a] < absence ).to be true
+    end
+
+    it 'does return false, when the given tree is equal' do
       TREE_EQL.each do |tree, other_tree|
         expect( other_tree < tree ).to be(false),
           "expected #{other_tree.inspect} < #{tree.inspect} to be false"
@@ -379,6 +404,8 @@ describe Sycamore::Tree do
     end
   end
 
+  ############################################################################
+
   describe '#<=' do
     it 'does return true, when the given value is a tree and includes this tree' do
       TREE_INCLUDES.each do |data, other|
@@ -388,7 +415,13 @@ describe Sycamore::Tree do
       end
     end
 
-    it 'does return true, when the given value is to this equal' do
+    it 'considers Absence to be a tree' do
+      absence = Sycamore::Absence.at(Sycamore::Tree.new, :missing)
+      absence << {a: :b}
+      expect( Sycamore::Tree[:a] <= absence ).to be true
+    end
+
+    it 'does return true, when the given tree is equal' do
       TREE_EQL.each do |tree, other_tree|
         expect( tree <= other_tree ).to be(true),
           "expected #{tree.inspect} <= #{other_tree.inspect}"

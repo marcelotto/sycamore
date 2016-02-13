@@ -478,19 +478,19 @@ module Sycamore
     end
 
     def >=(other)
-      other.is_a?(Tree) and self.include?(other)
+      (other.is_a?(Tree) or other.is_a?(Absence)) and self.include?(other)
     end
 
     def >(other)
-      other.is_a?(Tree) and self.include?(other) and self != other
+      (other.is_a?(Tree) or other.is_a?(Absence)) and self.include?(other) and self != other
     end
 
     def <(other)
-      other.is_a?(Tree) and other.include?(self) and self != other
+      (other.is_a?(Tree) or other.is_a?(Absence)) and other.include?(self) and self != other
     end
 
     def <=(other)
-      other.is_a?(Tree) and other.include?(self)
+      (other.is_a?(Tree) or other.is_a?(Absence)) and other.include?(self)
     end
 
 
@@ -533,6 +533,8 @@ module Sycamore
     alias flat? external?
 
     # @return [Boolean] if all of the given nodes have children
+    #
+    # @todo Does it make sense to support the no arguments case here?
     #
     def internal?(*nodes)
       return false if self.empty?
