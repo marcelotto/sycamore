@@ -5,4 +5,6 @@ module Sycamore
   class NothingMutation < StandardError ; end
   # raised when calling {Tree#node} on a Tree with multiple nodes
   class NonUniqueNodeSet < StandardError ; end
+  # raised when trying to fetch the child of a leaf
+  class ChildError < KeyError ; end
 end

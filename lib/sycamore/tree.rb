@@ -389,17 +389,16 @@ module Sycamore
     def fetch(node, *default, &block)
       raise InvalidNode, "#{node} is not a valid tree node" if node.nil? or node.is_a? Enumerable
 
-      case default.size
-        when 0
-          @data.fetch(node, &block)
-        when 1
-          if block_given?
-            warn 'block supersedes default value argument'
-            @data.fetch(node, &block)
-          else
-            @data.fetch(node, *default)
-          end
+      child = @data.fetch(node, *default, &block)
+      if child.equal? Nothing
+        child = case
+          when block_given?    then yield
+          when !default.empty? then default.first
+          else raise ChildError, "node #{node} has no child tree"
+        end
       end
+
+      child
     end
 
     def each_node(&block)
@@ -534,7 +533,7 @@ module Sycamore
 
     # @return [Boolean] if all of the given nodes have children
     #
-    # @todo Does it make sense to support the no arguments case here?
+    # @todo Does it make sense to support the no arguments variant here?
     #
     def internal?(*nodes)
       return false if self.empty?

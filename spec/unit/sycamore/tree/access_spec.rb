@@ -165,10 +165,10 @@ describe Sycamore::Tree do
         expect( example_tree.fetch(:foo) ).to be example_tree.child_of(:foo)
       end
 
-      it 'does return Nothing, when the given node is a leaf' do
-        expect( Sycamore::Tree[42   ].fetch(42   ) ).to be Sycamore::Nothing
-        expect( Sycamore::Tree[false].fetch(false) ).to be Sycamore::Nothing
-        expect( Sycamore::Tree[true ].fetch(true)  ).to be Sycamore::Nothing
+      it 'does raise an error, when the given node has no child tree' do
+        expect { Sycamore::Tree[42   ].fetch(42   ) }.to raise_error KeyError
+        expect { Sycamore::Tree[false].fetch(false) }.to raise_error KeyError
+        expect { Sycamore::Tree[true ].fetch(true)  }.to raise_error KeyError
       end
 
       it 'does raise an error, when the given the node is not present' do
@@ -186,10 +186,10 @@ describe Sycamore::Tree do
         expect( example_tree.fetch(:foo, :default) ).to be example_tree.child_of(:foo)
       end
 
-      it 'does return Nothing, when the given node is a leaf' do
-        expect( Sycamore::Tree[:miss].fetch(:miss, :default) ).to be Sycamore::Nothing
-        expect( Sycamore::Tree[false].fetch(false, :default) ).to be Sycamore::Nothing
-        expect( Sycamore::Tree[true ].fetch(true , :default) ).to be Sycamore::Nothing
+      it 'does return the given default value, when the given node has no child tree' do
+        expect( Sycamore::Tree[:miss].fetch(:miss, :default) ).to be :default
+        expect( Sycamore::Tree[false].fetch(false, :default) ).to be :default
+        expect( Sycamore::Tree[true ].fetch(true , :default) ).to be :default
       end
 
       it 'does return the given default value, when the given the node is not present' do
@@ -207,23 +207,16 @@ describe Sycamore::Tree do
         expect( example_tree.fetch(:foo, :default) ).to be example_tree.child_of(:foo)
       end
 
-      it 'does return Nothing, when the given node is a leaf' do
-        expect( Sycamore::Tree[:miss].fetch(:miss) { :default } ).to be Sycamore::Nothing
-        expect( Sycamore::Tree[false].fetch(false) { :default } ).to be Sycamore::Nothing
-        expect( Sycamore::Tree[true ].fetch(true ) { :default } ).to be Sycamore::Nothing
+      it 'does return the evaluation result of given block, when the given node has no child tree' do
+        expect( Sycamore::Tree[:miss].fetch(:miss) { :default } ).to be :default
+        expect( Sycamore::Tree[false].fetch(false) { :default } ).to be :default
+        expect( Sycamore::Tree[true ].fetch(true ) { :default } ).to be :default
       end
 
       it 'does return the evaluation result of given block, when the given the node is not present' do
         expect( Sycamore::Tree.new.fetch(:miss   ) { :default } ).to be :default
         expect( Sycamore::Tree[false].fetch(true ) { :default } ).to be :default
         expect( Sycamore::Tree[true ].fetch(false) { :default } ).to be :default
-      end
-    end
-
-    context 'when given a default value and block' do
-      it 'does print a warning and use the block' do
-        expect( example_tree ).to receive(:warn).with('block supersedes default value argument')
-        expect( example_tree.fetch(:missing, :value) { :default } ).to be :default
       end
     end
 
