@@ -31,7 +31,7 @@ module Sycamore
     PREDICATE_METHODS =
       %i[nothing? absent? present? blank? empty?
          include? include_node? member? key? has_key? include_path? path? >= > < <=
-         leaf? leaves? internal? external? flat? nested?
+         leaf? leaves? internal? external? flat? nested? strict_leaf? strict_leaves?
          eql? matches? === ==]
     QUERY_METHODS = PREDICATE_METHODS +
       %i[new_child dup hash to_h to_s inspect
@@ -517,6 +517,20 @@ module Sycamore
     #
     def leaf?(node)
       include_node?(node) && child_of(node).empty?
+    end
+
+    # @return [Boolean] if the given node has no children, even not an empty child tree
+    #
+    def strict_leaf?(node)
+      include_node?(node) && child_of(node).absent?
+    end
+
+    # @return [Boolean] if all of the given nodes have no children, even not an empty child tree
+    #
+    def strict_leaves?(*nodes)
+      nodes = self.nodes if nodes.empty?
+
+      nodes.all? { |node| strict_leaf?(node) }
     end
 
     # @return [Boolean] if all of the given nodes have no children
