@@ -52,6 +52,10 @@ module Sycamore
       self
     end
 
+    def to_s
+      '#<Tree: Nothing>'
+    end
+
     # the unique string representation of the Nothing tree
     #
     # @return [String] '#<Sycamore::Nothing>'

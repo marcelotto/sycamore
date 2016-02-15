@@ -1,30 +1,54 @@
 describe Sycamore::Tree do
 
   describe '#to_h' do
-    it 'does return the an empty hash, when empty' do
-      expect( Sycamore::Tree.new.to_h ).to eql Hash.new
+
+    it 'does return a hash, where the first level is unflattened and the rest flattened' do
+      expect( Sycamore::Tree[a: 1            ].to_h ).to eql( {a: 1} )
+      expect( Sycamore::Tree[:a, b: 1        ].to_h ).to eql( {a: nil, b: 1} )
+      expect( Sycamore::Tree[a: 1, b: [2, 3] ].to_h ).to eql( {a: 1, b: [2, 3]} )
+      expect( Sycamore::Tree[a: {b: nil, c: { }}].to_h ).to eql( {a: {b: nil, c: []}} )
+      expect( Sycamore::Tree[a: {b: nil, c: [1]}].to_h ).to eql( {a: {b: nil, c: 1}} )
     end
 
-    context 'when the tree consists of leaves only' do
-      it 'does return a hash, where the leaves have an empty hash as its value' do
-        expect( Sycamore::Tree[1   ].to_h ).to eql( {1 => {}} )
-        expect( Sycamore::Tree[1, 2].to_h ).to eql( {1 => {}, 2 => {}} )
+    context 'first level' do
+      context 'when called with flattened false' do
+        it 'does return an empty hash, when empty' do
+          expect( Sycamore::Tree.new.to_h ).to eql Hash.new
+        end
+
+        it 'does return a hash, with leaves having an empty array as a child' do
+          expect( Sycamore::Tree[1=>[], 2=>[]].to_h ).to eql( {1=>[], 2=>[]} )
+        end
+
+        it 'does return a hash, with strict leaves having nil as a child' do
+          expect( Sycamore::Tree[1   ].to_h ).to eql( {1 => nil} )
+          expect( Sycamore::Tree[1, 2].to_h ).to eql( {1 => nil, 2 => nil} )
+        end
       end
-    end
 
-    context 'when the tree has at least one node with children' do
-      it 'does return a hash, where the leaves at deeper levels are represented directly' do
-        expect( Sycamore::Tree[a: 1            ].to_h ).to eql( {a: 1} )
-        expect( Sycamore::Tree[:a, b: 1        ].to_h ).to eql( {a: {}, b: 1} )
-        expect( Sycamore::Tree[a: 1, b: [2, 3] ].to_h ).to eql( {a: 1, b: [2, 3]} )
+      context 'when called with flattened true' do
+        it 'does return the an empty array, when empty' do
+          expect( Sycamore::Tree.new.to_h(flattened: true) ).to eql []
+        end
+
+        it 'does return a hash, with leaves having an empty array as a child' do
+          expect( Sycamore::Tree[1=>[], 2=>{}].to_h(flattened: true) ).to eql( {1=>[], 2=>[]} )
+        end
+
+        it 'does return a hash, with strict leaves having no child' do
+          expect( Sycamore::Tree[1   ].to_h(flattened: true) ).to eql( 1)
+          expect( Sycamore::Tree[1, 2].to_h(flattened: true) ).to eql( [1, 2] )
+        end
       end
     end
   end
 
+  ############################################################################
+
   describe '#to_s' do
     shared_examples_for 'every to_s string' do |tree|
       it 'starts with a Tree-specific prefix' do
-        expect( tree.to_s ).to match /^#<Tree: /
+        expect( tree.to_s ).to match /^#<Tree\[ /
       end
       it 'contains the flattened hash to_s representation' do
         expect( tree.to_s ).to include tree.to_h(flattened: true).to_s
@@ -33,9 +57,11 @@ describe Sycamore::Tree do
     include_examples 'every to_s string', Sycamore::Tree.new
     include_examples 'every to_s string', Sycamore::Tree['foo']
     include_examples 'every to_s string', Sycamore::Tree[1.0, 2, 3]
-    include_examples 'every to_s string', Sycamore::Tree[foo: 1, bar: [2,3]]
     include_examples 'every to_s string', Sycamore::Tree[:foo, bar: [2,3]]
+    include_examples 'every to_s string', Sycamore::Tree[foo: 1, bar: [], baz: nil]
   end
+
+  ############################################################################
 
   describe '#inspect' do
     shared_examples_for 'every inspect string' do |tree|
@@ -55,6 +81,7 @@ describe Sycamore::Tree do
     include_examples 'every inspect string', Sycamore::Tree.new
     include_examples 'every inspect string', Sycamore::Tree[1,2,3]
     include_examples 'every inspect string', Sycamore::Tree[foo: 1, bar: [2,3]]
+    include_examples 'every inspect string', Sycamore::Tree[foo: 1, bar: [], baz: nil]
     include_examples 'every inspect string', (MyClass = Class.new(Sycamore::Tree)).new
   end
 

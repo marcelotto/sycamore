@@ -619,16 +619,16 @@ module Sycamore
     def to_h(flattened: false)
       case
         when empty?
-          {}
-        when leaves?
           if flattened
-            size == 1 ? nodes.first : nodes
+            nothing? ? nil : []
           else
-            map{ |node, _| [node, {}] }.to_h
+            {}
           end
+        when flattened && strict_leaves?
+          size == 1 ? nodes.first : nodes
         else
-          # not the prettiest, but the fastest way to inject on hashes, as noted
-          # here: http://stackoverflow.com/questions/3230863/ruby-rails-inject-on-hashes-good-style
+          # not the nicest, but fastest way to inject on hashes, as noted here:
+          # http://stackoverflow.com/questions/3230863/ruby-rails-inject-on-hashes-good-style
           hash = {}
           @data.each do |node, child|
             hash[node] = child.to_h(flattened: true)
@@ -638,7 +638,7 @@ module Sycamore
     end
 
     def to_s
-      "#<Tree: #{to_h(flattened: true)}>"
+      "#<Tree[ #{to_h(flattened: true)} ]>"
     end
 
     # @return a developer-friendly representation of `self` in the usual Ruby Object#inspect style.
