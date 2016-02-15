@@ -163,11 +163,14 @@ describe Sycamore::Tree do
           expect( Sycamore::Tree.new << {nil => 42} ).to be_empty
         end
 
-        it 'does ignore null values as children' do
-          expect(Sycamore::Tree.new.add({1 => Sycamore::Nothing, 2 => Sycamore::Nothing}).leaves?(1,2)).to be true
-          expect(Sycamore::Tree.new.add({1 => nil, 2 => nil}).leaves?(1,2)).to be true
-          expect(Sycamore::Tree.new.add({1 => [], 2 => []}).leaves?(1,2)).to be true
-          expect(Sycamore::Tree.new.add({1 => {}, 2 => {}}).leaves?(1,2)).to be true
+        it 'does add empty child enumerables as empty trees' do
+          expect(Sycamore::Tree.new.add(1 => []).child_of(1)).not_to be_absent
+          expect(Sycamore::Tree.new.add({1 => {}, 2 => {}}).child_of(1)).not_to be_absent
+        end
+
+        it 'does ignore Nothing-like values as children' do
+          expect(Sycamore::Tree.new.add({1 => Sycamore::Nothing}).child_of(1)).to be_absent
+          expect(Sycamore::Tree.new.add({1 => nil, 2 => nil}).child_of(1)).to be_absent
         end
 
         it 'does raise an error, when given a tree with an enumerable key' do

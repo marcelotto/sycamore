@@ -212,8 +212,7 @@ module Sycamore
 
     private def add_child(node, children)
       return self if node.nil?
-      return add_node(node) if Nothing.like?(children) or
-                             (children.respond_to?(:empty?) and children.empty?)
+      return add_node(node) if Nothing.like?(children)
 
       create_child(node)
       @data[node] << children
