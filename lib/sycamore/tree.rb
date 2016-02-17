@@ -31,7 +31,8 @@ module Sycamore
     PREDICATE_METHODS =
       %i[nothing? absent? present? blank? empty?
          include? include_node? member? key? has_key? include_path? path? >= > < <=
-         leaf? leaves? internal? external? flat? nested? strict_leaf? strict_leaves?
+         leaf? leaves? internal? external? flat? nested?
+         sleaf? sleaves? strict_leaf? strict_leaves?
          eql? matches? === ==]
     QUERY_METHODS = PREDICATE_METHODS +
       %i[new_child dup hash to_h to_s inspect
@@ -525,6 +526,8 @@ module Sycamore
       include_node?(node) && child_of(node).absent?
     end
 
+    alias sleaf? strict_leaf?
+
     # @return [Boolean] if all of the given nodes have no children, even not an empty child tree
     #
     def strict_leaves?(*nodes)
@@ -532,6 +535,8 @@ module Sycamore
 
       nodes.all? { |node| strict_leaf?(node) }
     end
+
+    alias sleaves? strict_leaves?
 
     # @return [Boolean] if all of the given nodes have no children
     #
@@ -613,6 +618,7 @@ module Sycamore
           end }
     end
 
+
     ########################################################################
     # @group Conversion
     ########################################################################
@@ -648,6 +654,7 @@ module Sycamore
       "#<#{self.class}:0x#{object_id.to_s(16)}(#{to_h(flattened: true).inspect})>".freeze
     end
 
+
     ########################################################################
     # @group Some helpers
     #
@@ -671,6 +678,7 @@ module Sycamore
     class << self
       alias like? tree_like?
     end
+
 
     ########################################################################
     # @group Standard Ruby protocols
