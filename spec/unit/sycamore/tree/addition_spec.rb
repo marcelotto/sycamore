@@ -77,12 +77,12 @@ describe Sycamore::Tree do
       end
 
       it 'does merge the values with the existing nodes' do
-        expect( Sycamore::Tree[1,2].add([2,3]).nodes.to_set ).to eq Set[1,2,3]
+        expect( Sycamore::Tree[1,2].add([2,3]).nodes.to_set ).to eql Set[1,2,3]
       end
 
       it 'does ignore duplicates' do
         expect( Sycamore::Tree.new.add [1,2,2,3,3,3] ).to include_nodes 1, 2, 3
-        expect( Sycamore::Tree.new.add(['foo', 'bar', 'baz', 'foo', 'bar']).nodes.to_set).to eq %w[baz foo bar].to_set
+        expect( Sycamore::Tree.new.add(['foo', 'bar', 'baz', 'foo', 'bar']).nodes.to_set).to eql %w[baz foo bar].to_set
       end
 
       context 'when the array is nested' do
@@ -106,7 +106,7 @@ describe Sycamore::Tree do
 
       context 'edge cases' do
         it 'does ignore the nils' do
-          expect( Sycamore::Tree.new.add([nil, :foo, nil, :bar]).nodes.to_set).to eq %i[foo bar].to_set
+          expect( Sycamore::Tree.new.add([nil, :foo, nil, :bar]).nodes.to_set).to eql %i[foo bar].to_set
         end
 
         it 'does nothing, when all given values are nil' do
@@ -212,8 +212,8 @@ describe Sycamore::Tree do
           it 'does treat it like a normal tree, when it was created' do
             absent_tree << 42
 
-            expect( Sycamore::Tree.new.add absent_tree ).to eq Sycamore::Tree[42]
-            expect( Sycamore::Tree.new.add 1 => absent_tree ).to eq Sycamore::Tree[1 => 42]
+            expect( Sycamore::Tree.new.add absent_tree ).to eql Sycamore::Tree[42]
+            expect( Sycamore::Tree.new.add 1 => absent_tree ).to eql Sycamore::Tree[1 => 42]
           end
         end
       end
@@ -226,8 +226,8 @@ describe Sycamore::Tree do
   describe '#replace' do
     it 'does clear the tree before adding the arguments' do
       expect( Sycamore::Tree[:foo].replace(nil) ).to be_empty
-      expect( Sycamore::Tree[:foo].replace(:bar).nodes ).to eq [:bar]
-      expect( Sycamore::Tree[:foo].replace([:bar, :baz]).nodes ).to eq %i[bar baz]
+      expect( Sycamore::Tree[:foo].replace(:bar).nodes ).to eql [:bar]
+      expect( Sycamore::Tree[:foo].replace([:bar, :baz]).nodes ).to eql %i[bar baz]
       expect( Sycamore::Tree[a: 1].replace(a: 2) ).to     include_tree(a: 2)
       expect( Sycamore::Tree[a: 1].replace(a: 2) ).not_to include_tree(a: 1)
     end

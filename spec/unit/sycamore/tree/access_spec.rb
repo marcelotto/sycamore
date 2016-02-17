@@ -75,7 +75,7 @@ describe Sycamore::Tree do
     it 'does return the child tree of the given node, when the given the node is present' do
       expect( Sycamore::Tree[property: :value].child_of(:property).node ).to be :value
       expect( Sycamore::Tree[false => 42     ].child_of(false).node     ).to be 42
-      expect( Sycamore::Tree[4 => {false=>2} ].child_of(4) ).to eq Sycamore::Tree[false=>2]
+      expect( Sycamore::Tree[4 => {false=>2} ].child_of(4) ).to eql Sycamore::Tree[false=>2]
     end
 
     it 'does return an absent tree, when the given node is a leaf' do
@@ -134,8 +134,8 @@ describe Sycamore::Tree do
       it 'does return a correctly configured absent tree' do
         tree = Sycamore::Tree.new
         absent_tree = tree.child_at(1, 2, 3)
-        absent_tree << []
-        expect(tree).to eq Sycamore::Tree[1=>{2=>3}]
+        absent_tree << 4
+        expect(tree).to eql Sycamore::Tree[1=>{2=>{3=>4}}]
       end
     end
 

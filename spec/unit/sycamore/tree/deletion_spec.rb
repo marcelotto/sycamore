@@ -5,7 +5,7 @@ describe Sycamore::Tree do
     context 'when given an atomic value' do
       it 'does delete the value from the set of nodes' do
         expect( Sycamore::Tree[1] >> 1 ).to be_empty
-        expect( Sycamore::Tree[1,2,3].delete(2).nodes.to_set ).to eq Set[1,3]
+        expect( Sycamore::Tree[1,2,3].delete(2).nodes.to_set ).to eql Set[1,3]
         expect( Sycamore::Tree[:foo, :bar].delete(:foo).size ).to be 1
       end
 
@@ -55,7 +55,7 @@ describe Sycamore::Tree do
 
       context 'edge cases' do
         it 'does nothing, when given an empty array' do
-          expect( Sycamore::Tree[1,2,3].delete([]).nodes.to_set ).to eq Set[1,2,3]
+          expect( Sycamore::Tree[1,2,3].delete([]).nodes.to_set ).to eql Set[1,2,3]
         end
       end
     end
@@ -88,7 +88,7 @@ describe Sycamore::Tree do
         end
 
         it 'does nothing, when the key is nil' do
-          expect( Sycamore::Tree[foo: 42] >> {nil => 42} ).to eq Sycamore::Tree[foo: 42]
+          expect( Sycamore::Tree[foo: 42] >> {nil => 42} ).to eql Sycamore::Tree[foo: 42]
         end
 
         it 'does ignore null values as children' do
@@ -118,7 +118,7 @@ describe Sycamore::Tree do
 
       context 'edge cases' do
         it 'does nothing, when given an empty tree' do
-          expect( Sycamore::Tree[42] >> Sycamore::Tree.new ).to eq Sycamore::Tree[42]
+          expect( Sycamore::Tree[42] >> Sycamore::Tree.new ).to eql Sycamore::Tree[42]
         end
 
         context 'when given an Absence' do
@@ -134,7 +134,7 @@ describe Sycamore::Tree do
 
             expect( Sycamore::Tree[42].delete absent_tree ).to be_empty
             expect( Sycamore::Tree[foo: 42].delete(foo: absent_tree)).to be_empty
-            expect( Sycamore::Tree[foo: [42, 3.14]].delete(foo: absent_tree)).to eq Sycamore::Tree[foo: 3.14]
+            expect( Sycamore::Tree[foo: [42, 3.14]].delete(foo: absent_tree)).to eql Sycamore::Tree[foo: 3.14]
           end
         end
 
@@ -154,12 +154,12 @@ describe Sycamore::Tree do
   describe '#clear' do
     it 'does nothing when empty' do
       expect( Sycamore::Tree.new.clear.size  ).to be 0
-      expect( Sycamore::Tree.new.clear.nodes ).to eq []
+      expect( Sycamore::Tree.new.clear.nodes ).to eql []
     end
 
     it 'does delete all nodes and their children' do
       expect( Sycamore::Tree[1, 2      ].clear.size  ).to be 0
-      expect( Sycamore::Tree[:foo, :bar].clear.nodes ).to eq []
+      expect( Sycamore::Tree[:foo, :bar].clear.nodes ).to eql []
     end
   end
 

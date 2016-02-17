@@ -68,11 +68,11 @@ describe Sycamore::Tree do
       end
 
       it 'does return an enumerator with the node-child-pairs' do
-        expect(Sycamore::Tree[1     ].paths.to_a ).to eq [Sycamore::Path[1]]
-        expect(Sycamore::Tree[1, 2  ].paths.to_a ).to eq [Sycamore::Path[1], Sycamore::Path[2]]
-        expect(Sycamore::Tree[1 => 2].paths.to_a ).to eq [Sycamore::Path[1, 2]]
+        expect(Sycamore::Tree[1     ].paths.to_a ).to eql [Sycamore::Path[1]]
+        expect(Sycamore::Tree[1, 2  ].paths.to_a ).to eql [Sycamore::Path[1], Sycamore::Path[2]]
+        expect(Sycamore::Tree[1 => 2].paths.to_a ).to eql [Sycamore::Path[1, 2]]
         expect(Sycamore::Tree[1 => { 2 => [3, 4] }].paths.to_a )
-          .to eq [Sycamore::Path[1, 2, 3], Sycamore::Path[1, 2, 4]]
+          .to eql [Sycamore::Path[1, 2, 3], Sycamore::Path[1, 2, 4]]
       end
     end
   end
