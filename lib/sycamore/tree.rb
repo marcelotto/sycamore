@@ -562,20 +562,21 @@ module Sycamore
     # @group Equality
     ########################################################################
 
-    # Currently, we accept the hash collision of different tree types with the
-    # same content. It is the simplest way to hold account of the special
-    # equivalence behaviour of the Nothing tree.
-    #
     def hash
-      @data.hash ^ Tree.hash
+      @data.hash ^ self.class.hash
     end
 
     def eql?(other)
       (other.instance_of?(self.class) and @data.eql?(other.data)) or
-        ((other.equal?(Nothing) or other.instance_of?(Absence)) and other.eql?(self))
+        (other.instance_of?(Absence) and other.eql?(self))
     end
 
-    alias == eql?
+    def ==(other)
+      (other.instance_of?(self.class) and size == other.size and
+        all? { |node, child| other.include?(node) and other[node] == child }) or
+        ((other.equal?(Nothing) or other.instance_of?(Absence)) and
+          other == self)
+    end
 
     # @todo This should apply a less strict equivalence comparison on the nodes.
     #   Problem: Requires a solution which doesn't use {Hash#include?}.

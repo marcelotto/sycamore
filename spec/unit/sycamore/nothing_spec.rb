@@ -65,18 +65,24 @@ describe Sycamore::Nothing do
   end
 
   describe '#eql?' do
-    it 'does return true when compared with any empty tree' do
-      expect( Sycamore::Nothing.eql? Sycamore::Tree.new ).to be true
-      expect( Sycamore::Nothing.eql? Class.new(Sycamore::Tree).new ).to be true
-      expect( Sycamore::Nothing.eql? Sycamore::Tree.new[42] ).to be true
+    it 'does return false when compared with any empty tree' do
+      expect( Sycamore::Nothing.eql? Sycamore::Tree.new              ).to be false
+      expect( Sycamore::Nothing.eql? Class.new(Sycamore::Tree).new   ).to be false
+    end
+
+    it 'does return true when compared with any absent tree' do
+      expect( Sycamore::Nothing.eql? Sycamore::Tree.new.child_of(42) ).to be true
     end
   end
 
   describe '#==' do
     it 'does return true when compared with any empty tree' do
-      expect( Sycamore::Nothing == Sycamore::Tree.new ).to be true
-      expect( Sycamore::Nothing == Class.new(Sycamore::Tree).new ).to be true
-      expect( Sycamore::Nothing == Sycamore::Tree.new[42] ).to be true
+      expect( Sycamore::Nothing == Sycamore::Tree.new              ).to be true
+      expect( Sycamore::Nothing == Class.new(Sycamore::Tree).new   ).to be true
+    end
+
+    it 'does return true when compared with any absent tree' do
+      expect( Sycamore::Nothing == Sycamore::Tree.new.child_of(42) ).to be true
     end
   end
 

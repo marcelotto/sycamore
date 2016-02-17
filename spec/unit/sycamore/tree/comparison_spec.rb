@@ -9,9 +9,8 @@ describe Sycamore::Tree do
   TREE_EQL = [
     [ Sycamore::Tree.new   , Sycamore::Tree.new ],
     [ MyTree.new           , MyTree.new ],
-    [ Sycamore::Tree.new   , Sycamore::Nothing ],
-    [ MyTree.new           , Sycamore::Nothing ],
     [ Sycamore::Tree[1]    , Sycamore::Tree[1] ],
+    [ Sycamore::Tree[1]    , Sycamore::Tree[1 => nil] ],
     [ Sycamore::Tree[1, 2] , Sycamore::Tree[1, 2] ],
     [ Sycamore::Tree[1, 2] , Sycamore::Tree[2, 1] ],
     [ Sycamore::Tree[a: 1] , Sycamore::Tree[a: 1] ],
@@ -34,6 +33,33 @@ describe Sycamore::Tree do
   ]
   TREE_NOT_EQL = TREE_NOT_EQL_BY_CONTENT + TREE_NOT_EQL_BY_TYPE
 
+  TREE_EQ_BUT_NOT_EQL = [
+    [ Sycamore::Tree.new   , Sycamore::Nothing ],
+    [ MyTree.new           , Sycamore::Nothing ],
+    [ Sycamore::Tree[1]     , Sycamore::Tree[1 => []] ],
+    [ Sycamore::Tree[1=>[]] , Sycamore::Tree[1] ],
+  ]
+
+  ############################################################################
+
+  describe '#hash' do
+    it 'does produce equal values, when the tree is eql' do
+      TREE_EQL.each do |tree, other|
+        expect( tree.hash ).to be(other.hash),
+                               "expected the hash of #{tree.inspect} to be also the hash of #{other.inspect}"
+      end
+    end
+
+    it 'does produce different values, when the tree is not eql' do
+      TREE_NOT_EQL.each do |tree, other|
+        expect(tree.hash).not_to eq(other.hash),
+          "expected the hash of #{tree.inspect} not to equal the hash of #{other.inspect}"
+      end
+    end
+  end
+
+  ############################################################################
+
   describe '#eql?' do
     it 'does return true, when the given value is of the same type and has eql content' do
       TREE_EQL.each do |tree, other|
@@ -53,35 +79,44 @@ describe Sycamore::Tree do
       end
     end
 
-    it 'does ignore empty child trees' do
-      tree = Sycamore::Tree[foo: :bar]
-      tree[:foo].clear
-      expect(tree).to eql Sycamore::Tree[:foo]
+    it 'does consider empty child trees' do
+      TREE_EQ_BUT_NOT_EQL.each do |tree, other|
+        expect(tree).not_to eql(other)
+      end
     end
   end
 
   ############################################################################
 
-  describe '#hash' do
-    it 'does produce equal values, when the tree is eql' do
+  describe '#==' do
+    it 'does return true, when the given value is of the same type and has eql content' do
       TREE_EQL.each do |tree, other|
-        expect( tree.hash ).to be(other.hash),
-          "expected the hash of #{tree.inspect} to be also the hash of #{other.inspect}"
+        expect(tree).to eq(other)
       end
     end
 
-    # see comment on Tree#hash
-    # it 'does produce different values, when the tree is not eql' do
-    #   TREE_NOT_EQL.each do |tree, other|
-    #     expect(tree.hash).not_to eq(other.hash),
-    #       "expected the hash of #{tree.inspect} not to equal the hash of #{other.inspect}"
-    #   end
-    # end
+    it 'does return false, when the content of the value tree is not eql' do
+      TREE_NOT_EQL_BY_CONTENT.each do |tree, other|
+        expect(tree).not_to eq(other)
+      end
+    end
+
+    it 'does return false, when the given value is not an instance of the same class' do
+      TREE_NOT_EQL_BY_TYPE.each do |tree, other|
+        expect(tree).not_to eq(other)
+      end
+    end
+
+    it 'does ignore empty child trees' do
+      TREE_EQ_BUT_NOT_EQL.each do |tree, other|
+        expect(tree).to eq(other)
+      end
+    end
   end
 
   ############################################################################
 
-  TREE_MATCH = TREE_EQL + [
+  TREE_MATCH = TREE_EQL + TREE_EQ_BUT_NOT_EQL + [
     [ Sycamore::Tree.new    , Sycamore::Nothing ],
     [ Sycamore::Nothing     , Sycamore::Tree.new ],
     [ Sycamore::Tree.new    , MyTree.new ],
