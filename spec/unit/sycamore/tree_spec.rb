@@ -174,6 +174,10 @@ describe Sycamore::Tree do
       expect( Sycamore::Tree[a: [1,2,3]].height ).to be 2
       expect( Sycamore::Tree[:a, b: 1  ].height ).to be 2
     end
+
+    it 'does ignore empty child trees' do
+      expect( Sycamore::Tree[:a, b: {1=>[]}].height ).to be 2
+    end
   end
 
   ############################################################################

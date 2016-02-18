@@ -75,6 +75,12 @@ describe Sycamore::Tree do
           .to eql [Sycamore::Path[1, 2, 3], Sycamore::Path[1, 2, 4]]
       end
     end
+
+    context 'edge cases' do
+      it 'does ignore empty child trees' do
+        expect(Sycamore::Tree[1 => []].paths.to_a ).to eql [Sycamore::Path[1]]
+      end
+    end
   end
 
 end

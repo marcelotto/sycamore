@@ -432,7 +432,7 @@ module Sycamore
       return enum_for(__callee__) unless block_given?
 
       each do |node, child|
-        if child.nothing?
+        if child.empty?
           yield Path[with_ancestor, node]
         else
           child.each_path(with_ancestor: with_ancestor.branch(node), &block)
