@@ -163,4 +163,13 @@ describe Sycamore::Tree do
     end
   end
 
+  ############################################################################
+
+  describe '#compact' do
+    it 'does delete all empty child trees' do
+      expect( Sycamore::Tree[1=>[]].compact.child_of(1)).to be_absent
+      expect( Sycamore::Tree[{1=>{},2=>{3=>{}}}].compact[1]).to be_absent
+      expect( Sycamore::Tree[{1=>{},2=>{3=>{}}}].compact[2,3]).to be_absent
+    end
+  end
 end

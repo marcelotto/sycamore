@@ -24,7 +24,7 @@ module Sycamore
     ########################################################################
 
     ADDITIVE_COMMAND_METHODS    = %i[add << replace create_child] << :[]=
-    DESTRUCTIVE_COMMAND_METHODS = %i[delete >> clear]
+    DESTRUCTIVE_COMMAND_METHODS = %i[delete >> clear compact]
     COMMAND_METHODS = ADDITIVE_COMMAND_METHODS + DESTRUCTIVE_COMMAND_METHODS +
       %i[freeze]
 
@@ -315,6 +315,21 @@ module Sycamore
     #
     def clear
       @data.clear
+
+      self
+    end
+
+    # Deletes all empty child trees recursively
+    #
+    # @return self as a proper command method
+    #
+    def compact
+      @data.each do |node, child| case
+          when child.nothing? then next
+          when child.empty?   then @data[node] = Nothing
+          else child.compact
+        end
+      end
 
       self
     end
