@@ -36,7 +36,8 @@ module Sycamore
          eql? matches? === ==]
     QUERY_METHODS = PREDICATE_METHODS +
       %i[new_child dup hash to_h to_s inspect
-         size height node nodes keys child_of child_at dig fetch
+         node nodes keys child_of child_at dig fetch
+         size total_size tsize height
          each each_path paths each_node each_key each_pair] << :[]
 
     # @return [Array<Symbol>] the names of all methods, which can change the state of a Tree
@@ -513,6 +514,16 @@ module Sycamore
     def size
       @data.size
     end
+
+    # @return [Fixnum] the number of nodes in this tree and all of its children
+    #
+    def total_size
+      total = size
+      @data.each { |_, child| total += child.total_size }
+      total
+    end
+
+    alias tsize total_size
 
     # @return [Fixnum] the length of the longest path
     #

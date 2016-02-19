@@ -162,6 +162,31 @@ describe Sycamore::Tree do
 
   ############################################################################
 
+  describe '#total_size' do
+    it 'does return 0, when empty' do
+      expect( Sycamore::Tree.new.total_size ).to be 0
+      expect( Sycamore::Tree.new.add(:foo).delete(:foo).total_size ).to be 0
+    end
+
+    it 'does return the number of nodes' do
+      expect( Sycamore::Tree[1             ].total_size ).to be 1
+      expect( Sycamore::Tree[:foo, 2, 'bar'].total_size ).to be 3
+      expect( Sycamore::Tree[1,2,2,3,3,3   ].total_size ).to be 3
+    end
+
+    it 'does return the number of nodes including the nodes of children' do
+      expect( Sycamore::Tree[a: [1,2,3]  ].total_size ).to be 4
+      expect( Sycamore::Tree[a: 1, b: nil].total_size ).to be 3
+    end
+
+    it 'does return the number of nodes including the nodes of children recursively' do
+      expect( Sycamore::Tree[x: 1, y: {2 => "a"}].total_size ).to be 5
+      expect( Sycamore::Tree[a: {b: {c: :d}}, e: []].total_size ).to be 5
+    end
+  end
+
+  ############################################################################
+
   describe '#height' do
     it 'does return 0, when empty' do
       expect( Sycamore::Tree.new.height ).to be 0
