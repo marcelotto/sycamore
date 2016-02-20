@@ -83,10 +83,10 @@ module Sycamore
     # creates a new Tree and initializes it with the given data
     #
     # @example
-    #   Tree[1]           # => 1
-    #   Tree[1, 2, 3]     # => [1,2,3]
-    #   Tree[1, 2, 2, 3]  # => [1,2,3]
-    #   Tree[x: 1, y: 2]  # => {:x=>1, :y=>2}
+    #   Tree[1]
+    #   Tree[1, 2, 3]
+    #   Tree[1, 2, 2, 3]
+    #   Tree[x: 1, y: 2]
     #
     # @param (see #add)
     #
@@ -359,13 +359,10 @@ module Sycamore
     # The only child node of the parent or an Exception, if more nodes present
     #
     # @example
-    #   Tree[1].node  # => 1
-    #   Tree.new.node  # => nil
-    #
-    #   matz = Tree[birthday: DateTime.parse('1965-04-14')]
-    #   matz[:birthday].node  # => #<DateTime: 1965-04-14T00:00:00+00:00 ((2438865j,0s,0n),+0s,2299161j)>
-    #
-    #   Tree[1,2].node  # => NonUniqueNodeSet: no implicit conversion of node set [1, 2] into a single node
+    #   tree = Tree[foo: 1, bar: [2,3]]
+    #   tree[:foo].node  # => 1
+    #   tree[:baz].node  # => nil
+    #   tree[:bar].node  # => raise Sycamore::NonUniqueNodeSet, "multiple nodes present: [2, 3]"
     #
     # @return [Object] the single present node or nil, if no nodes present
     # @raise [NonUniqueNodeSet] if more than one node present

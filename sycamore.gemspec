@@ -28,4 +28,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec', '~> 3.4.0'
   spec.add_development_dependency 'guard-rspec'
   spec.add_development_dependency 'yard', '~> 0.8'
+  spec.add_development_dependency 'yard-doctest'
 end
