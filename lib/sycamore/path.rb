@@ -1,13 +1,19 @@
 module Sycamore
 
+  ##
   # A compact, immutable representation of Tree paths, i.e. node sequences.
   #
   # This class is optimized for its usage in {Tree@each_path}, where it
   # can efficiently represent the whole tree as a set of paths by sharing the
   # parent paths.
+  # It is not intended to be instantiated by the user.
   #
-  # This class is not intended to be instantiated by the user.
-  # Tree methods which accept paths, always accept them always as arrays of nodes.
+  # @example
+  #   tree = Tree[foo: [:bar, :baz]]
+  #   path1, path2 = tree.paths.to_a
+  #   path1 == Path[:foo, :bar] # => true
+  #   path2 == Path[:foo, :baz] # => true
+  #   path1.parent.equal? path2.parent # => true
   #
   # @todo Measure the performance and memory consumption in comparison with a
   #   pure Array-based implementation (where tree nodes are duplicated), esp. in
@@ -22,39 +28,74 @@ module Sycamore
     # @group Construction
     ########################################################################
 
-    class << self
-
-      private :new
-
-      def root
-        ROOT
-      end
-
-      def of(*args)
-        if (parent = args.first).is_a? Path
-          parent.branch(*args[1..-1])
-        else
-          root.branch(*args)
-        end
-      end
-
-      alias [] of
-    end
-
+    ##
+    # @private
     def initialize(parent, node)
       @parent, @node = parent, node
     end
 
+    ##
+    # @return the root of all Paths
+    #
+    def self.root
+      ROOT
+    end
+
+    ##
+    # Creates a new path.
+    #
+    # Depending on whether the first argument is a {Path}, the new Path is
+    # {#branch}ed from this path or the {root}.
+    #
+    # @overload of(path, nodes)
+    #   @param path [Path] the path from which should be {#branch}ed
+    #   @param nodes [nodes]
+    #   @return [Path] the {#branch}ed path from the given path, with the given nodes expanded
+    #
+    # @overload of(nodes)
+    #   @param nodes [nodes]
+    #   @return [Path] the {#branch}ed path from the {root}, with the given nodes
+    #
+    def self.of(*args)
+      if (parent = args.first).is_a? Path
+        parent.branch(*args[1..-1])
+      else
+        root.branch(*args)
+      end
+    end
+
+    class << self
+      private :new
+
+      alias [] of
+    end
+
     ########################################################################
-    # @group Element access
+    # @group Elements
     ########################################################################
 
-    def branch(*path)
-      return branch(*path.first) if path.size == 1 and path.first.is_a? Enumerable
+    ##
+    # Returns a new path based on this path, but with the given nodes extended.
+    #
+    # @param nodes [nodes] an arbitrary number of nodes
+    # @return [Path]
+    #
+    # @raise [InvalidNode] if one or more of the given nodes is nil or an Enumerable
+    #
+    # @example
+    #   path = Path[:foo, :bar]
+    #   path.branch(:baz, :qux) ==
+    #     Path[:foo, :bar, :baz, :qux]  # => true
+    #   path / :baz / :qux ==
+    #     Path[:foo, :bar, :baz, :qux]  # => true
+    #
+    #
+    def branch(*nodes)
+      return branch(*nodes.first) if nodes.size == 1 and nodes.first.is_a? Enumerable
 
       parent = self
-      path.each do |node|
-        raise InvalidNode, "#{node} in Path #{path.inspect} is not a valid tree node" if
+      nodes.each do |node|
+        raise InvalidNode, "#{node} in Path #{nodes.inspect} is not a valid tree node" if
           node.nil? or node.is_a? Enumerable
         parent = Path.__send__(:new, parent, node)
       end
@@ -62,9 +103,19 @@ module Sycamore
       parent
     end
 
-    alias +  branch
-    alias /  branch
+    alias + branch
+    alias / branch
 
+    ##
+    # @return [Path] the n-th last parent path
+    # @param distance [Integer] the number of nodes to go up
+    #
+    # @example
+    #   path = Path[:foo, :bar, :baz]
+    #   path.up     # => Path[:foo, :bar]
+    #   path.up(2)  # => Path[:foo]
+    #   path.up(3)  # => Path[]
+    #
     def up(distance = 1)
       raise TypeError, "expected an integer, but got #{distance.inspect}" unless distance.is_a? Integer
 
@@ -75,12 +126,14 @@ module Sycamore
       end
     end
 
-    # @return [Boolean] if this is the root
+    ##
+    # @return [Boolean] if this is the root path
     #
     def root?
       false
     end
 
+    ##
     # @return [Integer] the number of nodes on this path
     #
     def length
@@ -91,7 +144,15 @@ module Sycamore
 
     alias size length
 
-    # enumerates over akk
+    ##
+    # Iterates over all nodes on this path.
+    #
+    # @overload each_node
+    #   @yield [node] each node
+    #
+    # @overload each_node
+    #   @return [Enumerator<node>]
+    #
     def each_node(&block)
       return enum_for(__callee__) unless block_given?
 
@@ -103,6 +164,17 @@ module Sycamore
 
     alias each each_node
 
+    ##
+    # If a given structure contains this path.
+    #
+    # @param struct [Object]
+    # @return [Boolean] if the given structure contains the nodes on this path
+    #
+    # @example
+    #   hash = {foo: {bar: :baz}}
+    #   Path[:foo, :bar].present_in? hash  # => true
+    #   Path[:foo, :bar].present_in? Tree[hash]  # => true
+    #
     def present_in?(struct)
       each do |node|
         case
@@ -125,10 +197,17 @@ module Sycamore
     # @group Equality
     ########################################################################
 
+    ##
+    # @return [Fixnum] hash code for this path
+    #
     def hash
       to_a.hash ^ self.class.hash
     end
 
+    ##
+    # @return [Boolean] if the other is a Path with the same nodes in the same order
+    # @param other [Object]
+    #
     def eql?(other)
       other.is_a?(self.class) and
         self.length == other.length and begin
@@ -136,6 +215,10 @@ module Sycamore
         end
     end
 
+    ##
+    # @return [Boolean] if the other is an Enumerable with the same nodes in the same order
+    # @param other [Object]
+    #
     def ==(other)
       other.is_a?(Enumerable) and self.length == other.length and begin
         i = other.each ; all? { |node| node == i.next }
@@ -146,14 +229,31 @@ module Sycamore
     # @group Conversion
     ########################################################################
 
-    def join(delimiter = '/')
-      @parent.join(delimiter) + delimiter + node.to_s
+    ##
+    # @return [String] a string created by converting each node on this path to a string, separated by the given separator
+    # @param separator [String]
+    #
+    # @note Since the root path with no node is at the beginning of each path,
+    #   the returned string always begins with the given separator.
+    #
+    # @example
+    #   Path[1,2,3].join       # => '/1/2/3'
+    #   Path[1,2,3].join('|')  # => '|1|2|3'
+    #
+    def join(separator = '/')
+      @parent.join(separator) + separator + node.to_s
     end
 
+    ##
+    # @return [String] a compact string representation of this path
+    #
     def to_s
       "#<Path: #{join}>"
     end
 
+    ##
+    # @return [String] a more verbose string representation of this path
+    #
     def inspect
       "#<Sycamore::Path[#{each_node.map(&:inspect).join(',')}]>"
     end
