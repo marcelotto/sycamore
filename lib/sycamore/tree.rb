@@ -1,7 +1,6 @@
 module Sycamore
 
-  ############################################################################
-  #
+  ##
   # A tree data structure as a recursively nested set of nodes of immutable values.
   #
   # A Sycamore tree is a set of nodes with links to their child trees,
@@ -23,64 +22,57 @@ module Sycamore
     # @group CQS reflection
     ########################################################################
 
-    ADDITIVE_COMMAND_METHODS    = %i[add << replace create_child] << :[]=
-    DESTRUCTIVE_COMMAND_METHODS = %i[delete >> clear compact]
+    # the names of all command methods, which add elements to a Tree
+    ADDITIVE_COMMAND_METHODS = %i[add << replace create_child] << :[]=
+
+    # the names of all command methods, which delete elements from a Tree
+    DESTRUCTIVE_COMMAND_METHODS = %i[delete >> clear compact replace] << :[]=
+
+    # the names of all additive command methods, which only add elements from a Tree
+    PURE_ADDITIVE_COMMAND_METHODS = ADDITIVE_COMMAND_METHODS - DESTRUCTIVE_COMMAND_METHODS
+
+    # the names of all destructive command methods, which only delete elements from a Tree
+    PURE_DESTRUCTIVE_COMMAND_METHODS = DESTRUCTIVE_COMMAND_METHODS - ADDITIVE_COMMAND_METHODS
+
+    # the names of all methods, which change the state of a Tree
     COMMAND_METHODS = ADDITIVE_COMMAND_METHODS + DESTRUCTIVE_COMMAND_METHODS +
       %i[freeze]
 
+    # the names of all query methods, which return a boolean
     PREDICATE_METHODS =
       %i[nothing? absent? present? blank? empty?
          include? include_node? member? key? has_key? include_path? path? >= > < <=
          leaf? leaves? internal? external? flat? nested?
          sleaf? sleaves? strict_leaf? strict_leaves?
          eql? matches? === ==]
+
+    # the names of all methods, which side-effect-freeze return only a value
     QUERY_METHODS = PREDICATE_METHODS +
       %i[new_child dup hash to_h to_s inspect
          node nodes keys child_of child_at dig fetch
          size total_size tsize height
          each each_path paths each_node each_key each_pair] << :[]
 
-    # @return [Array<Symbol>] the names of all methods, which can change the state of a Tree
-    #
-    def self.command_methods
-      COMMAND_METHODS
-    end
-
-    # @return [Array<Symbol>] the names of all command methods, which add elements to a Tree only
-    #
-    def self.additive_command_methods
-      ADDITIVE_COMMAND_METHODS
-    end
-
-    # @return [Array<Symbol>] the names of all command methods, which delete elements from a Tree only
-    #
-    def self.destructive_command_methods
-      DESTRUCTIVE_COMMAND_METHODS
-    end
-
-    # @return [Array<Symbol>] the names of all methods, which side-effect-freeze return only a value
-    #
-    def self.query_methods
-      QUERY_METHODS
-    end
-
-    # @return [Array<Symbol>] the names of all query methods, which return a boolean
-    #
-    def self.predicate_methods
-      PREDICATE_METHODS
-    end
+    %i[COMMAND_METHODS QUERY_METHODS PREDICATE_METHODS
+       ADDITIVE_COMMAND_METHODS DESTRUCTIVE_COMMAND_METHODS
+       PURE_ADDITIVE_COMMAND_METHODS PURE_DESTRUCTIVE_COMMAND_METHODS]
+      .each do |method_set|
+        define_singleton_method(method_set.downcase) { const_get method_set }
+      end
 
     ########################################################################
     # @group Construction
     ########################################################################
 
-    # creates a new empty Tree
+    ##
+    # Creates a new empty Tree.
     #
     def initialize
       @data = Hash.new
     end
 
-    # creates a new Tree and initializes it with the given data
+    ##
+    # Creates a new Tree and initializes it with the given data.
     #
     # @example
     #   Tree[1]
@@ -88,9 +80,8 @@ module Sycamore
     #   Tree[1, 2, 2, 3]
     #   Tree[x: 1, y: 2]
     #
-    # @param (see #add)
-    #
     # @return [Tree] initialized with the given data
+    # @param (see #add)
     #
     def self.with(*args)
       tree = new

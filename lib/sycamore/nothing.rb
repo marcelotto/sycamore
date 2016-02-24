@@ -44,7 +44,7 @@ module Sycamore
     end
 
     # TODO: YARD should be informed about this method definitions.
-    destructive_command_methods.each do |command_method|
+    pure_destructive_command_methods.each do |command_method|
       define_method(command_method) { |*args| self }
     end
 

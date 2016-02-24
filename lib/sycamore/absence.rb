@@ -99,7 +99,7 @@ module Sycamore
 
     # TODO: YARD should be informed about this method definitions.
     Tree.command_methods.each do |command_method|
-      if Tree.destructive_command_methods.include?(command_method)
+      if Tree.pure_destructive_command_methods.include?(command_method)
         define_method command_method do |*args|
           if absent?
             self
