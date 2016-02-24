@@ -3,7 +3,7 @@ module Sycamore
   ##
   # A compact, immutable representation of Tree paths, i.e. node sequences.
   #
-  # This class is optimized for its usage in {Tree@each_path}, where it
+  # This class is optimized for its usage in {Tree#each_path}, where it
   # can efficiently represent the whole tree as a set of paths by sharing the
   # parent paths.
   # It is not intended to be instantiated by the user.
