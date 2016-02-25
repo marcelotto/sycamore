@@ -373,17 +373,18 @@ module Sycamore
     end
 
     def child_at(*path)
+      first = path.first
       case path.length
         when 0
           raise ArgumentError, 'wrong number of arguments (given 0, expected 1+)'
         when 1
-          if path.first.is_a? Array
-            child_at(*path.first)
+          if first.is_a? Enumerable
+            child_at(*first)
           else
             child_of(*path)
           end
         else
-          child_of(path[0]).child_at(*path[1..-1])
+          child_of(first).child_at(*path[1..-1])
       end
     end
 

@@ -109,39 +109,75 @@ describe Sycamore::Tree do
   ############################################################################
 
   describe '#child_at' do
-    it 'does return the child tree of the given node, when the node at the given path is present' do
-      expect( Sycamore::Tree[property: :value].child_at(:property).node ).to be :value
-      expect( Sycamore::Tree[false => 42     ].child_at(false).node     ).to be 42
-      expect( Sycamore::Tree[4 => {false=>2} ].child_at(4) ).to eq Sycamore::Tree[false=>2]
+    context 'when given a path as a sequence of nodes' do
+      it 'does return the child tree of the given node, when the node at the given path is present' do
+        expect( Sycamore::Tree[property: :value].child_at(:property).node ).to be :value
+        expect( Sycamore::Tree[false => 42     ].child_at(false).node     ).to be 42
+        expect( Sycamore::Tree[4 => {false=>2} ].child_at(4) ).to eq Sycamore::Tree[false=>2]
 
-      expect( Sycamore::Tree[1 => {2 => 3}].child_at(1, 2).node ).to be 3
-      expect( Sycamore::Tree[1 => {2 => 3}].child_at([1, 2]).node ).to be 3
-    end
-
-    it 'does return an absent tree, when the node at the given path is a leaf' do
-      expect( Sycamore::Tree[42   ].child_at(42     )   ).to be_a Sycamore::Absence
-      expect( Sycamore::Tree[1,2,3].child_at(1, 2, 3)   ).to be_a Sycamore::Absence
-      expect( Sycamore::Tree[1,2,3].child_at([1, 2, 3]) ).to be_a Sycamore::Absence
-    end
-
-    context 'when the node at the given path is not present' do
-      it 'does return an absent tree' do
-        expect( Sycamore::Tree.new.child_at(:missing ) ).to be_a Sycamore::Absence
-        expect( Sycamore::Tree.new.child_at( 1, 2, 3 ) ).to be_a Sycamore::Absence
-        expect( Sycamore::Tree.new.child_at([1, 2, 3]) ).to be_a Sycamore::Absence
+        expect( Sycamore::Tree[1 => {2 => 3}].child_at(1, 2).node ).to be 3
+        expect( Sycamore::Tree[1 => {2 => 3}].child_at([1, 2]).node ).to be 3
       end
 
-      it 'does return a correctly configured absent tree' do
-        tree = Sycamore::Tree.new
-        absent_tree = tree.child_at(1, 2, 3)
-        absent_tree << 4
-        expect(tree).to eql Sycamore::Tree[1=>{2=>{3=>4}}]
+      it 'does return an absent tree, when the node at the given path is a leaf' do
+        expect( Sycamore::Tree[42   ].child_at(42     )   ).to be_a Sycamore::Absence
+        expect( Sycamore::Tree[1,2,3].child_at(1, 2, 3)   ).to be_a Sycamore::Absence
+        expect( Sycamore::Tree[1,2,3].child_at([1, 2, 3]) ).to be_a Sycamore::Absence
+      end
+
+      context 'when the node at the given path is not present' do
+        it 'does return an absent tree' do
+          expect( Sycamore::Tree.new.child_at(:missing ) ).to be_a Sycamore::Absence
+          expect( Sycamore::Tree.new.child_at( 1, 2, 3 ) ).to be_a Sycamore::Absence
+          expect( Sycamore::Tree.new.child_at([1, 2, 3]) ).to be_a Sycamore::Absence
+        end
+
+        it 'does return a correctly configured absent tree' do
+          tree = Sycamore::Tree.new
+          absent_tree = tree.child_at(1, 2, 3)
+          absent_tree << 4
+          expect(tree).to eql Sycamore::Tree[1=>{2=>{3=>4}}]
+        end
+      end
+    end
+
+    context 'when given a path as a Sycamore::Path object' do
+      it 'does return the child tree of the given node, when the node at the given path is present' do
+        expect( Sycamore::Tree[property: :value].child_at(Sycamore::Path[:property]).node ).to be :value
+        expect( Sycamore::Tree[false => 42     ].child_at(Sycamore::Path[false]).node     ).to be 42
+        expect( Sycamore::Tree[4 => {false=>2} ].child_at(Sycamore::Path[4]) ).to eq Sycamore::Tree[false=>2]
+
+        expect( Sycamore::Tree[1 => {2 => 3}].child_at(Sycamore::Path[1, 2]).node ).to be 3
+      end
+
+      it 'does return an absent tree, when the node at the given path is a leaf' do
+        expect( Sycamore::Tree[42   ].child_at(Sycamore::Path[42]     ) ).to be_a Sycamore::Absence
+        expect( Sycamore::Tree[1,2,3].child_at(Sycamore::Path[1, 2, 3]) ).to be_a Sycamore::Absence
+      end
+
+      context 'when the node at the given path is not present' do
+        it 'does return an absent tree' do
+          expect( Sycamore::Tree.new.child_at(Sycamore::Path[:missing]) ).to be_a Sycamore::Absence
+          expect( Sycamore::Tree.new.child_at(Sycamore::Path[1, 2, 3 ]) ).to be_a Sycamore::Absence
+        end
+
+        it 'does return a correctly configured absent tree' do
+          tree = Sycamore::Tree.new
+          absent_tree = tree.child_at(Sycamore::Path[1, 2, 3])
+          absent_tree << 4
+          expect(tree).to eql Sycamore::Tree[1=>{2=>{3=>4}}]
+        end
       end
     end
 
     context 'edge cases' do
       it 'does raise an ArgumentError, when given no arguments' do
         expect { Sycamore::Tree.new.child_at() }.to raise_error ArgumentError
+      end
+
+      it 'does raise an ArgumentError, when given an empty enumerable' do
+        expect { Sycamore::Tree.new.child_at([]) }.to raise_error ArgumentError
+        expect { Sycamore::Tree.new.child_at(Sycamore::Path[]) }.to raise_error ArgumentError
       end
 
       it 'does raise an error, when the given path contains nil' do
