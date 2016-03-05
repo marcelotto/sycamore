@@ -20,6 +20,10 @@ describe Sycamore::Nothing do
       specify { expect( Sycamore::Nothing.absent? ).to be true }
     end
 
+    describe '#existent?' do
+      specify { expect( Sycamore::Nothing.existent? ).to be false }
+    end
+
     describe '#present?' do
       specify { expect( Sycamore::Nothing.present? ).to be false }
     end

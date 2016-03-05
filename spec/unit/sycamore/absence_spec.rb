@@ -64,6 +64,28 @@ describe Sycamore::Absence do
 
   ############################################################################
 
+  describe '#existent?' do
+    context 'when the absent tree has not been created' do
+      specify { expect( absent_tree.existent? ).to be false }
+    end
+
+    context 'when the absent tree has been created' do
+      context 'when it is blank' do
+        before(:each) { absent_tree.add nil }
+
+        specify { expect( absent_tree.existent? ).to be true }
+      end
+
+      context 'when it contains data' do
+        before(:each) { absent_tree.add :something }
+
+        specify { expect( absent_tree.existent? ).to be true }
+      end
+    end
+  end
+
+  ############################################################################
+
   describe '#present?' do
     context 'when the absent tree has not been created' do
       specify { expect( absent_tree.present? ).to be false }

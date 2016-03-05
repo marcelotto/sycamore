@@ -40,7 +40,7 @@ module Sycamore
 
     # the names of all query methods, which return a boolean
     PREDICATE_METHODS =
-      %i[nothing? absent? present? blank? empty?
+      %i[nothing? absent? existent? present? blank? empty?
          include? include_node? member? key? has_key? include_path? path? >= > < <=
          leaf? leaves? internal? external? flat? nested?
          sleaf? sleaves? strict_leaf? strict_leaves?
@@ -113,6 +113,12 @@ module Sycamore
     #
     def absent?
       false
+    end
+
+    # @return [Boolean] if this is not an absent tree
+    #
+    def existent?
+      not absent?
     end
 
     # @return [Boolean] if this is not {blank?}, i.e. {empty?}

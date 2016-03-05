@@ -114,6 +114,10 @@ describe Sycamore::Tree do
     specify { expect( Sycamore::Tree.new.absent? ).to be false }
   end
 
+  describe '#existent?' do
+    specify { expect( Sycamore::Tree.new.existent? ).to be true }
+  end
+
   describe '#present?' do
     specify { expect( Sycamore::Tree.new.present?    ).to be false }
     specify { expect( Sycamore::Tree[0 ].present?    ).to be true }
