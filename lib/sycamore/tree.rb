@@ -43,7 +43,7 @@ module Sycamore
 
     # the names of all methods, which side-effect-freeze return only a value
     QUERY_METHODS = PREDICATE_METHODS +
-      %i[new_child dup hash to_h to_s inspect
+      %i[new_child dup hash to_native_object to_h to_s inspect
          node nodes keys child_of child_at dig fetch
          size total_size tsize height
          each each_path paths each_node each_key each_pair] << :[]
@@ -1152,29 +1152,36 @@ module Sycamore
     ########################################################################
 
     ##
+    # A native Ruby object representing the content of the tree.
+    #
+    # It is used by {#to_h} to produce flattened representations of child trees.
+    #
+    # @api private
+    #
+    def to_native_object
+      case
+        when empty?         then []
+        when strict_leaves? then size == 1 ? nodes.first : nodes
+                            else to_h
+      end
+    end
+
+    ##
     # A hash representation of this tree.
     #
-    # @todo Extract the flattened variant into a private method.
+    # @return [Hash]
     #
-    def to_h(flattened: false)
-      case
-        when empty?
-          if flattened
-            nothing? ? nil : []
-          else
-            {}
-          end
-        when flattened && strict_leaves?
-          size == 1 ? nodes.first : nodes
-        else
-          # not the nicest, but fastest way to inject on hashes, as noted here:
-          # http://stackoverflow.com/questions/3230863/ruby-rails-inject-on-hashes-good-style
-          hash = {}
-          @data.each do |node, child|
-            hash[node] = child.to_h(flattened: true)
-          end
-          hash
+    def to_h
+      return {} if empty?
+
+      # not the nicest, but fastest way to inject on hashes, as noted here:
+      # http://stackoverflow.com/questions/3230863/ruby-rails-inject-on-hashes-good-style
+      hash = {}
+      @data.each do |node, child|
+        hash[node] = child.to_native_object
       end
+
+      hash
     end
 
     ##
@@ -1183,7 +1190,7 @@ module Sycamore
     # @return [String]
     #
     def to_s
-      "#<Tree[ #{to_h(flattened: true)} ]>"
+      "#<Tree[ #{to_native_object} ]>"
     end
 
     ##

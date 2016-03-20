@@ -1,5 +1,22 @@
 describe Sycamore::Tree do
 
+  describe '#to_native_object' do
+    it 'does return the an empty array, when empty' do
+      expect( Sycamore::Tree.new.to_native_object ).to eql []
+    end
+
+    it 'does return a hash, with leaves having an empty array as a child' do
+      expect( Sycamore::Tree[1=>[], 2=>{}].to_native_object ).to eql( {1=>[], 2=>[]} )
+    end
+
+    it 'does return a hash, with strict leaves having no child' do
+      expect( Sycamore::Tree[1   ].to_native_object ).to eql( 1)
+      expect( Sycamore::Tree[1, 2].to_native_object ).to eql( [1, 2] )
+    end
+  end
+
+  ############################################################################
+
   describe '#to_h' do
 
     it 'does return a hash, where the first level is unflattened and the rest flattened' do
@@ -11,34 +28,17 @@ describe Sycamore::Tree do
     end
 
     context 'first level' do
-      context 'when called with flattened false' do
-        it 'does return an empty hash, when empty' do
-          expect( Sycamore::Tree.new.to_h ).to eql Hash.new
-        end
-
-        it 'does return a hash, with leaves having an empty array as a child' do
-          expect( Sycamore::Tree[1=>[], 2=>[]].to_h ).to eql( {1=>[], 2=>[]} )
-        end
-
-        it 'does return a hash, with strict leaves having nil as a child' do
-          expect( Sycamore::Tree[1   ].to_h ).to eql( {1 => nil} )
-          expect( Sycamore::Tree[1, 2].to_h ).to eql( {1 => nil, 2 => nil} )
-        end
+      it 'does return an empty hash, when empty' do
+        expect( Sycamore::Tree.new.to_h ).to eql Hash.new
       end
 
-      context 'when called with flattened true' do
-        it 'does return the an empty array, when empty' do
-          expect( Sycamore::Tree.new.to_h(flattened: true) ).to eql []
-        end
+      it 'does return a hash, with leaves having an empty array as a child' do
+        expect( Sycamore::Tree[1=>[], 2=>[]].to_h ).to eql( {1=>[], 2=>[]} )
+      end
 
-        it 'does return a hash, with leaves having an empty array as a child' do
-          expect( Sycamore::Tree[1=>[], 2=>{}].to_h(flattened: true) ).to eql( {1=>[], 2=>[]} )
-        end
-
-        it 'does return a hash, with strict leaves having no child' do
-          expect( Sycamore::Tree[1   ].to_h(flattened: true) ).to eql( 1)
-          expect( Sycamore::Tree[1, 2].to_h(flattened: true) ).to eql( [1, 2] )
-        end
+      it 'does return a hash, with strict leaves having nil as a child' do
+        expect( Sycamore::Tree[1   ].to_h ).to eql( {1 => nil} )
+        expect( Sycamore::Tree[1, 2].to_h ).to eql( {1 => nil, 2 => nil} )
       end
     end
   end
@@ -51,7 +51,7 @@ describe Sycamore::Tree do
         expect( tree.to_s ).to match /^#<Tree\[ /
       end
       it 'contains the flattened hash to_s representation' do
-        expect( tree.to_s ).to include tree.to_h(flattened: true).to_s
+        expect( tree.to_s ).to include tree.to_native_object.to_s
       end
     end
     include_examples 'every to_s string', Sycamore::Tree.new

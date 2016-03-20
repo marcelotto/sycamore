@@ -56,6 +56,10 @@ module Sycamore
       self
     end
 
+    def to_native_object
+      nil
+    end
+
     ##
     # A string representation of the Nothing tree.
     #
