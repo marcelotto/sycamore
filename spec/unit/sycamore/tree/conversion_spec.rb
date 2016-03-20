@@ -74,8 +74,8 @@ describe Sycamore::Tree do
       it 'contains the object identity' do
         expect( tree.inspect ).to include tree.object_id.to_s(16)
       end
-      it 'contains the flattened hash inspect representation' do
-        expect( tree.inspect ).to include tree.to_h(flattened: true).inspect
+      it 'contains inspect string representation of the expanded to_h representation' do
+        expect( tree.inspect ).to include tree.to_h.inspect
       end
     end
     include_examples 'every inspect string', Sycamore::Tree.new

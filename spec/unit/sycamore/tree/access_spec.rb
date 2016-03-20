@@ -1,5 +1,7 @@
 describe Sycamore::Tree do
 
+  subject(:tree) { Sycamore::Tree.new }
+
   describe '#nodes' do
     context 'when empty' do
       it 'does return an empty array' do

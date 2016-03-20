@@ -2,6 +2,9 @@ require 'singleton'
 
 module Sycamore
   class Path
+    ##
+    # @api private
+    #
     class Root < Path
       include Singleton
 
@@ -35,6 +38,6 @@ module Sycamore
       end
     end
 
-    ROOT = Root.instance
+    ROOT = Root.instance # @api private
   end
 end

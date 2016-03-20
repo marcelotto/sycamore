@@ -1,7 +1,15 @@
 describe Sycamore::Tree do
 
+  let(:tree) { Sycamore::Tree.new }
+
+  ############################################################################
+
   describe '#each_node' do
     context 'when a block given' do
+      it 'does return the tree' do
+        expect( tree.each_node { 'foo' } ).to be tree
+      end
+
       it 'does yield the block with each node as an argument' do
         expect { |b| Sycamore::Tree[1, 2, 3  ].each_node(&b) }.to yield_successive_args(1, 2, 3)
         expect { |b| Sycamore::Tree[foo: :bar].each_node(&b) }.to yield_successive_args(:foo)
@@ -23,6 +31,10 @@ describe Sycamore::Tree do
 
   describe '#each_pair' do
     context 'when a block given' do
+      it 'does return the tree' do
+        expect( tree.each_pair { 'foo' } ).to be tree
+      end
+
       it 'does yield the block with each node-child-pairs as an argument' do
         expect { |b| Sycamore::Tree[foo: :bar].each(&b) }
           .to yield_successive_args([:foo, Sycamore::Tree[:bar]])
@@ -53,6 +65,10 @@ describe Sycamore::Tree do
 
   describe '#each_path' do
     context 'when a block given' do
+      it 'does return the tree' do
+        expect( tree.each_path { 'foo' } ).to be tree
+      end
+
       it 'does yield the block with the paths to each leaf of the complete tree' do
         expect{ |b| Sycamore::Tree[42    ].each_path(&b) }.to yield_successive_args Sycamore::Path[42]
         expect{ |b| Sycamore::Tree[1, 2  ].each_path(&b) }.to yield_successive_args Sycamore::Path[1], Sycamore::Path[2]

@@ -1,8 +1,30 @@
 require 'delegate'
 
 module Sycamore
+
+  ##
+  # An Absence object represents the absence of a specific child {Sycamore::Tree}.
+  #
+  # +Absence+ instances get created when accessing non-existent children of a
+  # Tree with {Tree#child_of} or {Tree#child_at}.
+  # It is not intended to be instantiated by the user.
+  #
+  # An +Absence+ object can be used like a normal {Sycamore::Tree}.
+  # {Tree::QUERY_METHODS Query} and {Tree::DESTRUCTIVE_COMMAND_METHODS pure destructive command method}
+  # calls get delegated to {Sycamore::Nothing}, i.e. will behave like an empty Tree.
+  # On every other {Tree::COMMAND_METHODS command} calls, the +Absence+ object
+  # gets resolved, which means the missing tree will be created, added to the
+  # parent tree and the method call gets delegated to the now existing tree.
+  # After the +Absence+ object is resolved all subsequent method calls are
+  # delegated to the created tree.
+  # The type of tree eventually created is determined by the {Tree#new_child}
+  # implementation of the parent tree and the parent node.
+  #
   class Absence < Delegator
 
+    ##
+    # @api private
+    #
     def initialize(parent_tree, parent_node)
       @parent_tree, @parent_node = parent_tree, parent_node
     end
@@ -15,14 +37,22 @@ module Sycamore
     # presence creation
     ########################################################################
 
+    ##
+    # The tree object to which all method calls are delegated.
+    #
+    # @api private
+    #
     def presence
       @tree or Nothing
     end
 
     alias __getobj__ presence
 
+    ##
+    # @api private
+    #
     def create
-      @parent_tree = @parent_tree.create_child(@parent_node)
+      @parent_tree = @parent_tree.add_node_with_empty_child(@parent_node)
       @tree = @parent_tree[@parent_node]
     end
 
@@ -30,11 +60,16 @@ module Sycamore
     # Absence and Nothing predicates
     ########################################################################
 
-    # @see {Tree#absent?}
+    ##
+    # (see Tree#absent?)
+    #
     def absent?
       @tree.nil?
     end
 
+    ##
+    # (see Tree#nothing?)
+    #
     def nothing?
       false
     end
@@ -73,18 +108,42 @@ module Sycamore
     alias [] child_at
     alias dig child_at
 
+    ##
+    # A developer-friendly string representation of the absent tree.
+    #
+    # @return [String]
+    #
     def inspect
-      "#{absent? ? 'absent' : 'present'} child tree of node #{@parent_node.inspect} in #{@parent_tree.inspect}"
+      "#{absent? ? 'absent' : 'present'} child of node #{@parent_node.inspect} in #{@parent_tree.inspect}"
     end
 
+    ##
+    # Duplicates the resolved tree or raises an error, when unresolved.
+    #
+    # @return [Tree]
+    #
+    # @raise [TypeError] when this {Absence} is not resolved yet
+    #
     def dup
       presence.dup
     end
 
+    ##
+    # Clones the resolved tree or raises an error, when unresolved.
+    #
+    # @return [Tree]
+    #
+    # @raise [TypeError] when this {Absence} is not resolved yet
+    #
     def clone
       presence.clone
     end
 
+    ##
+    # Checks if the absent tree is frozen.
+    #
+    # @return [Boolean]
+    #
     def frozen?
       if absent?
         false

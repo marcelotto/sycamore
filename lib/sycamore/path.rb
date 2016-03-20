@@ -30,6 +30,7 @@ module Sycamore
 
     ##
     # @private
+    #
     def initialize(parent, node)
       @parent, @node = parent, node
     end
@@ -65,7 +66,7 @@ module Sycamore
     end
 
     class << self
-      private :new
+      private :new  # disable Path.new
 
       alias [] of
     end

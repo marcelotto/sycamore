@@ -482,7 +482,7 @@ describe Sycamore::Absence do
     shared_examples_for 'every inspect string' do |absent_tree|
       context 'when the absent tree has not been created' do
         it 'contains the word "absent"' do
-          expect( absent_tree.inspect ).to include 'absent child tree of'
+          expect( absent_tree.inspect ).to include 'absent child of'
         end
       end
 
@@ -490,7 +490,7 @@ describe Sycamore::Absence do
         before(:each) { absent_tree.add :something }
 
         it 'contains the word "present"' do
-          expect( absent_tree.inspect ).to include 'present child tree of'
+          expect( absent_tree.inspect ).to include 'present child of'
         end
       end
 
@@ -508,7 +508,7 @@ describe Sycamore::Absence do
   end
 
   ############################################################################
-  # Standard Ruby protocols
+  # Standard Ruby methods
   ############################################################################
 
   describe '#dup' do

@@ -4,36 +4,36 @@ describe Sycamore::Tree do
 
   ############################################################################
 
-  describe '#create_child' do
+  describe '#add_node_with_empty_child' do
     it 'does add the given node' do
-      expect( tree.create_child(:foo) ).to include_node :foo
+      expect( tree.add_node_with_empty_child(:foo) ).to include_node :foo
     end
 
     it 'does create the new child with #new_child' do
       expect( tree ).to receive(:new_child)
-      tree.create_child(:foo)
+      tree.add_node_with_empty_child(:foo)
     end
 
     it 'does add an empty tree as a child of the given node' do
-      expect( tree.create_child(:foo).child_of(:foo) ).to be_a Sycamore::Tree
-      expect( tree.create_child(:foo).child_of(:foo) ).not_to be Sycamore::Nothing
-      expect( tree.create_child(:foo).child_of(:foo) ).not_to be_absent
-      expect( tree.create_child(:foo).child_of(:foo) ).to be_empty
+      expect( tree.add_node_with_empty_child(:foo).child_of(:foo) ).to be_a Sycamore::Tree
+      expect( tree.add_node_with_empty_child(:foo).child_of(:foo) ).not_to be Sycamore::Nothing
+      expect( tree.add_node_with_empty_child(:foo).child_of(:foo) ).not_to be_absent
+      expect( tree.add_node_with_empty_child(:foo).child_of(:foo) ).to be_empty
 
-      expect( Sycamore::Tree[:foo].create_child(:foo).child_of(:foo) ).to be_a Sycamore::Tree
-      expect( Sycamore::Tree[:foo].create_child(:foo).child_of(:foo) ).not_to be Sycamore::Nothing
-      expect( Sycamore::Tree[:foo].create_child(:foo).child_of(:foo) ).not_to be_absent
-      expect( Sycamore::Tree[:foo].create_child(:foo).child_of(:foo) ).to be_empty
+      expect( Sycamore::Tree[:foo].add_node_with_empty_child(:foo).child_of(:foo) ).to be_a Sycamore::Tree
+      expect( Sycamore::Tree[:foo].add_node_with_empty_child(:foo).child_of(:foo) ).not_to be Sycamore::Nothing
+      expect( Sycamore::Tree[:foo].add_node_with_empty_child(:foo).child_of(:foo) ).not_to be_absent
+      expect( Sycamore::Tree[:foo].add_node_with_empty_child(:foo).child_of(:foo) ).to be_empty
     end
 
     it 'does nothing, when the given node is already present' do
       tree = Sycamore::Tree[foo: :bar]
-      expect { tree.create_child(:foo) }.not_to change { tree.child_of(:foo) }
+      expect { tree.add_node_with_empty_child(:foo) }.not_to change { tree.child_of(:foo) }
     end
 
     context 'edge cases' do
       it 'does raise an error, when given nil' do
-        expect { tree.create_child(nil) }.to raise_error Sycamore::InvalidNode
+        expect { tree.add_node_with_empty_child(nil) }.to raise_error Sycamore::InvalidNode
       end
     end
   end

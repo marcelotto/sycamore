@@ -80,7 +80,7 @@ describe Sycamore::Nothing do
   end
 
   describe '#==' do
-    it 'does return true when compared with any empty tree' do
+    it 'does return true when compared with an empty tree' do
       expect( Sycamore::Nothing == Sycamore::Tree.new              ).to be true
       expect( Sycamore::Nothing == Class.new(Sycamore::Tree).new   ).to be true
     end
