@@ -344,7 +344,50 @@ describe Sycamore::Tree do
       end
     end
 
+    context 'when given multiple arguments' do
+      context 'when all arguments are nodes' do
+        it 'does return true, when each arguments is included' do
+          TREE_INCLUDES_ENUMERABLE.each do |data, other|
+            tree = to_tree(data)
+            expect( tree.include?(*other) ).to be(true),
+                                               "expected #{tree.inspect} to include #{other.inspect} as an arguments splash"
+          end
+        end
+
+        it 'does return false, when some arguments are not included' do
+          TREE_NOT_INCLUDES_ENUMERABLE.each do |data, other|
+            tree = to_tree(data)
+            expect( tree.include?(*other) ).to be(false),
+                                               "expected #{tree.inspect} not to include #{other.inspect} as an arguments splash"
+          end
+        end
+      end
+
+      context 'when nodes and tree-like structures mixed' do
+        it 'does return true, when each arguments is included' do
+          TREE_INCLUDES_TREE.each do |data, other|
+            tree = to_tree(data) << :foo
+            expect( tree.include?(:foo, other) ).to be(true),
+              "expected #{tree.inspect} to include :foo and #{other.inspect} as an arguments splash"
+          end
+        end
+
+        it 'does return false, when some arguments are not included' do
+          TREE_NOT_INCLUDES_TREE.each do |data, other|
+            tree = to_tree(data) << :foo
+            expect( tree.include?(:foo, other) ).to be(false),
+              "expected #{tree.inspect} not to include #{other.inspect} as an arguments splash"
+          end
+        end
+      end
+    end
+
+
     context 'edge cases' do
+      it 'raise an error, when no arguments given' do
+        expect { Sycamore::Tree.new.include? }.to raise_error ArgumentError
+      end
+
       context 'when given a single value' do
         specify { expect( Sycamore::Tree[false].include? false).to be true }
         specify { expect( Sycamore::Tree[0    ].include? 0    ).to be true }

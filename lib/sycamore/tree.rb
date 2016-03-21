@@ -767,12 +767,19 @@ module Sycamore
     #
     # @example
     #   tree = Tree[ "a" => 100, "b" => 200, "c" => { foo: [:bar, :baz] } ]
-    #   tree.include?("a")       #=> true
-    #   tree.include?(:foo)       #=> false
-    #   tree.include?(["a", "b"])  #=> true
-    #   tree.include?("c" => {foo: :bar})  #=> true
+    #   tree.include?("a")                 # => true
+    #   tree.include?(:foo)                # => false
+    #   tree.include?(["a", "b"])          # => true
+    #   tree.include?("c" => {foo: :bar})  # => true
+    #   tree.include?("a", "b" => 200)     # => true
     #
-    def include?(elements)
+    def include?(*elements)
+      raise ArgumentError, 'wrong number of arguments (given 0, expected 1+)' if
+        elements.size == 0
+      return elements.all? { |element| include? element } if
+        elements.size > 1
+
+      elements = elements.first
       case
         when Tree.like?(elements)
           elements.all? do |node, child|
