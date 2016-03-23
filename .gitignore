@@ -3,18 +3,9 @@
 /Gemfile.lock
 /_yardoc/
 /coverage/
-/doc/yard
+/doc
 /pkg/
 /spec/reports/
-/tmp/
-/examples/*.out.rb
 /spec/examples.txt
-
-# TODO: should be defined another way, since personal folders
-/spike/
-/lib/scratch
-/spec/scratch
-/doc/readme-drafts
-/doc/methods
-/doc
+/tmp/
 
