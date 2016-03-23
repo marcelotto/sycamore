@@ -28,19 +28,4 @@ rescue LoadError
   puts "Couldn't find yard-doctest"
 end
 
-# TODO: Make this conditional on the presence of CLOC or use an alternative way ...
-namespace :stats do
-  namespace :loc do
-    task :lib do
-      sh "cloc lib"
-    end
-    task :spec do
-      sh "cloc spec"
-    end
-    task :all do
-      sh "cloc lib spec"
-    end
-  end
-end
-
 task :default => [:spec, 'yard:doctest']
