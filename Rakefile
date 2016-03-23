@@ -21,41 +21,11 @@ end
 begin
   require 'yard-doctest'
   YARD::Doctest::RakeTask.new do |task|
-    task.doctest_opts = %w[-v]
+    task.doctest_opts = %w[]
     task.pattern = 'lib/**/*.rb'
   end
 rescue LoadError
   puts "Couldn't find yard-doctest"
-end
-
-namespace :demo do
-  API = 'examples/api_readme.rb'
-  API_OUT = 'examples/api_readme.out.rb'
-
-  desc "Builds the demo in #{API}"
-  task :build => API_OUT
-
-  file API_OUT => API do
-    sh "ruby #{API} > #{API_OUT}"
-  end
-
-  desc "Prints the build demo in #{API_OUT}"
-  task :print => API_OUT do
-    verbose(false) { sh "cat #{API_OUT}" }
-  end
-
-  desc "Runs the build demo in #{API_OUT} as an integration test"
-  task :run => :print do
-    puts
-    print 'Running...'
-    verbose(false) { sh "ruby #{API_OUT}" }
-    puts 'OK'
-  end
-end
-
-namespace :test do
-  desc 'Run integration and unit tests'
-  task :all => ['demo:run', :spec]
 end
 
 # TODO: Make this conditional on the presence of CLOC or use an alternative way ...
@@ -72,3 +42,5 @@ namespace :stats do
     end
   end
 end
+
+task :default => [:spec, 'yard:doctest']
