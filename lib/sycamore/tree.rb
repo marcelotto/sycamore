@@ -722,7 +722,7 @@ module Sycamore
     #   tree.include_path? "a", 200  # => false
     #   tree.include_path? "c", :foo, :bar  # => true
     #   tree.include_path? ["c", :foo, :bar]  # => true
-    #   tree.include_path? Path["c", :foo, :bar]  # => true
+    #   tree.include_path? Sycamore::Path["c", :foo, :bar]  # => true
     #
     def include_path?(*args)
       raise ArgumentError, 'wrong number of arguments (given 0, expected 1+)' if args.count == 0

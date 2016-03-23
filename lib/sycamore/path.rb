@@ -11,8 +11,8 @@ module Sycamore
   # @example
   #   tree = Tree[foo: [:bar, :baz]]
   #   path1, path2 = tree.paths.to_a
-  #   path1 == Path[:foo, :bar] # => true
-  #   path2 == Path[:foo, :baz] # => true
+  #   path1 == Sycamore::Path[:foo, :bar] # => true
+  #   path2 == Sycamore::Path[:foo, :baz] # => true
   #   path1.parent.equal? path2.parent # => true
   #
   # @todo Measure the performance and memory consumption in comparison with a
@@ -84,11 +84,11 @@ module Sycamore
     # @raise [InvalidNode] if one or more of the given nodes is nil or an Enumerable
     #
     # @example
-    #   path = Path[:foo, :bar]
+    #   path = Sycamore::Path[:foo, :bar]
     #   path.branch(:baz, :qux) ==
-    #     Path[:foo, :bar, :baz, :qux]  # => true
+    #     Sycamore::Path[:foo, :bar, :baz, :qux]  # => true
     #   path / :baz / :qux ==
-    #     Path[:foo, :bar, :baz, :qux]  # => true
+    #     Sycamore::Path[:foo, :bar, :baz, :qux]  # => true
     #
     #
     def branch(*nodes)
@@ -112,10 +112,10 @@ module Sycamore
     # @param distance [Integer] the number of nodes to go up
     #
     # @example
-    #   path = Path[:foo, :bar, :baz]
-    #   path.up     # => Path[:foo, :bar]
-    #   path.up(2)  # => Path[:foo]
-    #   path.up(3)  # => Path[]
+    #   path = Sycamore::Path[:foo, :bar, :baz]
+    #   path.up     # => Sycamore::Path[:foo, :bar]
+    #   path.up(2)  # => Sycamore::Path[:foo]
+    #   path.up(3)  # => Sycamore::Path[]
     #
     def up(distance = 1)
       raise TypeError, "expected an integer, but got #{distance.inspect}" unless distance.is_a? Integer
@@ -173,8 +173,8 @@ module Sycamore
     #
     # @example
     #   hash = {foo: {bar: :baz}}
-    #   Path[:foo, :bar].present_in? hash  # => true
-    #   Path[:foo, :bar].present_in? Tree[hash]  # => true
+    #   Sycamore::Path[:foo, :bar].present_in? hash  # => true
+    #   Sycamore::Path[:foo, :bar].present_in? Tree[hash]  # => true
     #
     def present_in?(struct)
       each do |node|
@@ -238,8 +238,8 @@ module Sycamore
     #   the returned string always begins with the given separator.
     #
     # @example
-    #   Path[1,2,3].join       # => '/1/2/3'
-    #   Path[1,2,3].join('|')  # => '|1|2|3'
+    #   Sycamore::Path[1,2,3].join       # => '/1/2/3'
+    #   Sycamore::Path[1,2,3].join('|')  # => '|1|2|3'
     #
     def join(separator = '/')
       @parent.join(separator) + separator + node.to_s
