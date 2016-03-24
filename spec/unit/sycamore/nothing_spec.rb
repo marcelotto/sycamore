@@ -37,7 +37,7 @@ describe Sycamore::Nothing do
     end
 
     describe '#to_s' do
-      specify { expect( Sycamore::Nothing.to_s ).to eql '#<Tree: Nothing>' }
+      specify { expect( Sycamore::Nothing.to_s ).to eql 'Tree[Nothing]' }
     end
 
     describe '#inspect' do

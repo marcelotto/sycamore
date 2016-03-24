@@ -66,7 +66,7 @@ module Sycamore
     # @return [String]
     #
     def to_s
-      '#<Tree: Nothing>'
+      'Tree[Nothing]'
     end
 
     ##

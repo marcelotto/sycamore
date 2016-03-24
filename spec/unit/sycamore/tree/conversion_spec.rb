@@ -46,19 +46,40 @@ describe Sycamore::Tree do
   ############################################################################
 
   describe '#to_s' do
+    module ContextWithTreeConstant
+      Tree = Sycamore::Tree
+    end
+
     shared_examples_for 'every to_s string' do |tree|
       it 'starts with a Tree-specific prefix' do
-        expect( tree.to_s ).to match /^#<Tree\[ /
+        expect( tree.to_s ).to match /^Tree\[/
       end
-      it 'contains the flattened hash to_s representation' do
-        expect( tree.to_s ).to include tree.to_native_object.to_s
+
+      it 'evaluates to the original Tree, when all nodes contained have this property' do
+        expect( ContextWithTreeConstant.module_eval(tree.to_s) ).to eql tree
       end
     end
-    include_examples 'every to_s string', Sycamore::Tree.new
-    include_examples 'every to_s string', Sycamore::Tree['foo']
-    include_examples 'every to_s string', Sycamore::Tree[1.0, 2, 3]
-    include_examples 'every to_s string', Sycamore::Tree[:foo, bar: [2,3]]
-    include_examples 'every to_s string', Sycamore::Tree[foo: 1, bar: [], baz: nil]
+
+    shared_examples_for 'every to_s string (single leaf)' do |tree|
+      include_examples 'every to_s string', tree
+      it 'contains the nodes inspect representation' do
+        expect( tree.to_s ).to include tree.node.inspect
+      end
+    end
+
+    shared_examples_for 'every to_s string (non-single leaf)' do |tree|
+      include_examples 'every to_s string', tree
+      it 'contains the to_s representation of the hash representation without brackets' do
+        expect( tree.to_s ).to include tree.to_native_object.to_s[1..-2]
+      end
+    end
+
+    include_examples 'every to_s string (single leaf)',     Sycamore::Tree['foo']
+    include_examples 'every to_s string (non-single leaf)', Sycamore::Tree.new
+    include_examples 'every to_s string (non-single leaf)', Sycamore::Tree[1.0, 2, 3]
+    include_examples 'every to_s string (non-single leaf)', Sycamore::Tree[foo: [1,2]]
+    include_examples 'every to_s string (non-single leaf)', Sycamore::Tree[:foo, bar: [2,3]]
+    include_examples 'every to_s string (non-single leaf)', Sycamore::Tree[foo: 1, bar: [], baz: nil, qux: {}]
   end
 
   ############################################################################

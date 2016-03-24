@@ -1197,7 +1197,11 @@ module Sycamore
     # @return [String]
     #
     def to_s
-      "#<Tree[ #{to_native_object} ]>"
+      if (content = to_native_object).is_a? Enumerable
+        "Tree[#{content.inspect[1..-2]}]"
+      else
+        "Tree[#{content.inspect}]"
+      end
     end
 
     ##
