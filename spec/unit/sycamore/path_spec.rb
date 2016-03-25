@@ -43,18 +43,11 @@ describe Sycamore::Path do
     end
 
     context 'edge cases' do
-      it 'does raise an error, when given a nil value' do
-        expect { Sycamore::Path[nil] }.to raise_error Sycamore::InvalidNode
-        expect { Sycamore::Path[nil, 1] }.to raise_error Sycamore::InvalidNode
-        expect { Sycamore::Path[1, nil, 3] }.to raise_error Sycamore::InvalidNode
-      end
-
       it 'does raise an error, when given a nested collection' do
         expect { Sycamore::Path[1, [2], 3] }.to raise_error Sycamore::InvalidNode
         expect { Sycamore::Path[:foo, {bar: :baz}] }.to raise_error Sycamore::InvalidNode
       end
     end
-
   end
 
   ############################################################################
@@ -120,10 +113,10 @@ describe Sycamore::Path do
     end
 
     context 'edge cases' do
-      it 'does raise an error, when given nil' do
-        expect { Sycamore::Path[1].branch(nil)    }.to raise_error Sycamore::InvalidNode
-        expect { Sycamore::Path[1].branch(nil, 2) }.to raise_error Sycamore::InvalidNode
-        expect { Sycamore::Path[1].branch(2, nil) }.to raise_error Sycamore::InvalidNode
+      it 'does treat nil like any other value' do
+        expect( Sycamore::Path[1].branch(nil)    ).to be_path_of 1, nil
+        expect( Sycamore::Path[1].branch(nil, 2) ).to be_path_of 1, nil, 2
+        expect( Sycamore::Path[1].branch(2, nil) ).to be_path_of 1, 2, nil
       end
 
       it 'does raise an error, when given multiple collections of nodes' do
@@ -264,8 +257,11 @@ describe Sycamore::Path do
     end
 
     context 'edge cases' do
-      it 'does return false, when nil given' do
-        expect( Sycamore::Path[1].in? nil ).to be false
+      it 'does treat nil like any other value' do
+        expect( Sycamore::Path[nil].in? nil ).to be true
+        expect( Sycamore::Path[nil].in? [nil, :foo] ).to be true
+        expect( Sycamore::Path[nil, 1].in? nil => 1 ).to be true
+        expect( Sycamore::Path[nil, nil].in? nil => [nil] ).to be true
       end
     end
   end
@@ -277,7 +273,9 @@ describe Sycamore::Path do
   PATH_EQL = [
     [ Sycamore::Path[     ] , Sycamore::Path[] ],
     [ Sycamore::Path[1    ] , Sycamore::Path[1] ],
+    [ Sycamore::Path[nil  ] , Sycamore::Path[nil] ],
     [ Sycamore::Path[1,2,3] , Sycamore::Path[1,2,3] ],
+    [ Sycamore::Path[nil, nil] , Sycamore::Path[nil, nil] ],
   ]
 
   PATH_EQ = PATH_EQL + [
@@ -387,10 +385,12 @@ describe Sycamore::Path do
   describe '#to_a' do
     it 'does return an array representation of the path' do
       expect( Sycamore::Path[ 42             ].to_a ).to eq [42]
+      expect( Sycamore::Path[ nil            ].to_a ).to eq [nil]
       expect( Sycamore::Path[ 1, 2, 3        ].to_a ).to eq [1,2,3]
       expect( Sycamore::Path['foo'           ].to_a ).to eq ["foo"]
       expect( Sycamore::Path['foo', 'bar'    ].to_a ).to eq %w[foo bar]
       expect( Sycamore::Path['foo', 'bar', 42].to_a ).to eq ['foo', 'bar', 42]
+      expect( Sycamore::Path['foo', nil, 42  ].to_a ).to eq ['foo', nil, 42]
     end
   end
 
@@ -411,6 +411,7 @@ describe Sycamore::Path do
     include_examples 'every join string', Sycamore::Path[1]
     include_examples 'every join string', Sycamore::Path[:foo, 'bar', 42]
     include_examples 'every join string', Sycamore::Path[:foo, 'bar', 42], '\\'
+    include_examples 'every join string', Sycamore::Path[:foo, nil, 42], '\\'
   end
 
   ############################################################################
@@ -427,6 +428,7 @@ describe Sycamore::Path do
 
     include_examples 'every to_s string', Sycamore::Path[1]
     include_examples 'every to_s string', Sycamore::Path[:foo, 'bar', 42]
+    include_examples 'every to_s string', Sycamore::Path[:foo, 'bar', nil]
   end
 
   ############################################################################
@@ -445,6 +447,7 @@ describe Sycamore::Path do
 
     include_examples 'every inspect string', Sycamore::Path[1]
     include_examples 'every inspect string', Sycamore::Path[:foo, 'bar', 42]
+    include_examples 'every inspect string', Sycamore::Path[nil, :foo, 'bar', 42]
   end
 
 end

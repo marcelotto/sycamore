@@ -49,7 +49,7 @@ describe Sycamore::Absence do
 
     context 'when the absent tree has been created' do
       context 'when it is blank' do
-        before(:each) { absent_tree.add nil }
+        before(:each) { absent_tree.add(1).delete(1) }
 
         specify { expect( absent_tree.absent? ).to be false }
       end
@@ -71,7 +71,7 @@ describe Sycamore::Absence do
 
     context 'when the absent tree has been created' do
       context 'when it is blank' do
-        before(:each) { absent_tree.add nil }
+        before(:each) { absent_tree.add(1).delete(1) }
 
         specify { expect( absent_tree.existent? ).to be true }
       end
@@ -93,7 +93,7 @@ describe Sycamore::Absence do
 
     context 'when the absent tree has been created' do
       context 'when it is blank' do
-        before(:each) { absent_tree.add nil }
+        before(:each) { absent_tree.add Sycamore::Nothing }
         specify { expect( absent_tree.present? ).to be false }
       end
       context 'when it contains data' do
@@ -325,8 +325,11 @@ describe Sycamore::Absence do
       end
 
       context 'edge cases' do
-        it 'does raise an error, when given nil' do
-          expect { absent_tree.child_of(nil) }.to raise_error Sycamore::InvalidNode
+        it 'does treat nil like any other value' do
+          expect( absent_tree.child_of(nil) )
+            .to be_a(Sycamore::Absence)
+            .and be_absent
+            .and be_different_to absent_tree
         end
 
         it 'does raise an error, when given the Nothing tree' do

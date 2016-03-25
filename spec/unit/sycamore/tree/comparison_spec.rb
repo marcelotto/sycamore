@@ -10,6 +10,8 @@ describe Sycamore::Tree do
     [ Sycamore::Tree.new   , Sycamore::Tree.new ],
     [ MyTree.new           , MyTree.new ],
     [ Sycamore::Tree[1]    , Sycamore::Tree[1] ],
+    [ Sycamore::Tree[nil]  , Sycamore::Tree[nil] ],
+    [ Sycamore::Tree[1]    , Sycamore::Tree[1 => Sycamore::Nothing] ],
     [ Sycamore::Tree[1]    , Sycamore::Tree[1 => nil] ],
     [ Sycamore::Tree[1, 2] , Sycamore::Tree[1, 2] ],
     [ Sycamore::Tree[1, 2] , Sycamore::Tree[2, 1] ],
@@ -20,10 +22,13 @@ describe Sycamore::Tree do
   ]
   TREE_NOT_EQL_BY_CONTENT = [
     [ Sycamore::Tree[1]              , Sycamore::Tree[2] ],
+    [ Sycamore::Tree[nil]            , Sycamore::Tree[] ],
     [ Sycamore::Tree[1]              , Sycamore::Tree[1.0] ],
     [ Sycamore::Tree[:foo, :bar]     , Sycamore::Tree['foo', 'bar'] ],
     [ Sycamore::Tree[a: 1]           , Sycamore::Tree[:a] ],
     [ Sycamore::Tree[a: 1]           , Sycamore::Tree[a: 2] ],
+    [ Sycamore::Tree[a: [nil]]       , Sycamore::Tree[:a] ],
+    [ Sycamore::Tree[a: [nil]]       , Sycamore::Tree[a: 2] ],
     [ Sycamore::Tree[1=>{2=>{3=>4}}] , Sycamore::Tree[1=>{2=>{3=>1}}] ],
   ]
   TREE_NOT_EQL_BY_TYPE = [
@@ -46,7 +51,7 @@ describe Sycamore::Tree do
     it 'does produce equal values, when the tree is eql' do
       TREE_EQL.each do |tree, other|
         expect( tree.hash ).to be(other.hash),
-                               "expected the hash of #{tree.inspect} to be also the hash of #{other.inspect}"
+          "expected the hash of #{tree.inspect} to be also the hash of #{other.inspect}"
       end
     end
 
@@ -390,6 +395,7 @@ describe Sycamore::Tree do
 
       context 'when given a single value' do
         specify { expect( Sycamore::Tree[false].include? false).to be true }
+        specify { expect( Sycamore::Tree[nil  ].include? nil  ).to be true }
         specify { expect( Sycamore::Tree[0    ].include? 0    ).to be true }
       end
     end
@@ -517,17 +523,21 @@ describe Sycamore::Tree do
     HAS_PATH_EXAMPLES = [
       # Path    , Tree
       [ [1]     , [1] ],
+      [ [nil]   , [nil] ],
       [ [1, 2]  , {1 => 2} ],
       [ [1]     , {1 => {2 => 3, 4 => 5}} ],
       [ [1,2]   , {1 => {2 => 3, 4 => 5}} ],
       [ [1,2,3] , {1 => {2 => 3, 4 => 5}} ],
       [ [1,2]   , {1 => [2, 3]} ],
-      [ [1,2,3] , {1 => {2 => [3], 4 => 5}} ],
+      [ [nil,2,3] , {nil => {2 => 3, 4 => 5}} ],
+      [ [1,2,nil] , {1 => {2 => [nil], 4 => 5}} ],
+      [ [nil,nil,nil] , {nil => {nil => [nil]}} ],
     ]
 
     NOT_HAS_PATH_EXAMPLES = [
       # Path    , Tree
       [ [1]     , [] ],
+      [ [nil]   , [] ],
       [ [2]     , {1 => 2} ],
       [ [1,2,3] , {1 => 2} ],
     ]

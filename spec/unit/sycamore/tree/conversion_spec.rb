@@ -1,7 +1,7 @@
 describe Sycamore::Tree do
 
   describe '#to_native_object' do
-    it 'does return the an empty array, when empty' do
+    it 'does return an empty array, when empty' do
       expect( Sycamore::Tree.new.to_native_object ).to eql []
     end
 
@@ -10,8 +10,14 @@ describe Sycamore::Tree do
     end
 
     it 'does return a hash, with strict leaves having no child' do
-      expect( Sycamore::Tree[1   ].to_native_object ).to eql( 1)
-      expect( Sycamore::Tree[1, 2].to_native_object ).to eql( [1, 2] )
+      expect( Sycamore::Tree[1   ].to_native_object ).to eql 1
+      expect( Sycamore::Tree[1, 2].to_native_object ).to eql [1, 2]
+    end
+
+    context 'edge cases' do
+      specify { expect( Sycamore::Tree[nil  ].to_native_object ).to eql nil }
+      specify { expect( Sycamore::Tree[false].to_native_object ).to eql false }
+      specify { expect( Sycamore::Tree[true ].to_native_object ).to eql true }
     end
   end
 
@@ -27,18 +33,26 @@ describe Sycamore::Tree do
       expect( Sycamore::Tree[a: {b: nil, c: [1]}].to_h ).to eql( {a: {b: nil, c: 1}} )
     end
 
-    context 'first level' do
-      it 'does return an empty hash, when empty' do
-        expect( Sycamore::Tree.new.to_h ).to eql Hash.new
-      end
+    it 'does return an empty hash, when empty' do
+      expect( Sycamore::Tree.new.to_h ).to eql Hash.new
+    end
 
-      it 'does return a hash, with leaves having an empty array as a child' do
-        expect( Sycamore::Tree[1=>[], 2=>[]].to_h ).to eql( {1=>[], 2=>[]} )
-      end
+    it 'does return a hash, with leaves having an empty array as a child' do
+      expect( Sycamore::Tree[1=>[], 2=>[]].to_h ).to eql( {1=>[], 2=>[]} )
+    end
 
-      it 'does return a hash, with strict leaves having nil as a child' do
-        expect( Sycamore::Tree[1   ].to_h ).to eql( {1 => nil} )
-        expect( Sycamore::Tree[1, 2].to_h ).to eql( {1 => nil, 2 => nil} )
+    it 'does return a hash, with strict leaves having nil as a child' do
+      expect( Sycamore::Tree[1   ].to_h ).to eql( {1 => nil} )
+      expect( Sycamore::Tree[1, 2].to_h ).to eql( {1 => nil, 2 => nil} )
+    end
+
+    context 'edge cases' do
+      it 'does treat nil like any other value' do
+        expect( Sycamore::Tree[nil => 1].to_h ).to eql( {nil => 1} )
+        expect( Sycamore::Tree[nil => [], 2 => []].to_h ).to eql( {nil => [], 2 => []} )
+        expect( Sycamore::Tree[nil].to_h ).to eql( {nil => nil} )
+        expect( Sycamore::Tree[nil => [nil]].to_h ).to eql( {nil => nil} )
+        expect( Sycamore::Tree[nil => {nil => nil}].to_h ).to eql( {nil => nil} )
       end
     end
   end
@@ -75,6 +89,7 @@ describe Sycamore::Tree do
     end
 
     include_examples 'every to_s string (single leaf)',     Sycamore::Tree['foo']
+    include_examples 'every to_s string (single leaf)',     Sycamore::Tree[nil]
     include_examples 'every to_s string (non-single leaf)', Sycamore::Tree.new
     include_examples 'every to_s string (non-single leaf)', Sycamore::Tree[1.0, 2, 3]
     include_examples 'every to_s string (non-single leaf)', Sycamore::Tree[foo: [1,2]]

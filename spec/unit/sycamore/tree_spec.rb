@@ -123,6 +123,7 @@ describe Sycamore::Tree do
     specify { expect( Sycamore::Tree[0 ].present?    ).to be true }
     specify { expect( Sycamore::Tree[''].present?    ).to be true }
     specify { expect( Sycamore::Tree[false].present? ).to be true }
+    specify { expect( Sycamore::Tree[nil].present?   ).to be true }
   end
 
 
@@ -133,7 +134,6 @@ describe Sycamore::Tree do
   describe '#empty?' do
     it 'does return true, when the Tree has no nodes' do
       expect( Sycamore::Tree.new.empty?               ).to be true
-      expect( Sycamore::Tree[nil              ].empty?).to be true
       expect( Sycamore::Tree[Sycamore::Nothing].empty?).to be true
     end
 
@@ -141,6 +141,10 @@ describe Sycamore::Tree do
       expect( Sycamore::Tree[42              ].empty? ).to be false
       expect( Sycamore::Tree[[42]            ].empty? ).to be false
       expect( Sycamore::Tree[property: :value].empty? ).to be false
+    end
+
+    it 'does treat nil like any other value' do
+      expect( Sycamore::Tree[nil].empty?).to be false
     end
   end
 
@@ -154,6 +158,7 @@ describe Sycamore::Tree do
 
     it 'does return the number of nodes' do
       expect( Sycamore::Tree[1             ].size ).to be 1
+      expect( Sycamore::Tree[nil           ].size ).to be 1
       expect( Sycamore::Tree[:foo, 2, 'bar'].size ).to be 3
       expect( Sycamore::Tree[1,2,2,3,3,3   ].size ).to be 3
     end
@@ -174,6 +179,7 @@ describe Sycamore::Tree do
 
     it 'does return the number of nodes' do
       expect( Sycamore::Tree[1             ].total_size ).to be 1
+      expect( Sycamore::Tree[nil           ].total_size ).to be 1
       expect( Sycamore::Tree[:foo, 2, 'bar'].total_size ).to be 3
       expect( Sycamore::Tree[1,2,2,3,3,3   ].total_size ).to be 3
     end
@@ -181,6 +187,7 @@ describe Sycamore::Tree do
     it 'does return the number of nodes including the nodes of children' do
       expect( Sycamore::Tree[a: [1,2,3]  ].total_size ).to be 4
       expect( Sycamore::Tree[a: 1, b: nil].total_size ).to be 3
+      expect( Sycamore::Tree[a: 1, b: [nil]].total_size ).to be 4
     end
 
     it 'does return the number of nodes including the nodes of children recursively' do
@@ -199,6 +206,7 @@ describe Sycamore::Tree do
 
     it 'does return the length of the longest path' do
       expect( Sycamore::Tree[42        ].height ).to be 1
+      expect( Sycamore::Tree[nil       ].height ).to be 1
       expect( Sycamore::Tree[1,2,3     ].height ).to be 1
       expect( Sycamore::Tree[a: [1,2,3]].height ).to be 2
       expect( Sycamore::Tree[:a, b: 1  ].height ).to be 2
@@ -236,9 +244,10 @@ describe Sycamore::Tree do
     end
 
     context 'edge cases' do
-      it 'does return false, when given nil' do
+      it 'does treat nil like any other value' do
         expect( Sycamore::Tree.new.leaf?(nil)  ).to be false
-        expect( Sycamore::Tree[nil].leaf?(nil) ).to be false
+        expect( Sycamore::Tree[nil].leaf?(nil) ).to be true
+        expect( Sycamore::Tree[nil => 1].leaf?(nil) ).to be false
       end
     end
   end
@@ -270,9 +279,10 @@ describe Sycamore::Tree do
     end
 
     context 'edge cases' do
-      it 'does return false, when given nil' do
+      it 'does treat nil like any other value' do
         expect( Sycamore::Tree.new.strict_leaf?(nil)  ).to be false
-        expect( Sycamore::Tree[nil].strict_leaf?(nil) ).to be false
+        expect( Sycamore::Tree[nil].strict_leaf?(nil) ).to be true
+        expect( Sycamore::Tree[nil => 1].strict_leaf?(nil) ).to be false
       end
     end
   end
@@ -327,9 +337,9 @@ describe Sycamore::Tree do
     end
 
     context 'edge cases' do
-      it 'does return false, when given nil' do
-        expect( Sycamore::Tree[   ].strict_leaves?(nil) ).to be false
-        expect( Sycamore::Tree[nil].strict_leaves?(nil) ).to be false
+      it 'does treat nil like any other value' do
+        expect( Sycamore::Tree[1  ].strict_leaves?(nil, 1) ).to be false
+        expect( Sycamore::Tree[1, nil].strict_leaves?(nil, 1) ).to be true
       end
     end
   end
@@ -384,9 +394,9 @@ describe Sycamore::Tree do
     end
 
     context 'edge cases' do
-      it 'does return false, when given nil' do
-        expect( Sycamore::Tree[   ].external?(nil) ).to be false
-        expect( Sycamore::Tree[nil].external?(nil) ).to be false
+      it 'does treat nil like any other value' do
+        expect( Sycamore::Tree[1,    ].external?(1, nil) ).to be false
+        expect( Sycamore::Tree[1, nil].external?(1, nil) ).to be true
       end
     end
   end
@@ -429,9 +439,8 @@ describe Sycamore::Tree do
     end
 
     context 'edge cases' do
-      context 'when given nil' do
-        specify { expect( Sycamore::Tree[   ].internal?(nil) ).to be false }
-        specify { expect( Sycamore::Tree[nil].internal?(nil) ).to be false }
+      it 'does treat nil like any other value' do
+        expect( Sycamore::Tree[nil => 1].internal?(nil) ).to be true
       end
     end
   end

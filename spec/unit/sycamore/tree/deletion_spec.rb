@@ -15,15 +15,15 @@ describe Sycamore::Tree do
       end
 
       context 'edge cases' do
-        it 'does nothing, when given nil' do
-          expect( Sycamore::Tree[1].delete(nil) ).to include_node 1
-        end
-
         it 'does nothing, when given the Nothing tree' do
           expect( Sycamore::Tree[1].delete(Sycamore::Nothing) ).to include_node 1
         end
 
-        it 'does treat false as key like any other value' do
+        it 'does treat nil like any other value' do
+          expect( Sycamore::Tree[nil].delete(nil)).to be_empty
+        end
+
+        it 'does treat false like any other value' do
           expect( Sycamore::Tree[false].delete(false)).to be_empty
         end
       end
@@ -57,6 +57,10 @@ describe Sycamore::Tree do
         it 'does nothing, when given an empty array' do
           expect( Sycamore::Tree[1,2,3].delete([]).nodes.to_set ).to eql Set[1,2,3]
         end
+
+        it 'does treat nil like any other value' do
+          expect( Sycamore::Tree[1, 2, nil].delete([nil, 1]).nodes ).to eql [2]
+        end
       end
     end
 
@@ -69,6 +73,18 @@ describe Sycamore::Tree do
       { before: {a: [1, 2]}      , delete: {a: Sycamore::Tree[2]} , after: {a: 1} },
     ]
 
+    NOT_DELETE_TREE_EXAMPLES = [
+      { before: {a: 1}           , delete: {a: 2} },
+      { before: {a: [1, 2]}      , delete: {a: 3} },
+      { before: {a: [1, 2]}      , delete: {a: [3]} },
+      { before: {a: 1, b: [2,3]} , delete: {a:2, b:4} },
+      { before: {a: [1, 2]}      , delete: {a: Sycamore::Tree[3]} },
+    ]
+
+    PARTIAL_DELETE_TREE_EXAMPLES = [
+      { before: {a: [1, 2]}      , delete: {a: [2, 3]} , after: {a: 1} },
+      { before: {a: 1, b: [2,3]} , delete: {c:1, b:2}  , after: {a:1, b:3} },
+    ]
 
     context 'when given a hash' do
       it 'does delete the given tree structure' do
@@ -78,24 +94,45 @@ describe Sycamore::Tree do
         end
       end
 
-      context 'edge cases' do
-        it 'does treat false as key like any other value' do
-          expect( Sycamore::Tree[false => 1].delete(false => 1) ).to be_empty
+      it 'does nothing, when given something not part of the tree' do
+        NOT_DELETE_TREE_EXAMPLES.each do |example|
+          expect( Sycamore::Tree[example[:before]].delete(example[:delete]) )
+            .to eql Sycamore::Tree[example[:before]]
         end
+      end
 
+      it 'does delete the existing paths and ignore the not existing paths of given input data' do
+        PARTIAL_DELETE_TREE_EXAMPLES.each do |example|
+          expect( Sycamore::Tree[example[:before]].delete(example[:delete]) )
+            .to eql Sycamore::Tree[example[:after]]
+        end
+      end
+
+      context 'edge cases' do
         it 'does nothing, when given an empty hash' do
           expect( Sycamore::Tree.new >> {} ).to be_empty
         end
 
-        it 'does nothing, when the key is nil' do
-          expect( Sycamore::Tree[foo: 42] >> {nil => 42} ).to eql Sycamore::Tree[foo: 42]
+        it 'does treat false as a key like any other value' do
+          expect( Sycamore::Tree[false => :foo].delete(false => :foo) ).to be_empty
+        end
+
+        it 'does treat nil as a key like any other value' do
+          expect( Sycamore::Tree[nil => :foo].delete(nil => :foo) ).to be_empty
+        end
+
+        it 'does treat nil as an element of the child tree like any other value' do
+          expect( Sycamore::Tree[1 => [2, nil]].delete(1 => [nil]) ).to eql Sycamore::Tree[1=>2]
+          expect( Sycamore::Tree[1 => [2, nil]].delete(1 => [nil, 2]) ).to be_empty
+          expect( Sycamore::Tree[1 => {nil => 2}].delete(1 => {nil => 2}) ).to be_empty
         end
 
         it 'does ignore null values as children' do
-          expect(Sycamore::Tree[1 => 2].delete({1 => Sycamore::Nothing})).to be_empty
-          expect(Sycamore::Tree[1 => 2].delete({1 => nil})).to be_empty
           expect(Sycamore::Tree[1 => 2].delete({1 => {}})).to be_empty
           expect(Sycamore::Tree[1     ].delete({1 => []})).to be_empty
+          expect(Sycamore::Tree[1 => 2].delete({1 => Sycamore::Nothing})).to be_empty
+          expect(Sycamore::Tree[1 => 2].delete({1 => nil})).to be_empty
+          expect(Sycamore::Tree[1 => nil].delete({1 => nil})).to be_empty
         end
 
         it 'does raise an error, when given a tree with an enumerable key' do

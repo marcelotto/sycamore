@@ -163,9 +163,6 @@ module Sycamore
     ##
     # Adds nodes or a tree structure to this tree.
     #
-    # Note, since a {Sycamore::Tree} can't contain +nil+ values, they are
-    # silently ignored.
-    #
     # @overload add(node)
     #   adds a single node
     #   @param node [Object]
@@ -209,27 +206,8 @@ module Sycamore
 
     alias << add
 
-    ##
-    # Adds a node with an empty child to this tree.
-    #
-    # @return +self+ as a proper command method
-    #
-    # @raise [InvalidNode]
-    #
-    # @api private
-    #
-    def add_node_with_empty_child(node)
-      raise InvalidNode, "#{node} is not a valid tree node" if node.nil? or node.is_a? Enumerable
-
-      if @data.fetch(node, Nothing).nothing?
-        @data[node] = new_child(node)
-      end
-
-      self
-    end
-
     private def add_node(node)
-      return self if Nothing.like? node
+      return self if node.equal? Nothing
       return add_tree(node) if Tree.like? node
       raise InvalidNode, "#{node} is not a valid tree node" if node.is_a? Enumerable
 
@@ -244,8 +222,26 @@ module Sycamore
       self
     end
 
+    ##
+    # Adds a node with an empty child to this tree.
+    #
+    # @return +self+ as a proper command method
+    #
+    # @raise [InvalidNode]
+    #
+    # @api private
+    #
+    def add_node_with_empty_child(node)
+      raise InvalidNode, "#{node} is not a valid tree node" if node.is_a? Enumerable
+
+      if @data.fetch(node, Nothing).nothing?
+        @data[node] = new_child(node)
+      end
+
+      self
+    end
+
     private def add_child(node, children)
-      return self if node.nil?
       return add_node(node) if Nothing.like?(children)
 
       add_node_with_empty_child(node)
@@ -343,9 +339,6 @@ module Sycamore
     ##
     # Replaces the contents of this tree.
     #
-    # Note, since a {Sycamore::Tree} can't contain +nil+ values, they are
-    # silently ignored.
-    #
     # @overload replace(node)
     #   Replaces the contents of this tree with a single node.
     #   @param node [Object]
@@ -380,9 +373,6 @@ module Sycamore
     #
     # Note that even if you assign a {Sycamore::Tree} directly the given tree
     # will not become part of this tree by reference.
-    #
-    # Since a {Sycamore::Tree} can't contain +nil+ values, they are
-    # silently ignored.
     #
     # @overload []=(*path, node)
     #   Replaces the contents of the child at the given path with a single node.
@@ -515,7 +505,7 @@ module Sycamore
     # @param node [Object]
     # @return [Tree, Absence] the child tree of a node if present, otherwise an {Absence}
     #
-    # @raise [InvalidNode] when given an +Enumerable+ or +nil+
+    # @raise [InvalidNode] when given an +Enumerable+
     #
     # @example
     #   tree = Tree[foo: 1]
@@ -525,7 +515,7 @@ module Sycamore
     # @todo Should we differentiate the case of a leaf and a not present node? How?
     #
     def child_of(node)
-      raise InvalidNode, "#{node} is not a valid tree node" if node.nil? or node.is_a? Enumerable
+      raise InvalidNode, "#{node} is not a valid tree node" if node.is_a? Enumerable
 
       Nothing.like?(child = @data[node]) ? Absence.at(self, node) : child
     end
@@ -533,7 +523,7 @@ module Sycamore
     ##
     # The child tree of a node at a path.
     #
-    # When a child to the given node is not a present, an {Absence} object
+    # When a child at the given node path is not a present, an {Absence} object
     # representing the missing tree is returned.
     #
     # @overload child_at(*nodes)
@@ -585,7 +575,7 @@ module Sycamore
     # @param default [Object] optional
     # @return [Tree, default]
     #
-    # @raise [InvalidNode] when given an +Enumerable+ or +nil+ as node
+    # @raise [InvalidNode] when given an +Enumerable+ as node
     # @raise [KeyError] when the given +node+ can't be found
     # @raise [ChildError] when no child for the given +node+ present
     #
@@ -601,7 +591,7 @@ module Sycamore
     # @todo Should we differentiate the case of a leaf and a not present node? How?
     #
     def fetch(node, *default, &block)
-      raise InvalidNode, "#{node} is not a valid tree node" if node.nil? or node.is_a? Enumerable
+      raise InvalidNode, "#{node} is not a valid tree node" if node.is_a? Enumerable
 
       child = @data.fetch(node, *default, &block)
       if child.equal? Nothing

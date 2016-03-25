@@ -12,6 +12,7 @@ describe Sycamore::Tree do
 
       it 'does yield the block with each node as an argument' do
         expect { |b| Sycamore::Tree[1, 2, 3  ].each_node(&b) }.to yield_successive_args(1, 2, 3)
+        expect { |b| Sycamore::Tree[1, nil, 3].each_node(&b) }.to yield_successive_args(1, nil, 3)
         expect { |b| Sycamore::Tree[foo: :bar].each_node(&b) }.to yield_successive_args(:foo)
       end
     end
@@ -40,13 +41,19 @@ describe Sycamore::Tree do
           .to yield_successive_args([:foo, Sycamore::Tree[:bar]])
         expect { |b| Sycamore::Tree[1=>2, 3=>[4, 5]].each(&b) }
           .to yield_successive_args([1, Sycamore::Tree[2]], [3, Sycamore::Tree[4, 5]])
+        expect { |b| Sycamore::Tree[nil => {nil => 2}].each(&b) }
+          .to yield_successive_args([nil, Sycamore::Tree[nil => 2]])
       end
 
-      it 'does yield nil as the child of leaves' do
+      it 'does yield the Nothing tree as the child of leaves' do
         expect { |b| Sycamore::Tree[1, 2, 3].each(&b) }
           .to yield_successive_args([1, Sycamore::Nothing], [2, Sycamore::Nothing], [3, Sycamore::Nothing])
-        expect { |b| Sycamore::Tree[1, 4=>5].each(&b) }
+        expect { |b| Sycamore::Tree[1, 4 => 5].each(&b) }
           .to yield_successive_args([1, Sycamore::Nothing], [4, Sycamore::Tree[5]])
+        expect { |b| Sycamore::Tree[nil, 4 => 5].each(&b) }
+          .to yield_successive_args([nil, Sycamore::Nothing], [4, Sycamore::Tree[5]])
+        expect { |b| Sycamore::Tree[1, nil => 5].each(&b) }
+          .to yield_successive_args([1, Sycamore::Nothing], [nil, Sycamore::Tree[5]])
       end
     end
 
@@ -70,11 +77,16 @@ describe Sycamore::Tree do
       end
 
       it 'does yield the block with the paths to each leaf of the complete tree' do
-        expect{ |b| Sycamore::Tree[42    ].each_path(&b) }.to yield_successive_args Sycamore::Path[42]
-        expect{ |b| Sycamore::Tree[1, 2  ].each_path(&b) }.to yield_successive_args Sycamore::Path[1], Sycamore::Path[2]
-        expect{ |b| Sycamore::Tree[1 => 2].each_path(&b) }.to yield_successive_args Sycamore::Path[1, 2]
+        expect{ |b| Sycamore::Tree[42     ].each_path(&b) }.to yield_successive_args Sycamore::Path[42]
+        expect{ |b| Sycamore::Tree[1, 2   ].each_path(&b) }.to yield_successive_args Sycamore::Path[1], Sycamore::Path[2]
+        expect{ |b| Sycamore::Tree[1,nil,3].each_path(&b) }.to yield_successive_args Sycamore::Path[1], Sycamore::Path[nil], Sycamore::Path[3]
+        expect{ |b| Sycamore::Tree[1 => 2 ].each_path(&b) }.to yield_successive_args Sycamore::Path[1, 2]
         expect{ |b| Sycamore::Tree[1 => { 2 => [3, 4] }].each_path(&b) }
           .to yield_successive_args Sycamore::Path[1, 2, 3], Sycamore::Path[1, 2, 4]
+        expect{ |b| Sycamore::Tree[1 => { nil => [nil, 3] }, nil => 4].each_path(&b) }
+          .to yield_successive_args Sycamore::Path[1, nil, nil],
+                                    Sycamore::Path[1, nil, 3],
+                                    Sycamore::Path[nil, 4]
       end
     end
 

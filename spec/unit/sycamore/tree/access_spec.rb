@@ -76,23 +76,31 @@ describe Sycamore::Tree do
   describe '#child_of' do
     it 'does return the child tree of the given node, when the given the node is present' do
       expect( Sycamore::Tree[property: :value].child_of(:property).node ).to be :value
-      expect( Sycamore::Tree[false => 42     ].child_of(false).node     ).to be 42
-      expect( Sycamore::Tree[4 => {false=>2} ].child_of(4) ).to eql Sycamore::Tree[false=>2]
     end
 
     it 'does return an absent tree, when the given node is a leaf' do
-      expect( Sycamore::Tree[42   ].child_of(42   ) ).to be_a Sycamore::Absence
-      expect( Sycamore::Tree[false].child_of(false) ).to be_a Sycamore::Absence
+      expect( Sycamore::Tree[42].child_of(42) ).to be_a Sycamore::Absence
     end
 
     it 'does return an absent tree, when the given the node is not present' do
       expect( Sycamore::Tree.new.child_of(:missing) ).to be_a Sycamore::Absence
-      expect( Sycamore::Tree.new.child_of(false   ) ).to be_a Sycamore::Absence
     end
 
     context 'edge cases' do
-      it 'does raise an error, when given nil' do
-        expect { Sycamore::Tree.new.child_of(nil) }.to raise_error Sycamore::InvalidNode
+      it 'does treat nil like any other value' do
+        expect( Sycamore::Tree[nil => 42].child_of(nil).node ).to be 42
+        expect( Sycamore::Tree[4 => {nil => 2}].child_of(4) ).to eql Sycamore::Tree[nil => 2]
+        expect( Sycamore::Tree[nil => 42].child_of(nil).node ).to be 42
+        expect( Sycamore::Tree[nil].child_of(nil) ).to be_a Sycamore::Absence
+        expect( Sycamore::Tree.new.child_of(nil) ).to be_a Sycamore::Absence
+      end
+
+      it 'does treat false like any other value' do
+        expect( Sycamore::Tree[false => 42].child_of(false).node ).to be 42
+        expect( Sycamore::Tree[4 => {false => 2}].child_of(4) ).to eql Sycamore::Tree[false => 2]
+        expect( Sycamore::Tree[false => 42].child_of(false).node ).to be 42
+        expect( Sycamore::Tree[false].child_of(false) ).to be_a Sycamore::Absence
+        expect( Sycamore::Tree.new.child_of(false   ) ).to be_a Sycamore::Absence
       end
 
       it 'does raise an error, when given the Nothing tree' do
@@ -114,17 +122,15 @@ describe Sycamore::Tree do
     context 'when given a path as a sequence of nodes' do
       it 'does return the child tree of the given node, when the node at the given path is present' do
         expect( Sycamore::Tree[property: :value].child_at(:property).node ).to be :value
-        expect( Sycamore::Tree[false => 42     ].child_at(false).node     ).to be 42
-        expect( Sycamore::Tree[4 => {false=>2} ].child_at(4) ).to eq Sycamore::Tree[false=>2]
 
         expect( Sycamore::Tree[1 => {2 => 3}].child_at(1, 2).node ).to be 3
         expect( Sycamore::Tree[1 => {2 => 3}].child_at([1, 2]).node ).to be 3
       end
 
       it 'does return an absent tree, when the node at the given path is a leaf' do
-        expect( Sycamore::Tree[42   ].child_at(42     )   ).to be_a Sycamore::Absence
-        expect( Sycamore::Tree[1,2,3].child_at(1, 2, 3)   ).to be_a Sycamore::Absence
-        expect( Sycamore::Tree[1,2,3].child_at([1, 2, 3]) ).to be_a Sycamore::Absence
+        expect( Sycamore::Tree[42       ].child_at(42       ) ).to be_a Sycamore::Absence
+        expect( Sycamore::Tree[1=>{2=>3}].child_at(1, 2, 3  ) ).to be_a Sycamore::Absence
+        expect( Sycamore::Tree[1=>{2=>3}].child_at([1, 2, 3]) ).to be_a Sycamore::Absence
       end
 
       context 'when the node at the given path is not present' do
@@ -146,9 +152,6 @@ describe Sycamore::Tree do
     context 'when given a path as a Sycamore::Path object' do
       it 'does return the child tree of the given node, when the node at the given path is present' do
         expect( Sycamore::Tree[property: :value].child_at(Sycamore::Path[:property]).node ).to be :value
-        expect( Sycamore::Tree[false => 42     ].child_at(Sycamore::Path[false]).node     ).to be 42
-        expect( Sycamore::Tree[4 => {false=>2} ].child_at(Sycamore::Path[4]) ).to eq Sycamore::Tree[false=>2]
-
         expect( Sycamore::Tree[1 => {2 => 3}].child_at(Sycamore::Path[1, 2]).node ).to be 3
       end
 
@@ -182,10 +185,38 @@ describe Sycamore::Tree do
         expect { Sycamore::Tree.new.child_at(Sycamore::Path[]) }.to raise_error ArgumentError
       end
 
-      it 'does raise an error, when the given path contains nil' do
-        expect { Sycamore::Tree.new.child_at(nil, nil) }.to raise_error Sycamore::InvalidNode
-        expect { Sycamore::Tree.new.child_at(1, nil  ) }.to raise_error Sycamore::InvalidNode
-        expect { Sycamore::Tree.new.child_at(nil, 1  ) }.to raise_error Sycamore::InvalidNode
+      it 'does treat nil like any other value' do
+        expect( Sycamore::Tree[nil => 42     ].child_at(nil).node     ).to be 42
+        expect( Sycamore::Tree[4 => {nil => 2} ].child_at(4) ).to eq Sycamore::Tree[nil => 2]
+        expect( Sycamore::Tree[1 => {nil => 3}].child_at(1, nil).node ).to be 3
+        expect( Sycamore::Tree[nil => {nil => nil}].child_at(nil, nil).node ).to be nil
+        expect( Sycamore::Tree[nil => nil].child_at(nil, nil) ).to be_a Sycamore::Absence
+        expect( Sycamore::Tree.new.child_at(nil, nil) ).to be_a Sycamore::Absence
+
+        tree = Sycamore::Tree.new
+        absent_tree = tree.child_at(nil, nil, nil)
+        absent_tree << nil
+        expect(tree).to eql Sycamore::Tree[nil => {nil => {nil => [nil]}}]
+
+        expect( Sycamore::Tree[nil => 42       ].child_at(Sycamore::Path[nil]).node     ).to be 42
+        expect( Sycamore::Tree[4 => {nil => 2} ].child_at(Sycamore::Path[4]) ).to eq Sycamore::Tree[nil => 2]
+      end
+
+      it 'does treat boolean values like any other value' do
+        expect( Sycamore::Tree[false => 42      ].child_at(false).node     ).to be 42
+        expect( Sycamore::Tree[4 => {false => 2}].child_at(4) ).to eq Sycamore::Tree[false => 2]
+        expect( Sycamore::Tree[1 => {false => 3}].child_at(1, false).node ).to be 3
+        expect( Sycamore::Tree[false => {false => false}].child_at(false, false).node ).to be false
+        expect( Sycamore::Tree[false => false].child_at(false, false) ).to be_a Sycamore::Absence
+        expect( Sycamore::Tree.new.child_at(false, false) ).to be_a Sycamore::Absence
+
+        tree = Sycamore::Tree.new
+        absent_tree = tree.child_at(false, false, false)
+        absent_tree << false
+        expect(tree).to eql Sycamore::Tree[false => {false => {false => false}}]
+
+        expect( Sycamore::Tree[false => 42       ].child_at(Sycamore::Path[false]).node     ).to be 42
+        expect( Sycamore::Tree[4 => {false => 2} ].child_at(Sycamore::Path[4]) ).to eq Sycamore::Tree[false => 2]
       end
     end
   end
@@ -259,10 +290,18 @@ describe Sycamore::Tree do
     end
 
     context 'edge cases' do
-      it 'does raise an error, when given nil' do
-        expect { Sycamore::Tree.new.fetch(nil) }.to raise_error Sycamore::InvalidNode
-        expect { Sycamore::Tree.new.fetch(nil, :default) }.to raise_error Sycamore::InvalidNode
-        expect { Sycamore::Tree.new.fetch(nil) { 42 } }.to raise_error Sycamore::InvalidNode
+      it 'does treat nil like any other value' do
+        expect { Sycamore::Tree.new.fetch(nil) }.to raise_error KeyError
+        expect( Sycamore::Tree.new.fetch(nil, :default) ).to be :default
+        expect( Sycamore::Tree.new.fetch(nil) { :default } ).to be :default
+
+        expect { Sycamore::Tree[nil].fetch(nil) }.to raise_error KeyError
+        expect( Sycamore::Tree[nil].fetch(nil, :default) ).to be :default
+        expect( Sycamore::Tree[nil].fetch(nil) { :default } ).to be :default
+
+        expect( Sycamore::Tree[nil => :foo].fetch(nil).node ).to be :foo
+        expect( Sycamore::Tree[nil => :foo].fetch(nil, :default).node ).to be :foo
+        expect( Sycamore::Tree[nil => :foo].fetch(nil) { :default }.node ).to be :foo
       end
 
       it 'does raise an error, when given the Nothing tree' do

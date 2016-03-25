@@ -81,7 +81,7 @@ module Sycamore
     # @param nodes [nodes] an arbitrary number of nodes
     # @return [Path]
     #
-    # @raise [InvalidNode] if one or more of the given nodes is nil or an Enumerable
+    # @raise [InvalidNode] if one or more of the given nodes is an Enumerable
     #
     # @example
     #   path = Sycamore::Path[:foo, :bar]
@@ -90,14 +90,13 @@ module Sycamore
     #   path / :baz / :qux ==
     #     Sycamore::Path[:foo, :bar, :baz, :qux]  # => true
     #
-    #
     def branch(*nodes)
       return branch(*nodes.first) if nodes.size == 1 and nodes.first.is_a? Enumerable
 
       parent = self
       nodes.each do |node|
         raise InvalidNode, "#{node} in Path #{nodes.inspect} is not a valid tree node" if
-          node.nil? or node.is_a? Enumerable
+          node.is_a? Enumerable
         parent = Path.__send__(:new, parent, node)
       end
 
@@ -118,7 +117,8 @@ module Sycamore
     #   path.up(3)  # => Sycamore::Path[]
     #
     def up(distance = 1)
-      raise TypeError, "expected an integer, but got #{distance.inspect}" unless distance.is_a? Integer
+      raise TypeError, "expected an integer, but got #{distance.inspect}" unless
+        distance.is_a? Integer
 
       case distance
         when 1 then @parent
@@ -179,14 +179,12 @@ module Sycamore
     def present_in?(struct)
       each do |node|
         case
-          when struct.nil?
-            return false
           when struct.is_a?(Enumerable)
             return false unless struct.include? node
-            struct = (Tree.like?(struct) ? struct[node] : nil )
+            struct = (Tree.like?(struct) ? struct[node] : Nothing )
           else
             return false unless struct.eql? node
-            struct = nil
+            struct = Nothing
         end
       end
       true

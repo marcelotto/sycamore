@@ -7,9 +7,11 @@ describe Sycamore::Nothing do
 
   describe 'query methods' do
     describe 'children' do
-      specify { expect( Sycamore::Nothing.child_of(1    ) ).to be Sycamore::Nothing }
-      specify { expect( Sycamore::Nothing.child_at(1,2,3) ).to be Sycamore::Nothing }
-      specify { expect( Sycamore::Nothing[:foo, :bar]     ).to be Sycamore::Nothing }
+      specify { expect( Sycamore::Nothing.child_of(1      ) ).to be Sycamore::Nothing }
+      specify { expect( Sycamore::Nothing.child_of(nil    ) ).to be Sycamore::Nothing }
+      specify { expect( Sycamore::Nothing.child_at(1, 2, 3) ).to be Sycamore::Nothing }
+      specify { expect( Sycamore::Nothing.child_at(1,nil,3) ).to be Sycamore::Nothing }
+      specify { expect( Sycamore::Nothing[:foo, :bar]       ).to be Sycamore::Nothing }
     end
 
     describe '#nothing?' do
@@ -47,13 +49,13 @@ describe Sycamore::Nothing do
 
   describe 'additive command methods' do
     it 'does raise an exception on all command methods' do
-      expect_failing { Nothing << 'Bye' }
-      expect_failing { Nothing.add 42 }
-      expect_failing { Nothing.add :foo, :bar }
+      expect_failing { Sycamore::Nothing << 'Bye' }
+      expect_failing { Sycamore::Nothing.add 42 }
+      expect_failing { Sycamore::Nothing.add :foo, :bar }
     end
 
     def expect_failing(&block)
-      expect(&block)
+      expect(&block).to raise_error Sycamore::NothingMutation
     end
   end
 
