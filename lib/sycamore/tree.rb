@@ -1155,11 +1155,14 @@ module Sycamore
     #
     # @api private
     #
-    def to_native_object
+    def to_native_object(sleaf_child_as: nil, special_nil: false)
       case
-        when empty?         then []
-        when strict_leaves? then size == 1 ? nodes.first : nodes
-                            else to_h
+        when empty?
+          []
+        when strict_leaves?
+          size == 1 && (!special_nil || !nodes.first.nil?) ? nodes.first : nodes
+        else
+          to_h(sleaf_child_as: sleaf_child_as, special_nil: special_nil)
       end
     end
 
@@ -1168,14 +1171,14 @@ module Sycamore
     #
     # @return [Hash]
     #
-    def to_h
+    def to_h(*args)
       return {} if empty?
 
       # not the nicest, but fastest way to inject on hashes, as noted here:
       # http://stackoverflow.com/questions/3230863/ruby-rails-inject-on-hashes-good-style
       hash = {}
       @data.each do |node, child|
-        hash[node] = child.to_native_object
+        hash[node] = child.to_native_object(*args)
       end
 
       hash
@@ -1187,7 +1190,7 @@ module Sycamore
     # @return [String]
     #
     def to_s
-      if (content = to_native_object).is_a? Enumerable
+      if (content = to_native_object(special_nil: true)).is_a? Enumerable
         "Tree[#{content.inspect[1..-2]}]"
       else
         "Tree[#{content.inspect}]"
@@ -1200,7 +1203,8 @@ module Sycamore
     # @return [String]
     #
     def inspect
-      "#<#{self.class}:0x#{object_id.to_s(16)} #{to_h.inspect}>"
+      "#<#{self.class}:0x#{object_id.to_s(16)} #{
+            to_h(sleaf_child_as: Sycamore::NothingTree::NestedString).inspect}>"
     end
 
     ##

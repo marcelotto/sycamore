@@ -41,9 +41,21 @@ describe Sycamore::Tree do
       expect( Sycamore::Tree[1=>[], 2=>[]].to_h ).to eql( {1=>[], 2=>[]} )
     end
 
-    it 'does return a hash, with strict leaves having nil as a child' do
-      expect( Sycamore::Tree[1   ].to_h ).to eql( {1 => nil} )
-      expect( Sycamore::Tree[1, 2].to_h ).to eql( {1 => nil, 2 => nil} )
+    context 'when no sleaf_child_as defined' do
+      it 'does return a hash, with strict leaves having nil as a child' do
+        expect( Sycamore::Tree[1   ].to_h ).to eql( {1 => nil} )
+        expect( Sycamore::Tree[1, 2].to_h ).to eql( {1 => nil, 2 => nil} )
+      end
+    end
+
+    context 'when sleaf_child_as defined' do
+      let(:sleaf_child_as) { Sycamore::Nothing }
+      it 'does return a hash, with strict leaves having nil as a child' do
+        expect( Sycamore::Tree[1].to_h(sleaf_child_as: sleaf_child_as) )
+          .to eql( {1 => sleaf_child_as} )
+        expect( Sycamore::Tree[1, 2].to_h(sleaf_child_as: sleaf_child_as) )
+          .to eql( {1 => sleaf_child_as, 2 => sleaf_child_as} )
+      end
     end
 
     context 'edge cases' do
@@ -84,7 +96,7 @@ describe Sycamore::Tree do
     shared_examples_for 'every to_s string (non-single leaf)' do |tree|
       include_examples 'every to_s string', tree
       it 'contains the to_s representation of the hash representation without brackets' do
-        expect( tree.to_s ).to include tree.to_native_object.to_s[1..-2]
+        expect( tree.to_s ).to include tree.to_native_object(special_nil: true).to_s[1..-2]
       end
     end
 
@@ -95,6 +107,7 @@ describe Sycamore::Tree do
     include_examples 'every to_s string (non-single leaf)', Sycamore::Tree[foo: [1,2]]
     include_examples 'every to_s string (non-single leaf)', Sycamore::Tree[:foo, bar: [2,3]]
     include_examples 'every to_s string (non-single leaf)', Sycamore::Tree[foo: 1, bar: [], baz: nil, qux: {}]
+    include_examples 'every to_s string (non-single leaf)', Sycamore::Tree[nil, foo: {nil => [nil]}]
   end
 
   ############################################################################
@@ -110,15 +123,17 @@ describe Sycamore::Tree do
       it 'contains the object identity' do
         expect( tree.inspect ).to include tree.object_id.to_s(16)
       end
-      it 'contains inspect string representation of the expanded to_h representation' do
-        expect( tree.inspect ).to include tree.to_h.inspect
+      it 'contains the inspect string representation of the expanded to_h representation' do
+        expect( tree.inspect ).to include tree.to_h(sleaf_child_as: Sycamore::NothingTree::NestedString).inspect
       end
     end
+
     include_examples 'every inspect string', Sycamore::Tree.new
     include_examples 'every inspect string', Sycamore::Tree[1,2,3]
     include_examples 'every inspect string', Sycamore::Tree[foo: 1, bar: [2,3]]
     include_examples 'every inspect string', Sycamore::Tree[foo: 1, bar: [], baz: nil]
     include_examples 'every inspect string', (MyClass = Class.new(Sycamore::Tree)).new
+    include_examples 'every inspect string', Sycamore::Tree[nil, foo: {nil => [nil]}]
   end
 
 end

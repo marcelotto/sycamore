@@ -56,8 +56,8 @@ module Sycamore
       self
     end
 
-    def to_native_object
-      nil
+    def to_native_object(sleaf_child_as: nil, **args)
+      sleaf_child_as
     end
 
     ##
@@ -132,6 +132,20 @@ module Sycamore
     def like?(object)
       object.nil? or object.equal? self
     end
+
+    ##
+    # @api private
+    class NestedStringPresentation
+      include Singleton
+
+      def inspect
+        'n/a'
+      end
+    end
+
+    ##
+    # @api private
+    NestedString = NestedStringPresentation.instance.freeze
 
   end
 
