@@ -1,10 +1,12 @@
 
 # Sycamore
 
-> _"The Egyptians' Holy Sycamore also stood on the threshold of life and death, connecting the two worlds."_  - [Wikipedia: Tree of Life](http://en.wikipedia.org/wiki/Tree_of_life)
+> _"The Egyptians' Holy Sycamore also stood on the threshold of life and death, connecting the two worlds."_  
+>   -- [Wikipedia: Tree of Life](http://en.wikipedia.org/wiki/Tree_of_life)
 
 [![Travis CI Build Status](https://secure.travis-ci.org/marcelotto/sycamore.png)](https://travis-ci.org/marcelotto/sycamore?branch=master)
 [![Inline docs](http://inch-ci.org/github/marcelotto/sycamore.png)](http://inch-ci.org/github/marcelotto/sycamore)
+[![Documentation](http://img.shields.io/badge/docs-rdoc.info-blue.svg)](http://rubydoc.org/gems/spread2rdf/frames)
 [![License](http://img.shields.io/license/MIT.png?color=green)](http://opensource.org/licenses/MIT)
 
 **Sycamore is an implementation of an unordered tree data structure.**
@@ -494,6 +496,11 @@ Tree['some possibly very big data chunk' => [1, 2]].each_path.to_a
 # => [#<Sycamore::Path["some possibly very big data chunk",1]>,
 #     #<Sycamore::Path["some possibly very big data chunk",2]>]
 ```
+
+
+## Getting help
+
+- [RDoc](http://www.rubydoc.info/gems/sycamore/)
 
 
 ## Contributing
