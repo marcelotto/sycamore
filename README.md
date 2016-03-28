@@ -4,6 +4,7 @@
 > _"The Egyptians' Holy Sycamore also stood on the threshold of life and death, connecting the two worlds."_  
 >   -- [Wikipedia: Tree of Life](http://en.wikipedia.org/wiki/Tree_of_life)
 
+[![Gem Version](https://badge.fury.io/rb/sycamore.svg)](http://badge.fury.io/rb/sycamore)
 [![Travis CI Build Status](https://secure.travis-ci.org/marcelotto/sycamore.png)](https://travis-ci.org/marcelotto/sycamore?branch=master)
 [![Coverage Status](https://coveralls.io/repos/marcelotto/sycamore/badge.png)](https://coveralls.io/r/marcelotto/sycamore)
 [![Inline docs](http://inch-ci.org/github/marcelotto/sycamore.png)](http://inch-ci.org/github/marcelotto/sycamore)
