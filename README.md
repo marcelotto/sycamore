@@ -93,7 +93,7 @@ tree = Tree.new
 tree.empty?  # => true
 ```
 
-No additional arguments are supported at the time. As you'll see, for a `Sycamore::Tree` the functionality of the Hash constructor to specify the default value behaviour is of too little value to justify its use in the default constructor. The decision of its use can be tracked in [issue #1]().
+No additional arguments are supported at the time. As you'll see, for a `Sycamore::Tree` the functionality of the Hash constructor to specify the default value behaviour is of too little value to justify its use in the default constructor.
 
 The `[]` operator creates a new `Tree` and adds the arguments as its initial input. It can handle a single node value, a collection of nodes or a complete tree. 
 
