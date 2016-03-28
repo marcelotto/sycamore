@@ -1,296 +1,503 @@
 
 # Sycamore
 
-Sycamore is an implementation of a [Tree data structure](http://en.wikipedia.org/wiki/Tree_(data_structure\)) of unordered values, solely based on Ruby's native Hash maps. 
+> _"The Egyptians' Holy Sycamore also stood on the threshold of life and death, connecting the two worlds."_  - [Wikipedia: Tree of Life](http://en.wikipedia.org/wiki/Tree_of_life)
 
-It can be used as a more usable/pleasant/powerful alternative to a standard Ruby Hash (with `Sycamore::Tree`) or Struct/OpenStruct (with `Sycamore::Structure`) or a Set ... whenever all elements are value objects and the order of all elements is irrelevant. [More on: Why `Sycamore::Tree` over `Hash`?]
+[![License](http://img.shields.io/license/MIT.png?color=green)](http://opensource.org/licenses/MIT)
 
-It tries to be as close to Ruby's language, spirit and standard library as possible, by being 100% compatible to Ruby's Hash, while using as little as possible overhead to a bare Hash, regarding speed and memory consumption. From a data structure standpoint, a `Sycamore::Tree` is nothing more than a wrapper around a Ruby `Hash`, with a special interpretation and some restrictions on its content. 
-[The latter restrictions, by some required and some optional rules to follow. !?] 
-[For some cases, it might have a slight/significant more memory consumption, when ... breite Trees]
+**Sycamore is an implementation of an unordered tree data structure.**
+
+Features:
+
+- easy, hassle-free access to arbitrarily deep nested elements
+- grows automatically when needed
+- familiar Hash interface
+- no more `nil`-induced errors
+
+Imagine a Sycamore tree as a recursively nested set. The elements of this set, called nodes, are associated with a child tree of additional nodes and so on. This might be different to your usual understanding of a tree, which has to have one single root node, but this notion is much more general. The usual tree is just a special case with just one node at the first level. But I prefer to think of the root to be implicit. Effectively every object is a tree in this sense. You can assume `self` to be the implicit root.
+
+Restrictions:
+
+- Only values you would use as keys of a hash should be used as nodes of a Sycamore tree. Although Ruby's official Hash documentation says *a Hash allows you to use any object type*, one is well advised [to use immutable objects only](http://jafrog.com/2012/10/07/mutable-objects-as-hash-keys-in-ruby.html). Enumerables as nodes are explicitly excluded by Sycamore.
+- The nodes are unordered and can't contain duplicates.
+- A Sycamore tree is uni-directional, i.e. has no relationship to its parent.
+
+## Why
+
+JSON, document-oriented databases, GraphQL and much more - trees in the sense of recursively nested sets are omnipresent today. But why then are there so few implementations of tree data structures? The answer is simple: because of Ruby's powerful built-in hashes. The problem is that while Ruby's Hash, as an implementation of the [Hash map data structure](https://en.wikipedia.org/wiki/Hash_table), might be perfectly fine for flat dictionary like structures, it is not very well-suited for storing tree structures. Ruby's hash literals, which allow it to easily nest multiple hashes, belie this fact. But it catches up when you want to build up a tree with hashes dynamically and have to manage the hash nesting manually.
+
+In contrast to the few existing implementations of tree data structures in Ruby, Sycamores is based on Ruby's very efficient hashes and contains the values directly without any additional overhead. It only wraps the hashes itself. This wrapper object is very thin, containing nothing more than the hash itself. This comes at the price of the aforementioned restrictions, prohibiting it to be a general applicable tree implementation. But I hope to get around some of these restrictions in the future.
+
+Another compelling reason for the use of Sycamore is its handling of `nil`. Much has [been](https://www.youtube.com/watch?v=OMPfEXIlTVE) [said](http://programmers.stackexchange.com/questions/12777/are-null-references-really-a-bad-thing) about the problem of `nil` (or equivalent null-values in other languages), including: ["It was my Billion-dollar mistake"](http://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare) from its founder, Tony Hoare. Every developer has experienced it in the form of errors such as 
+
+```
+NoMethodError: undefined method '[]' for nil:NilClass
+```
+
+With Sycamore this is a thing of the past.
 
 
-A `Sycamore::Tree` interprets a Ruby Hash as a set of nodes and a mapping to potential child trees, i.e. other `Sycamore::Tree`s recursivly, containing nodes with more Sycamore trees etc., but the nesting is abstracted away. It provides a Ruby Hash compatible API, which controls the full life-cycle of a `Sycamore::Tree`, without having to take care or even notice the nesting (of Hashs via Trees). Sycamore has a notion of Absence, so the controlled life-cycle begins before the creation, so that Trees get created automatically, but only then, when absolutely required.
+## Supported Ruby versions
 
-So, in essence, in Sycamore there are no `nil`s anymore and we thereby get rid of what Tony Hoare called [his billion-dollar-mistake](http://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare). At least in Ruby, where it is surprisingly easy to implement [in restricted circumstances].
+- MRI >= 2.0
 
+
+## Dependencies
+
+- none
 
 ## Installation
 
-With an installed version of Ruby, you can install Sycamore from your command line as a [Ruby gem](https://rubygems.org/gems/sycamore):
+The recommended installation method is via [RubyGems](http://rubygems.org/).
 
     $ gem install sycamore
 
 
 ## Usage
 
-I recommend to try the following code for yourself and play around more with it, using a Ruby REPL, e.g. like [Pry](http://pryrepl.org).
+I will introduce Sycamore's Tree API by comparing it with [Rubys native Hash API](http://ruby-doc.org/core-2.2.3/Hash.html).
 
-    $ pry -r sycamore
-
-Or better, you activate the optional Sycamore Ruby Extension, which allows you to use a `Sycamore::Tree` unqualified as `Tree`.
-
-    $ pry -r sycamore/extension
-
-To use `Sycamore::Tree` unqualified in your Ruby code, you have to require it in your code explicitly with this file.
+In the following I'll always write `Tree` for the Sycamore tree class, instead of the fully qualified `Sycamore::Tree`. By default, this global `Tree` constant is not available. If you want this, you'll have to 
 
 ```ruby
 require 'sycamore/extension'
-```
+``` 
 
-I hope to offer this extensions in a much less obtrusive way soon, by implementating them as Ruby 2 refinements. Watch the progress in [issue #?]().
-
-But before we come to know the `Sycamore::Tree`, one aspect you should be aware of: Sycamore's application of CQS as a general pattern/idiom of method implementations to it's `Tree` class.
-
-
-### Command-Query-Separation (CQS)
-
-The instance methods of the `Sycamore::Tree` class are divided into two groups, for the two types of return type behaviour of the [CQS principle](http://martinfowler.com/bliki/CommandQuerySeparation.html):
-
-- _Command methods_ of a `Tree` return `self` and go [Eastward](http://confreaks.tv/videos/rubyconf2014-eastward-ho-a-clear-path-through-ruby-with-oo). Above being idempotent regarding the return value by consistently returning `self`, all _command methods_ of a `Tree` are also idempotent with respect to the state of a `Tree`: many subsequent calls of the same method with the same args, don't change the state after the first call.
--  _Query methods_ of a `Tree` return the result of the query and don't change the state of the `Tree` at all.
-
-### Method name conventions
-
-Since operators don't support blocks, the `Tree` methods are implemented as ordinary methods and aliased to an operator. The operators are the prefered way of usage (at least, it's my taste and usage furtherhence), unless you need the block [or some other not available feature?].
-
-
-### Tree creation
-
-A `Sycamore::Tree` can be created manually with its constructor.
+When you can't or don't to want to have the `Tree` alias constant in the global namespace, but still want a short alternative name, you can alternatively
 
 ```ruby
-tree = Tree.new # => #<Sycamore::Tree:0x0123456789abcd @map={}>
-```
+require 'sycamore/stree'
+``` 
 
-For convenience, the constructor with all its affordances can be used also with the `Sycamore.Tree()` factory function, which can be used unqualified also, when the `sycamore/extension` is activated.
+to get an alias constant `STree` with less potential for conflicts.
 
-```ruby
-tree = Tree() # => #<Sycamore::Tree:0x007fa662ad17d0 @map={}>
-```
+I recommend trying the following code yourself in a Ruby REPL like [Pry](http://pryrepl.org).
 
-Another option to create a tree is the Tree class method `[]`.
 
-```ruby
-tree = Tree[] # => #<Sycamore::Tree:0x007fa662ad17d0 @map={}>
-```
+### Creating trees
 
-But where now comes the announced life-cycle into play, that begins before the creation. For that, I have to comfort you, with the hint, that all subsequentially needed Tree creations to build up the intended tree structure, are done automatically when needed, and only when needed. Before we introduce that, we have to understand what a Tree consists of.
+A `Sycamore::Tree` can be created similar to Hashes with the standard constructor or the class-level `[]` operator.
 
-As you can see now, our created `Tree` is `empty?`
+`Tree.new` creates an empty `Sycamore::Tree`.
 
 ```ruby
+tree = Tree.new
 tree.empty?  # => true
 ```
 
-So, let's add some content by giving it some nodes ...
+No additional arguments are supported at the time. As you'll see, for a `Sycamore::Tree` the functionality of the Hash constructor to specify the default value behaviour is of too little value to justify its use in the default constructor. The decision of its use can be tracked in [issue #1]().
 
-
-### Nodes
-
-#### Introduction
-
-Let's start our examination of the contents of `Tree`s by studying flat trees, containing leaves only, i.e. containing nodes without children only, so we can focus on the concept of nodes. This will allow us to move on familiar ground and compare it to another, simpler, but closely related data structure of the Ruby Standard Library: `Set`. A flat tree with leaves only, is equivalent to a Set in general and to Ruby's `Set` implementation in specific.
-
-A tree without children is only a set of nodes. So, what is a node? In Sycamore, _node_ is only another word for _value_. In any place, you can replace the word 'node' with the word 'value' and vice versa. But I prefer the term `node` over `value` because it is more neutral, at least with less dissent connotations. For example, it sounds strange and unfamiliar to talk of properties or attributes as values. But that's also a valid tree structure of nodes. 
-
-Now, a node is a value. But what do I mean by that. Technically, since `Tree`s are in fact just Ruby Hashes, it can be every object, that adheres the requirements for an object to be used as a hash key: It must provide a proper `hash` method implementation.
-
-Let's see this in action.
-
-
-#### API
-
-You can add a node with `add_node`, like this
+The `[]` operator creates a new `Tree` and adds the arguments as its initial input. It can handle a single node value, a collection of nodes or a complete tree. 
 
 ```ruby
-tree.add_node(42) # => #<Sycamore::Tree:0x007fa662ad17d0 @map={42=>Nothing}>
+Tree[1]           # => #<Sycamore::Tree:0x3fcfe51a5a3c {1=>n/a}>
+Tree[1, 2, 3]     # => #<Sycamore::Tree:0x3fcfe51a56f4 {1=>n/a, 2=>n/a, 3=>n/a}>
+Tree[1, 2, 2, 3]  # => #<Sycamore::Tree:0x3fcfe51a52d0 {1=>n/a, 2=>n/a, 3=>n/a}>
+Tree[x: 1, y: 2]  # => #<Sycamore::Tree:0x3fcfe51a4e34 {:x=>1, :y=>2}>
 ```
 
-and get the whole node set back with `nodes`, like that
+As you can see in line 3 nodes are stored as a set, i.e. with duplicates removed.
+
+Note that multiple arguments are not interpreted as an associative array as `Hash[]` does, but rather as a set of leaves, i.e. nodes without children.
 
 ```ruby
-tree.nodes # => [42]
+Hash[1, 2, 3, 4]  # => {1=>2, 3=>4}
+Hash[1, 2, 3]     # => ArgumentError: odd number of arguments for Hash
 ```
 
-You can also add multiple nodes at once with `add_nodes`, by providing the nodes either as multiple arguments, or as a single `Enumerable` argument.
+You can also see that children of leaves, i.e. nodes without children, are signified with `n/a`. When providing input data with Hashes, you can use `nil` as the child value of a leaf.
 
 ```ruby
-tree.add_nodes [1, 2]  # => #<Sycamore::Tree:0x007fa662ad17d0 @map={42=>Nothing, 1=>Nothing, 2=>nil}>
-tree.add_nodes(1, 2)   # does the same (by splatting the args)
-tree.nodes             # => [42, 1, 2]
+Tree[x: 1, y: 2, z: nil]  
+# => #<Sycamore::Tree:0x3fcfe51a4e34 {:x=>1, :y=>2, :z=>n/a}>
 ```
 
-Nested collections are not supported by `add_nodes`.
+In general the `nil` child value for leaves in Hash literals is mandatory, but on the first level it can be ommitted, by providing the leaves as an argument before the non-leaf nodes.
 
 ```ruby
-tree.add_nodes [1, [2, 3]]
-# => ArgumentError: can't handle enumerable nodes
+Tree[:a, :b, c: {d: 1, e: nil}]
+# => #<Sycamore::Tree:0x3fd3f9c6bb0c {:a=>n/a, :b=>n/a, :c=>{:d=>1, :e=>n/a}}>
 ```
 
-Another option for adding nodes is the `<<` operator. 
+If you really want to have a node with `nil` as a child, you'll have to put the `nil` in an array.
 
 ```ruby
-tree << [1, 2] # => #<Sycamore::Tree:0x007fa662ad17d0 @map={42=>nil, 1=>nil, 2=>nil}>
+Tree[x: 1, y: 2, z: [nil]]  
+# => #<Sycamore::Tree:0x3fd641858264 {:x=>1, :y=>2, :z=>nil}>
 ```
 
-This operator is an alias for the universal `add` method, which delegates to `add_nodes` unless the given value is a hash. 
 
-You can also give a single node or an `Enumerable` of nodes to `new` (or the `Sycamore.Tree()` factory function), which will get delegated to `add_node` resp. `add_nodes` of the newly created `Tree`.
+### Accessing trees
+
+Access to elements of a `Sycamore::Tree` is mostly API-compatible to that of Rubys Hash class. But there is one major difference in the return type of most of the access methods: Since we are dealing with a recursively defined tree structure, the returned children are always trees as well.
+
+The main method for accessing a tree is the `[]` operator.
 
 ```ruby
-Tree.new(42).nodes # => [42]
-Tree(42).nodes     # does the same
-Tree([1, 2]).nodes # => [1, 2]
+tree = Tree[x: 1, y: {2 => "a"}]
+
+tree[:x]    # => #<Sycamore::Tree:0x3fea48d24d40 {1=>n/a}>
+tree[:y]    # => #<Sycamore::Tree:0x3fea48d24b74 {2=>"a"}>
+tree[:y][2] # => #<Sycamore::Tree:0x3fea48d248f4 {"a"=>n/a}>
 ```
 
-Finally, you can use the `Tree.[]` class method, which allows to provide a set of node directly, instead requiring an explicit Array construction.
+The actual nodes of a tree can be retrieved with the method `nodes`.
 
 ```ruby
-Tree[1, 2].nodes # => [1, 2]
+tree.nodes  # => [:x, :y]
+tree[:x].nodes  # => [1]
+tree[:y].nodes  # => [2]
+tree[:y][2].nodes  # => ["a"]
 ```
 
-Now, we have filled a `Sycamore::Tree` with nodes. 
+If it's certain that a tree has at most one element, you can also use `node` to get that node directly.
 
 ```ruby
-tree.empty? # => false
-tree.size   # => 3
+tree[:y].node     # => 2
+tree[:y][2].node  # => "a"
+tree[:x][1].node  # => nil
+tree.node  # Sycamore::NonUniqueNodeSet: multiple nodes present: [:x, :y]
 ```
 
-What can we do with them? We can see if a tree includes a node with `include?`.
+As opposed to Hash, the `[]` operator of `Sycamore::Tree` also supports multiple arguments which get interpreted as a path.
 
 ```ruby
-...
+tree[:y, 2].node  # => "a"
 ```
 
-TODO: We can remove nodes ...
-
-TODO: We can enumerate them ...
-
-But that wouldn't be much more, than using a plain `Set` from Ruby's Standard library, because we have no children, only leaves. 
+For compatibility with Ruby 2.3 hashes, this can also be done with the `dig` method.
 
 ```ruby
-tree.leaves?           # a shortcut for  
-tree.leaf?(tree.nodes) # => true
-tree.children.empty?   # => true
+tree.dig(:y, 2).node  # => "a"
 ```
 
-Redundant with above:
-But in fact, without children, you can use Sycamore `Tree`s as a full substitute of Rubys `Set`. It is API compatible and uses the same amount of memory in this case and [is as fast as it. TODO: make speed comparisons].
-
-
-
-### Child trees
-
-#### Introduction
-
-There are two basic categories of nodes: A node with a child tree or a node without a child tree, i.e. a leaf node. A node with a child tree is connected with another `Sycamore::Tree` and so on, recursively, until we reach a leaf.
-
-The connection of all nodes to their child tree is the `Hash` map of a `Sycamore::Tree` and everything a `Sycamore::Tree` consists of. 
-
-The whole high-level child API are in fact only three methods, which also can be used via Ruby operators.
-
-- `child` or `[]`
-- `add` or `<<`
-- `remove` or `>>`
-
-These methods delegate to lower-level methods, depending on the arguments types. These lower-level methods further delegate to implementation-specific methods. For a description of this child API in detail, read its documentation [here](). 
-
-
-#### API
-
-##### Adding children with `add` or `<<`
-
-You can add complex tree structure of nodes to a `Tree` with the already mentioned universal `add` method or `<<` operator. As discussed, `add` and `<<` applied on a simple value or a non-Hash-like Enumerable will add a single node or a set of nodes. Now, when you give it a Hash-like object, it will add a corresponding tree structure of nodes.
+`fetch`, as a more controlled way to access the elements, is also supported.
 
 ```ruby
-root = Tree()
-root << { property: "value" } # does the same
-root.add property: "value"    # => <Tree:0x...>
-root.nodes # => [:property]
+tree.fetch(:x)               # => #<Sycamore::Tree:0x3fea48d24d40 {1=>n/a}>
+tree.fetch(:z)               # => KeyError: key not found: :z
+tree.fetch(:z, :default)     # => :default
+tree.fetch(:z) { :default }  # => :default
 ```
 
-As the `Tree` constructor and the `Tree()` factory function delegate to `add`, they can be used with a Hash-like structure, too.
+Fetching the child of a leaf behaves almost the same as fetching the child of a non-existing node, i.e. the default value is returned or a `KeyError` gets raised. In order to differentiate these cases, a `Sycamore::ChildError` as a subclass of `KeyError` is raised when accessing the child of a leaf.
+
+The number of nodes of a tree can be determined with `size`. This will only count direct nodes.
 
 ```ruby
-root = Tree(property: "value")
+tree.size  # => 2
 ```
 
-##### Hash-like structures
-
-Before we look at the created child tree, let's discuss what is meant with the terms of Hash-like or non-Hash-like structures. 
-
-TODO: ... 
-
-If an object is Hash-like is determined by the module function `Tree.hash_like?`, which implements a heuristic. The details can be found in the documentation. I will simplify the ...
-
-
-
-##### Getting a child with `child` or `[]`
-
-To get the child tree of a node, simply give the node to `child` or the `[]` operator.
+`total_size` or its short alias `tsize` returns the total number of nodes of a tree, including the nodes of children.
 
 ```ruby
-root = Tree(1 => 2)
-root.child(1) # => <Tree:0x...>
-root[1]		  # does the same
-root[1].nodes # => [2]
+tree.total_size  # => 5
+tree[:y].tsize   # => 2
 ```
 
-As you see, `child` and `<<` return another `Tree`. So, if you simply want to add some nodes as children to a single node, you can do that without a Hash-like structure like this:
+The height of a tree, i.e. the length of its longest path can be computed with  the method `height`.
 
 ```ruby
-root = Tree(1)
-root[1] << 2
-root[1].nodes # => [2] 
-root[1][2] << [3, 4]
+tree.height  # => 3
 ```
 
-But the just created `Tree` could be created simpler, even without a Hash-like structure. 
+`empty?` checks if a tree is empty.
 
 ```ruby
-root = Tree()
-root[1][2] << [3, 4]
+tree.empty?         # => false
+tree[:x, 1].empty?  # => true
 ```
 
-To understand why this works and we don't get an `undefined method '[]' for nil:NilClass` exception like you would for a Ruby Hash, we must look at how `child` or `[]` handle leaves? 
+`leaf?` checks if a node is a leaf.
 
-Also note, that `child` and `[]` support a second variant using `Path`s, which will be discussed later. This allows further simplifications when accessing deeper children.
+```ruby
+tree.leaf? :x     # => false
+tree[:x].leaf? 1  # => true
+```
+
+`leaves?` (or one of its aliases `external?` and `flat?`) can be used to determine this for more nodes at once.
+
+```ruby
+Tree[1, 2, 3].leaves?(1, 2)  # => true
+```
+
+Without any arguments `leaves?` returns whether all nodes of a tree are leaves.
+
+```ruby
+Tree[1, 2].leaves?  # => true
+```
+
+`include?` checks whether one or more nodes are in the set of nodes of this tree.
+
+```ruby
+tree.include? :x        # => true
+tree.include? [:x, :y]  # => true
+```
+
+`include?` can also check whether a tree structure (incl. a hash) is a sub tree of a `Sycamore::Tree`.
+
+```ruby
+tree.include?(x: 1, y: 2)  # => true
+```
 
 
+### Accessing absent trees
+
+There is another major difference to a hash, which is in fact just a consequence of the already mentioned difference, that the access methods (except `fetch`) **always** return trees, when asked for children: They even return a child tree, when it does not exist. When you ask a hash for a non-existent element with the `[]` operator, you'll get a `nil`, which is an incarnation of the null-problem and the cause of many bug tracking sessions.
+
+```ruby
+hash = {x: 1, y: {2 => "a"}}
+hash[:z]  # => nil
+hash[:z][3]  # => NoMethodError: undefined method `[]' for nil:NilClass
+```
+
+Sycamore on the other side returns a special tree, the `Nothing` tree:
+
+```ruby
+tree = Tree[x: 1, y: {2 => "a"}]
+tree[:z]     # => #<Sycamore::Nothing>
+tree[:z][3]  # => #<Sycamore::Nothing>
+```
+
+`Sycamore::Nothing` is a singleton `Tree` implementing a [null object](https://en.wikipedia.org/wiki/Null_Object_pattern). It behaves on every query method call like an empty tree.
+
+```ruby
+Sycamore::Nothing.empty?  # => true
+Sycamore::Nothing.size    # => 0
+Sycamore::Nothing[42]     # => #<Sycamore::Nothing>
+```
+
+Sycamore adheres to a strict [command-query-separation (CQS)](https://en.wikipedia.org/wiki/Command%E2%80%93query_separation). A method is either a command changing the state of the tree and returning `self` or a query method, which only computes and returns the results of the query, but leaves the state unchanged. The only exception to this strict separation is made, when it is necessary in order to preserve hash compatibility. All query methods are supported by the `Sycamore::Nothing` tree with empty tree semantics.
+
+Among the command methods are two subclasses: additive command methods, which add elements and destructive command methods, which remove elements. These are further refined into pure additive and pure destructive command methods, which either support additions or deletions only, not both operations at once. The `Sycamore::Tree` extends Ruby's reflection API with class methods to retrieve the respective methods: `query_methods`, `command_methods`, `additive_command_methods`, `destructive_command_methods`, `pure_additive_command_methods`, `pure_destructive_command_methods`.
+
+```ruby
+Tree.command_methods
+# => [:add, :<<, :replace, :create_child, :[]=, :delete, :>>, :clear, :compact, :replace, :[]=, :freeze]
+Tree.additive_command_methods
+# => [:add, :<<, :replace, :create_child, :[]=]
+Tree.pure_additive_command_methods
+# => [:add, :<<, :create_child]
+Tree.pure_destructive_command_methods
+# => [:delete, :>>, :clear, :compact]
+```
+
+Pure destructive command methods on `Sycamore::Nothing` are no-ops. All other command methods raise an exception.
+
+```ruby
+Sycamore::Nothing.clear  # => #<Sycamore::Nothing>
+Sycamore::Nothing[:foo] = :bar  
+# => Sycamore::NothingMutation: attempt to change the Nothing tree
+```
+
+But inspecting the `Nothing` tree returned by `Tree#[]` further shows, that this isn't the end of the story.
+
+```ruby
+tree[:z].inspect
+# => absent child of node :z in #<Sycamore::Tree:0x3fc88e04a470 {:x=>1, :y=>{2=>"a"}}>
+tree[:z][3].inspect
+# => absent child of node 3 in absent child of node :z in #<Sycamore::Tree:0x3fc88e04a470 {:x=>1, :y=>{2=>"a"}}>
+```
+
+We'll actually get an `Absence` object, a [proxy object](https://en.wikipedia.org/wiki/Proxy_pattern) for the requested not yet existing tree. As long as we don't try to change it, this `Absence` object delegates all method calls to `Sycamore::Nothing`. But as soon as we call a non-pure-destructive command method, the missing tree will be created, added to the parent tree and the method call gets delegated to the now existing tree.
+
+```ruby
+tree[:z] = 3
+tree.to_h  # => {:x=>1, :y=>{2=>"a"}, :z=>3}
+```
+
+So a `Sycamore::Tree` is a tree, on which the nodes grow automatically, but only when needed. And this works recursively on arbitrarily deep nested absent trees.
+
+```ruby
+tree[:some][:very][:deep] = :node
+tree.to_h  # => {:x=>1, :y=>{2=>"a"}, :z=>3, :some=>{:very=>{:deep=>:node}}}
+```
+
+In order to determine whether a node has no children, you can simply use `empty?`.
+
+```ruby
+tree = Tree[a: 1]
+tree[:a].empty?  # => false
+tree[:b].empty?  # => true  
+```
+
+But how can you distinguish an empty from a missing tree?
+
+```ruby
+user = Tree[name: 'Adam', shopping_cart_items: []]
+
+user[:shopping_cart_items].empty?  # => true
+user[:foo].empty?                  # => true
+```
+
+One way is the use of the `absent?` method, which only returns `true` on an `Absence` object.
+
+```ruby
+user[:shopping_cart_items].absent?  # => false
+user[:foo].absent?                  # => true
+```
+
+Another possibility, without the need to create the `Absence` in the first place is the `leaf?` method, since it also checks for the presence of a node.
+
+```ruby
+user.leaf? :shopping_cart_items         # => true
+user.leaf? :foo                         # => false
+```
+
+But the `leaf?` method has as similar problem in this respect: it doesn't differentiate between absent and empty children.
+
+```ruby
+tree = Tree[foo: nil, bar: []]
+tree.leaf? :foo         # => true
+tree.leaf? :bar         # => true
+```
+
+`strict_leaf?` and `strict_leaves?` (or their short aliases `sleaf?` and `sleaves?`) are more strict in this regard: when a node has an empty child tree it is considered a leaf, but not a strict leaf.
+
+```ruby
+tree.strict_leaf? :foo  # => true
+tree.strict_leaf? :bar  # => false
+```
+
+Besides `absent?`, the congeneric methods `blank?` (as an alias of `empty?`) and its negation `present?` are ActiveSupport compatible available. Unfortunately, the natural expectation of `Tree#present?` and `Tree#absent?` to be mutually opposed leads astray.
+
+```ruby
+user[:shopping_cart_items].absent?   # => false
+user[:shopping_cart_items].present?  # => false
+```
+
+The risks rising from an ActiveSupport incompatible `present?` is probably greater then this inconsistence. So, if you want check if a tree is not absent, use `existent?` as the negation of `absent?`.
+
+Beside these options, `fetch` is also a method to handle this situation in a nuanced way.
+
+```ruby
+user.fetch(:shopping_cart_items)  # => #<Sycamore::Tree:0x3febb9c9b3d4 {}>
+user.fetch(:foo)                            
+# => KeyError: key not found: :foo
+user.fetch(:foo, :default)  # => :default
+```
+
+Empty child trees also play a role when determining equality. The `eql?` and `==` equivalence differ exactly in their handling of this question: `==` treats empty child trees as absent trees, while `eql?` doesn't.
+
+```ruby
+Tree[:foo].eql? Tree[foo: []]  # => false
+Tree[:foo] == Tree[foo: []]    # => true
+```
+
+All empty child trees can be removed with `compact`.
+
+```ruby
+Tree[:foo].eql? Tree[foo: []].compact  # => true
+```
+
+An arbitrary structure can be compared with a `Sycamore::Tree` for equality with `===`.
+
+```ruby
+Tree[:foo, :bar] === [:foo, :bar]      # => true
+Tree[:foo, :bar] === Set[:foo, :bar]   # => true
+Tree[:foo => :bar] === {:foo => :bar}  # => true
+```
 
 
-### Absent trees and the `Nothing` tree
+### Changing trees
 
-> "The Egyptians' Holy Sycamore also stood on the threshold of life and death, connecting the two worlds." - [Wikipedia](http://en.wikipedia.org/wiki/Tree_of_life)
+Let's examine the command methods to change the contents of a tree. The `add` method or the `<<` operator as its alias allows the addition of one, multiple or a tree structure of nodes.
+
+```ruby
+tree = Tree.new
+tree << 1
+tree << [2, 3]
+tree << {3 => :a, 4 => :b}
+puts tree 
+> Tree[1=>nil, 2=>nil, 3=>:a, 4=>:b]
+```
+
+The `[]=` operator is Hash-compatible supported.
+
+```ruby
+tree[5] = :c
+puts tree 
+> Tree[1=>nil, 2=>nil, 3=>:a, 4=>:b, 5=>:c]
+```
+
+Note that this is just an `add` with a previous call of `clear`, which deletes all elements of the tree. This means, you can safely assign another tree without having to think about object identity.
+
+If you want to explicitly state, that a node doesn't have any children, you can specify it in the following equivalent ways.
+
+```ruby
+tree[:foo] = []
+tree[:foo] = {}
+```
+
+Note that these values are interpreted similarly inside tree structures, i.e. empty Enumerables become empty child trees, while `Nothing` or `nil` are used as place holders for the explicit negation of a child.
+
+```ruby
+puts Tree[ a: { b: nil }, c: { d: []} ]
+>Tree[:a=>:b, :c=>{:d=>[]}]
+```
+
+Beside the deletion of all elements with the already mentioned `clear` method, single or multiple nodes and entire tree structures can be removed with `delete` or the `>>` operator.
+
+```ruby
+tree >> 1
+tree >> [2, 3]
+tree >> {4 => :b}
+puts tree 
+> Tree[5=>:c, :foo=>[]]
+```
+
+When removing a tree structure, only child trees with no more existing nodes get deleted.
+
+```ruby
+tree = Tree[a: [1,2]]
+tree >> {a: 1}
+puts tree 
+> Tree[:a=>2]
+
+tree = Tree[a: 1, b: 2]
+tree >> {a: 1}
+puts tree 
+> Tree[:b=>2]
+```
 
 
-### Trees as Enumerables
+### Iterating trees
 
-### Tree equivalence
+The fundamental `each` and with that all Enumerable methods behave Hash-compatible.
 
+```ruby
+tree = Tree[ 1 => {a: 'foo'}, 2 => :b, 3 => nil ]
+tree.each { |node, child| puts "#{node} => #{child}" }
 
-## Project Status?
+> 1 => Tree[:a=>"foo"]
+> 2 => Tree[:b]
+> 3 => Tree[]
+```
 
-??
+`each_path` iterates over all paths to leafs of a tree. 
 
-## Development
+```ruby
+tree.each_path { |path| puts path }
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `bin/console` for an interactive prompt that will allow you to experiment.
+> #<Path: /1/a/foo>
+> #<Path: /2/b>
+> #<Path: /3>
+```
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release` to create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+The paths are represented by `Sycamore::Path` objects and are basically an Enumerable of the nodes on the path, specifically optimized for the enumeration of the set of paths of a tree. It does this, by sharing nodes between the different path objects. This means in the set of all paths, every node is contained exactly once, even the internal nodes being part of multiple paths.
+
+```ruby
+Tree['some possibly very big data chunk' => [1, 2]].each_path.to_a
+# => [#<Sycamore::Path["some possibly very big data chunk",1]>,
+#     #<Sycamore::Path["some possibly very big data chunk",2]>]
+```
 
 
 ## Contributing
 
-
-1. Fork it ( https://github.com/marcelotto/sycamore/fork )
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
+see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 
-## License
+## License and Copyright
 
-Copyright (c) 2015-2016 Marcel Otto. MIT Licensed, see [LICENSE](LICENSE.TXT) for details.
+(c) 2015-2016 Marcel Otto. MIT Licensed, see [LICENSE](LICENSE.TXT) for details.
