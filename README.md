@@ -1,6 +1,8 @@
 
 # Sycamore
 
+[![Join the chat at https://gitter.im/marcelotto/sycamore](https://badges.gitter.im/marcelotto/sycamore.svg)](https://gitter.im/marcelotto/sycamore?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 > _"The Egyptians' Holy Sycamore also stood on the threshold of life and death, connecting the two worlds."_  - [Wikipedia: Tree of Life](http://en.wikipedia.org/wiki/Tree_of_life)
 
 [![Travis CI Build Status](https://secure.travis-ci.org/marcelotto/sycamore.png)](https://travis-ci.org/marcelotto/sycamore?branch=master)
