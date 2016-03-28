@@ -40,7 +40,8 @@ With Sycamore this is a thing of the past.
 
 ## Supported Ruby versions
 
-- MRI >= 2.0
+- MRI >= 2.1
+- JRuby
 
 
 ## Dependencies
