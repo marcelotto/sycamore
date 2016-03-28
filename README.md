@@ -7,6 +7,7 @@
 [![Travis CI Build Status](https://secure.travis-ci.org/marcelotto/sycamore.png)](https://travis-ci.org/marcelotto/sycamore?branch=master)
 [![Inline docs](http://inch-ci.org/github/marcelotto/sycamore.png)](http://inch-ci.org/github/marcelotto/sycamore)
 [![Documentation](http://img.shields.io/badge/docs-rdoc.info-blue.svg)](http://rubydoc.org/gems/spread2rdf/frames)
+[![Gitter Chat](http://img.shields.io/badge/chat-gitter.im-orange.svg)](https://gitter.im/marcelotto/sycamore)
 [![License](http://img.shields.io/license/MIT.png?color=green)](http://opensource.org/licenses/MIT)
 
 **Sycamore is an implementation of an unordered tree data structure.**
@@ -501,6 +502,7 @@ Tree['some possibly very big data chunk' => [1, 2]].each_path.to_a
 ## Getting help
 
 - [RDoc](http://www.rubydoc.info/gems/sycamore/)
+- [Gitter](https://gitter.im/marcelotto/sycamore)
 
 
 ## Contributing
