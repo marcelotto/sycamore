@@ -4,6 +4,7 @@
 > _"The Egyptians' Holy Sycamore also stood on the threshold of life and death, connecting the two worlds."_  - [Wikipedia: Tree of Life](http://en.wikipedia.org/wiki/Tree_of_life)
 
 [![Travis CI Build Status](https://secure.travis-ci.org/marcelotto/sycamore.png)](https://travis-ci.org/marcelotto/sycamore?branch=master)
+[![Inline docs](http://inch-ci.org/github/marcelotto/sycamore.png)](http://inch-ci.org/github/marcelotto/sycamore)
 [![License](http://img.shields.io/license/MIT.png?color=green)](http://opensource.org/licenses/MIT)
 
 **Sycamore is an implementation of an unordered tree data structure.**
