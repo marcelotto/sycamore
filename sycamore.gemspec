@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Marcel Otto']
   spec.email         = ['marcelotto@gmx.de']
 
-  spec.summary       = %q{A pure Ruby implementation of a tree data structure of immutable values.}
+  spec.summary       = %q{An unordered tree data structure for Ruby.}
   spec.description   = %q{Sycamore is an implementation of an unordered tree data structure of immutable values solely based on Ruby Hashes.}
   spec.homepage      = 'https://github.com/marcelotto/sycamore'
 
@@ -17,10 +17,6 @@ Gem::Specification.new do |spec|
   spec.bindir        = 'exe'
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
-
-  # if spec.respond_to?(:metadata)
-  #   spec.metadata['allowed_push_host'] = "TODO: Set to 'http://mygemserver.com' to prevent pushes to rubygems.org, or delete to allow pushes to any server."
-  # end
 
   spec.add_development_dependency 'bundler', '~> 1.9'
   spec.add_development_dependency 'rake', '~> 10.0'
