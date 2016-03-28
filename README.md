@@ -5,6 +5,7 @@
 >   -- [Wikipedia: Tree of Life](http://en.wikipedia.org/wiki/Tree_of_life)
 
 [![Travis CI Build Status](https://secure.travis-ci.org/marcelotto/sycamore.png)](https://travis-ci.org/marcelotto/sycamore?branch=master)
+[![Coverage Status](https://coveralls.io/repos/marcelotto/sycamore/badge.png)](https://coveralls.io/r/marcelotto/sycamore)
 [![Inline docs](http://inch-ci.org/github/marcelotto/sycamore.png)](http://inch-ci.org/github/marcelotto/sycamore)
 [![Documentation](http://img.shields.io/badge/docs-rdoc.info-blue.svg)](http://rubydoc.org/gems/spread2rdf/frames)
 [![Gitter Chat](http://img.shields.io/badge/chat-gitter.im-orange.svg)](https://gitter.im/marcelotto/sycamore)

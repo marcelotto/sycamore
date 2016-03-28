@@ -1,3 +1,18 @@
+require 'bundler/setup'
+begin
+  require 'simplecov'
+  require 'coveralls'
+  SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new([
+     SimpleCov::Formatter::HTMLFormatter,
+     Coveralls::SimpleCov::Formatter
+  ])
+  SimpleCov.start do
+    add_filter "/spec/"
+  end
+rescue LoadError => e
+  STDERR.puts "Coverage Skipped: #{e.message}"
+end
+
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'sycamore'
 require 'set'
