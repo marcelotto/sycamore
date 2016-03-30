@@ -258,7 +258,7 @@ tree.include?(x: 1, y: 2)  # => true
 
 ### Accessing absent trees
 
-There is another major difference to a hash: They even return a child tree when it does not exist. When you ask a hash for a non-existent element with the `[]` operator, you'll get a `nil`, which is an incarnation of the null-problem and the cause of many bug tracking sessions.
+There is another major difference in the access method behaviour of a Scyamore tree in comparison to hashes: The child access methods even return a tree when it does not exist. When you ask a hash for a non-existent element with the `[]` operator, you'll get a `nil`, which is an incarnation of the null-problem and the cause of many bug tracking sessions.
 
 ```ruby
 hash = {x: 1, y: {2 => "a"}}
