@@ -63,7 +63,7 @@ The recommended installation method is via [RubyGems](http://rubygems.org/).
 
 ## Usage
 
-I will introduce Sycamore's Tree API by comparing it with [Rubys native Hash API](http://ruby-doc.org/core-2.2.3/Hash.html).
+I will introduce Sycamore's Tree API by comparing it with [Ruby's Hash API](http://ruby-doc.org/core-2.2.3/Hash.html).
 
 In the following I'll always write `Tree` for the Sycamore tree class, instead of the fully qualified `Sycamore::Tree`. By default, this global `Tree` constant is not available. If you want this, you'll have to 
 
@@ -93,7 +93,7 @@ tree = Tree.new
 tree.empty?  # => true
 ```
 
-No additional arguments are supported at the time. As you'll see, for a `Sycamore::Tree` the functionality of the Hash constructor to specify the default value behaviour is of too little value to justify its use in the default constructor.
+No additional arguments are supported at the time. As you'll see, for a `Sycamore::Tree` the functionality of the Hash constructor to specify the default value behaviour is of too little value to justify its use in the default constructor, so I'd like to reserve them for something more useful.
 
 The `[]` operator creates a new `Tree` and adds the arguments as its initial input. It can handle a single node value, a collection of nodes or a complete tree. 
 
@@ -173,7 +173,7 @@ As opposed to Hash, the `[]` operator of `Sycamore::Tree` also supports multiple
 tree[:y, 2].node  # => "a"
 ```
 
-For compatibility with Ruby 2.3 hashes, this can also be done with the `dig` method.
+For compatibility with Ruby 2.3 Hashes, this can also be done with the `dig` method.
 
 ```ruby
 tree.dig(:y, 2).node  # => "a"
@@ -251,7 +251,7 @@ tree.include?(x: 1, y: 2)  # => true
 
 ### Accessing absent trees
 
-There is another major difference to a hash, which is in fact just a consequence of the already mentioned difference, that the access methods (except `fetch`) **always** return trees, when asked for children: They even return a child tree, when it does not exist. When you ask a hash for a non-existent element with the `[]` operator, you'll get a `nil`, which is an incarnation of the null-problem and the cause of many bug tracking sessions.
+There is another major difference to a hash: They even return a child tree when it does not exist. When you ask a hash for a non-existent element with the `[]` operator, you'll get a `nil`, which is an incarnation of the null-problem and the cause of many bug tracking sessions.
 
 ```ruby
 hash = {x: 1, y: {2 => "a"}}
@@ -275,7 +275,7 @@ Sycamore::Nothing.size    # => 0
 Sycamore::Nothing[42]     # => #<Sycamore::Nothing>
 ```
 
-Sycamore adheres to a strict [command-query-separation (CQS)](https://en.wikipedia.org/wiki/Command%E2%80%93query_separation). A method is either a command changing the state of the tree and returning `self` or a query method, which only computes and returns the results of the query, but leaves the state unchanged. The only exception to this strict separation is made, when it is necessary in order to preserve hash compatibility. All query methods are supported by the `Sycamore::Nothing` tree with empty tree semantics.
+Sycamore adheres to a strict [command-query-separation (CQS)](https://en.wikipedia.org/wiki/Command%E2%80%93query_separation). A method is either a command changing the state of the tree and returning `self` or a query method, which only computes and returns the results of the query, but leaves the state unchanged. The only exception to this strict separation is made, when it is necessary in order to preserve Hash compatibility. All query methods are supported by the `Sycamore::Nothing` tree with empty tree semantics.
 
 Among the command methods are two subclasses: additive command methods, which add elements and destructive command methods, which remove elements. These are further refined into pure additive and pure destructive command methods, which either support additions or deletions only, not both operations at once. The `Sycamore::Tree` extends Ruby's reflection API with class methods to retrieve the respective methods: `query_methods`, `command_methods`, `additive_command_methods`, `destructive_command_methods`, `pure_additive_command_methods`, `pure_destructive_command_methods`.
 
