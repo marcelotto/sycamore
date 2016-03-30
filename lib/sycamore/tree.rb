@@ -44,7 +44,7 @@ module Sycamore
     # the names of all methods, which side-effect-freeze return only a value
     QUERY_METHODS = PREDICATE_METHODS +
       %i[new_child dup hash to_native_object to_h to_s inspect
-         node nodes keys child_of child_at dig fetch
+         node node! nodes keys child_of child_at dig fetch
          size total_size tsize height
          each each_path paths each_node each_key each_pair] << :[]
 
@@ -489,11 +489,34 @@ module Sycamore
     #   tree[:baz].node  # => nil
     #   tree[:bar].node  # => raise Sycamore::NonUniqueNodeSet, "multiple nodes present: [2, 3]"
     #
+    # @see Tree#node!
+    #
     def node
       nodes = self.nodes
       raise NonUniqueNodeSet, "multiple nodes present: #{nodes}" if nodes.size > 1
 
       nodes.first
+    end
+
+    ##
+    # The only node of this tree or an exception, if none or more {#nodes nodes} present.
+    #
+    # @return [Object] the single present node
+    #
+    # @raise [EmptyNodeSet] if no nodes present
+    # @raise [NonUniqueNodeSet] if more than one node present
+    #
+    # @example
+    #   tree = Tree[foo: 1, bar: [2,3]]
+    #   tree[:foo].node!  # => 1
+    #   tree[:baz].node!  # => raise Sycamore::EmptyNodeSet, "no node present"
+    #   tree[:bar].node!  # => raise Sycamore::NonUniqueNodeSet, "multiple nodes present: [2, 3]"
+    #
+    # @see Tree#node
+    #
+    def node!
+      raise EmptyNodeSet, 'no node present' if empty?
+      node
     end
 
     ##

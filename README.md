@@ -167,6 +167,13 @@ tree[:x][1].node  # => nil
 tree.node  # Sycamore::NonUniqueNodeSet: multiple nodes present: [:x, :y]
 ```
 
+The bang variant `node!` raises an error when the node set is empty, instead of returning `nil`.
+
+```ruby
+tree[:y][2].node!  # => "a"
+tree[:x][1].node!  # => # Sycamore::EmptyNodeSet: no node present
+```
+
 As opposed to Hash, the `[]` operator of `Sycamore::Tree` also supports multiple arguments which get interpreted as a path.
 
 ```ruby

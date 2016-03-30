@@ -64,9 +64,40 @@ describe Sycamore::Tree do
     end
 
     context 'when containing multiple nodes' do
-      it 'does raise a TypeError' do
+      it 'does raise an error' do
         expect { Sycamore::Tree[:foo, :bar].node }.to raise_error Sycamore::NonUniqueNodeSet
         expect { Sycamore::Tree[foo: 1, bar: 2, baz: nil].node }.to raise_error Sycamore::NonUniqueNodeSet
+      end
+    end
+  end
+
+  ############################################################################
+
+  describe '#node!' do
+    context 'when empty' do
+      it 'does raise an error' do
+        expect { Sycamore::Tree.new.node! }.to raise_error Sycamore::EmptyNodeSet
+      end
+    end
+
+    context 'when containing a single node' do
+      context 'without children' do
+        it 'does return the node' do
+          expect( Sycamore::Tree[1].node! ).to eql 1
+        end
+      end
+
+      context 'with children' do
+        it 'does return the node' do
+          expect( Sycamore::Tree[1 => [2,3]].node! ).to eql 1
+        end
+      end
+    end
+
+    context 'when containing multiple nodes' do
+      it 'does raise a TypeError' do
+        expect { Sycamore::Tree[:foo, :bar].node! }.to raise_error Sycamore::NonUniqueNodeSet
+        expect { Sycamore::Tree[foo: 1, bar: 2, baz: nil].node! }.to raise_error Sycamore::NonUniqueNodeSet
       end
     end
   end
