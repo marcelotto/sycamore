@@ -255,6 +255,11 @@ tree.include? [:x, :y]  # => true
 tree.include?(x: 1, y: 2)  # => true
 ```
 
+`to_h` returns the tree as a Hash.
+
+```ruby
+tree.to_h  # => {:x=>1, :y=>{2=>"a"}}
+```
 
 ### Accessing absent trees
 
