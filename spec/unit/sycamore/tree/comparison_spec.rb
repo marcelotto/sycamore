@@ -611,4 +611,33 @@ describe Sycamore::Tree do
     end
   end
 
+
+  ############################################################################
+
+  describe '#search(a_string)' do
+    programmers = Sycamore::Tree.new
+    programmers[:name, "Dewayne"] << {skill: "Ruby"}
+    programmers[:name, "Dewayne"] << {skill: "Ada"}
+    programmers[:name, "Marcel"]  << {skill: "Ruby"}
+    programmers[:name, "Marcel"]  << {author_of: "sycamore"}
+
+    context "Looking for something in a tree" do
+
+      it "should return an empty array when something is not in the tree" do
+        java_programmers = programmers.search('Java')
+        expect (java_programmers.class == Array)
+        expect (java_programmers.empty?)
+      end
+
+      it "should return an array of paths when something is found in the tree" do
+        ruby_programmers = programmers.search('Ruby')
+        expect (ruby_programmers.class == Array)
+        expect (2 == ruby_programmers.size)
+        expect (ruby_programmers.first.class == Sycamore::Path)
+      end
+
+    end
+
+  end
+
 end
