@@ -1012,7 +1012,7 @@ module Sycamore
     #
     #
     def search(a_string)
-      self.each_path.select{|a_path| a_path.join('/').include?(a_string)}
+      self.each_path.select{|a_path| a_path.join('/').downcase.include?(a_string.downcase)}
     end
 
 
