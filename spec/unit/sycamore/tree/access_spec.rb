@@ -349,4 +349,74 @@ describe Sycamore::Tree do
     end
   end
 
+  ############################################################################
+
+  describe '#search' do
+    context 'when given a single node' do
+      it 'does return an empty array, when the given node is not present in the tree or any of its child trees' do
+        expect( Sycamore::Tree.new.search(1) ).to be_an(Array).and be_empty
+        expect( Sycamore::Tree[foo: '1'].search(1) ).to be_an(Array).and be_empty
+      end
+
+      it 'does return the root path, when the given node is present in the node set directly' do
+        expect( Sycamore::Tree[1,2,3].search(2) ).to contain_exactly Sycamore::Path::ROOT
+      end
+
+      it 'does return all paths to the child trees, where the given node is in the node set' do
+        expect( Sycamore::Tree[foo: :bar].search(:bar) ).to contain_exactly Sycamore::Path[:foo]
+        expect( Sycamore::Tree[1 => {2 => [3, 42], 42 => 4}].search(42) )
+          .to contain_exactly Sycamore::Path[1, 2], Sycamore::Path[1]
+      end
+
+      it 'does return every path to the child trees, even when the given node is multiple times present on the path' do
+        expect( Sycamore::Tree[foo: {foo: :foo}].search(:foo) )
+          .to contain_exactly Sycamore::Path[], Sycamore::Path[:foo], Sycamore::Path[:foo, :foo]
+      end
+    end
+
+    context 'when given an enumerable collection of nodes' do
+      it 'does return an empty array, when all of the given nodes are not present in the tree or any of its child trees' do
+        expect( Sycamore::Tree[1].search([1,2]) ).to be_an(Array).and be_empty
+        expect( Sycamore::Tree[foo: :bar].search([:foo, :bar]) ).to be_an(Array).and be_empty
+      end
+
+      it 'does return the root path, when the given nodes are present in the node set directly' do
+        expect( Sycamore::Tree[1,2,3].search([1, 2]) ).to contain_exactly Sycamore::Path::ROOT
+      end
+
+      it 'does return all paths to the child trees, where the given nodes are in the node set' do
+        expect( Sycamore::Tree[foo: [:bar, :baz]].search([:bar, :baz]) ).to contain_exactly Sycamore::Path[:foo]
+        expect( Sycamore::Tree[1 => {2 => [3, :foo, :bar], 4 => [:foo, :bar]}].search([:foo, :bar]) )
+          .to contain_exactly Sycamore::Path[1, 2], Sycamore::Path[1, 4]
+      end
+
+      it 'does return every path to the child trees, even when the given nodes are multiple times present on the path' do
+        expect( Sycamore::Tree[foo: {foo: [:foo, :bar]}, bar: nil].search([:foo, :bar]) )
+          .to contain_exactly Sycamore::Path[], Sycamore::Path[:foo, :foo]
+      end
+    end
+
+    context 'when given a tree-like structure' do
+      it 'does return an empty array, when all the given tree structure is not present in the tree or any of its child trees' do
+        expect( Sycamore::Tree[1].search(foo: :bar) ).to be_an(Array).and be_empty
+        expect( Sycamore::Tree[foo: :bar].search(foo: :baz) ).to be_an(Array).and be_empty
+      end
+
+      it 'does return the root path, when the given tree structure is present directly' do
+        expect( Sycamore::Tree[foo: :bar].search(foo: :bar) ).to contain_exactly Sycamore::Path::ROOT
+      end
+
+      it 'does return all paths to the child trees, where the given tree structure is present' do
+        expect( Sycamore::Tree[1 => {foo: [:bar, :baz]}].search(foo: :bar) ).to contain_exactly Sycamore::Path[1]
+        expect( Sycamore::Tree[1 => {2 => {3 => nil, foo: :bar}, 4 => {foo: :bar}}].search(foo: :bar) )
+          .to contain_exactly Sycamore::Path[1, 2], Sycamore::Path[1, 4]
+      end
+
+      it 'does return every path to the child trees, even when the given tree structure is multiple times present on the path' do
+        expect( Sycamore::Tree[foo: {foo: {foo: :bar}, bar: nil}].search(foo: :bar) )
+          .to contain_exactly Sycamore::Path[], Sycamore::Path[:foo, :foo]
+      end
+    end
+  end
+
 end

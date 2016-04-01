@@ -44,7 +44,7 @@ module Sycamore
     # the names of all methods, which side-effect-freeze return only a value
     QUERY_METHODS = PREDICATE_METHODS +
       %i[new_child dup hash to_native_object to_h to_s inspect
-         node node! nodes keys child_of child_at dig fetch
+         node node! nodes keys child_of child_at dig fetch search
          size total_size tsize height
          each each_path paths each_node each_key each_pair] << :[]
 
@@ -806,6 +806,32 @@ module Sycamore
         else
           include_node? elements
       end
+    end
+
+    ##
+    # Searches the tree for one or multiple nodes or a complete tree.
+    #
+    # @param nodes_or_tree [Object, Array, Tree, Hash]
+    # @return [Array<Path>]
+    #
+    # @example
+    #   tree = Tree[ "a" => [:foo, 100], "b" => { foo: [:bar, :baz] } ]
+    #   tree.search :bar          # => [Sycamore::Path["b", :foo]]
+    #   tree.search :foo          # => [Sycamore::Path["a"], Sycamore::Path["b"]]
+    #   tree.search [:bar, :baz]  # => [Sycamore::Path["b", :foo]]
+    #   tree.search foo: :bar     # => [Sycamore::Path["b"]]
+    #   tree.search 42            # => []
+    #
+    def search(nodes_or_tree)
+      _search(nodes_or_tree)
+    end
+
+    protected def _search(query, current_path: Path::ROOT, results: [])
+      results << current_path if include?(query)
+      each do |node, child|
+        child._search(query, current_path: current_path/node, results: results)
+      end
+      results
     end
 
     ##

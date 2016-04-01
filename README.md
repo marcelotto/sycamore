@@ -513,6 +513,23 @@ Tree['some possibly very big data chunk' => [1, 2]].each_path.to_a
 ```
 
 
+### Searching in trees
+
+`search` returns the set of all paths to child trees containing a node or tree.
+
+```ruby
+tree = Tree[ 1 => {a: 'foo'}, 2 => :b, 3 => [:a, :b, :c] ]
+tree.search :a        # => [#<Sycamore::Path[1]>, #<Sycamore::Path[1]>]
+tree.search a: 'foo'  # => [#<Sycamore::Path[1]>]
+```
+
+If you search for multiple nodes, only the paths to child trees containing all of the given nodes are returned.
+
+```ruby
+tree.search [:b, :c]  # => [#<Sycamore::Path[3]>]
+```
+
+
 ## Getting help
 
 - [RDoc](http://www.rubydoc.info/gems/sycamore/)
