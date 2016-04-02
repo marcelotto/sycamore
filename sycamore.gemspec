@@ -12,6 +12,9 @@ Gem::Specification.new do |spec|
   spec.summary       = %q{An unordered tree data structure for Ruby.}
   spec.description   = %q{Sycamore is an implementation of an unordered tree data structure of immutable values solely based on Ruby Hashes.}
   spec.homepage      = 'https://github.com/marcelotto/sycamore'
+  spec.license       = 'MIT'
+
+  spec.required_ruby_version = '>= 2.1'
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   spec.bindir        = 'exe'
