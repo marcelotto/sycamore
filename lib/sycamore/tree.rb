@@ -18,10 +18,12 @@ module Sycamore
     ########################################################################
 
     # the names of all command methods, which add elements to a Tree
-    ADDITIVE_COMMAND_METHODS = %i[add << replace add_node_with_empty_child] << :[]=
+    ADDITIVE_COMMAND_METHODS = %i[add << replace add_node_with_empty_child
+       clear_child_of_node] << :[]=
 
     # the names of all command methods, which delete elements from a Tree
-    DESTRUCTIVE_COMMAND_METHODS = %i[delete >> clear compact replace] << :[]=
+    DESTRUCTIVE_COMMAND_METHODS = %i[delete >> clear compact replace
+        clear_child_of_node] << :[]=
 
     # the names of all additive command methods, which only add elements from a Tree
     PURE_ADDITIVE_COMMAND_METHODS = ADDITIVE_COMMAND_METHODS - DESTRUCTIVE_COMMAND_METHODS
@@ -223,12 +225,6 @@ module Sycamore
     end
 
     ##
-    # Adds a node with an empty child to this tree.
-    #
-    # @return +self+ as a proper command method
-    #
-    # @raise [InvalidNode]
-    #
     # @api private
     #
     def add_node_with_empty_child(node)
@@ -237,6 +233,17 @@ module Sycamore
       if @data.fetch(node, Nothing).nothing?
         @data[node] = new_child(node)
       end
+
+      self
+    end
+
+    ##
+    # @api private
+    #
+    def clear_child_of_node(node)
+      raise InvalidNode, "#{node} is not a valid tree node" if node.is_a? Enumerable
+
+      @data[node] = Nothing
 
       self
     end
@@ -289,7 +296,6 @@ module Sycamore
     #   tree.delete "d" => {foo: :baz}
     #   tree.to_h  # => {}
     #
-    # @todo differentiate a greedy and a non-greedy variant
     # @todo support Paths
     #
     def delete(nodes_or_tree)
@@ -374,6 +380,9 @@ module Sycamore
     # Note that even if you assign a {Sycamore::Tree} directly the given tree
     # will not become part of this tree by reference.
     #
+    # An exception is the assignment of the {Nothing} tree: it will delete the
+    # child tree at the given path entirely.
+    #
     # @overload []=(*path, node)
     #   Replaces the contents of the child at the given path with a single node.
     #   @param path [Array<Object>, Sycamore::Path] a path as a sequence of nodes or a {Path} object
@@ -406,12 +415,23 @@ module Sycamore
     #   tree.to_h  # => {:foo => :baz, 1 => :baz}
     #   tree[:foo] << :bar
     #   tree.to_h  # => {:foo => [:baz, :bar], 1 => :baz}
+    #   tree[:foo] = Sycamore::Nothing
+    #   tree.to_h  # => {:foo => nil, 1 => :baz}
     #
     def []=(*args)
       path, nodes_or_tree = args[0..-2], args[-1]
       raise ArgumentError, 'wrong number of arguments (given 1, expected 2)' if path.empty?
 
-      child_at(*path).replace(nodes_or_tree)
+      if nodes_or_tree.equal? Sycamore::Nothing
+        if path.size == 1
+          clear_child_of_node(path.first)
+        else
+          path, node = path[0..-2], path[-1]
+          child_at(*path).clear_child_of_node(node)
+        end
+      else
+        child_at(*path).replace(nodes_or_tree)
+      end
     end
 
     ##
@@ -446,7 +466,7 @@ module Sycamore
     def compact
       @data.each do |node, child| case
           when child.nothing? then next
-          when child.empty?   then @data[node] = Nothing
+          when child.empty?   then clear_child_of_node(node)
           else child.compact
         end
       end

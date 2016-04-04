@@ -449,6 +449,12 @@ tree[:foo] = []
 tree[:foo] = {}
 ```
 
+To remove a child tree entirely, you can assign `Nothing` to the parent node.
+
+```ruby
+tree[:foo] = Nothing
+```
+
 Note that these values are interpreted similarly inside tree structures, i.e. empty Enumerables become empty child trees, while `Nothing` or `nil` are used as place holders for the explicit negation of a child.
 
 ```ruby

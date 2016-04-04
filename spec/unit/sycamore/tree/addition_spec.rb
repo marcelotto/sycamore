@@ -268,6 +268,31 @@ describe Sycamore::Tree do
       end
     end
 
+    context 'when assigning Nothing' do
+      context 'when the node at the given path is present' do
+        it 'does remove a child' do
+          tree = Sycamore::Tree[a: 1]
+          expect { tree[:a] = Sycamore::Nothing }
+            .to change { tree[:a].class }.from(Sycamore::Tree).to(Sycamore::Absence)
+          expect( tree ).to eql Sycamore::Tree[:a]
+
+          tree = Sycamore::Tree[a: {b: 1}]
+          expect { tree[:a, :b] = Sycamore::Nothing }
+            .to change { tree[:a, :b].class }.from(Sycamore::Tree).to(Sycamore::Absence)
+          expect( tree ).to eql Sycamore::Tree[a: :b]
+        end
+      end
+
+      context 'when the node at the given path is not present' do
+        it 'does create the tree' do
+          tree = Sycamore::Tree.new
+          expect { tree[:a] = Sycamore::Nothing }.to change { tree }.from(Sycamore::Tree[]).to(Sycamore::Tree[:a])
+          tree = Sycamore::Tree.new
+          expect { tree[:b, :c] = Sycamore::Nothing }.to change { tree }.from(Sycamore::Tree[]).to(Sycamore::Tree[b: :c])
+        end
+      end
+    end
+
     context 'edge cases' do
       it 'does raise an error, when the given path is empty' do
         expect { tree[] = 42 }.to raise_error ArgumentError
@@ -278,7 +303,7 @@ describe Sycamore::Tree do
         expect { tree[nil, nil] = 1 }.to change { tree[nil, nil].nodes }.from([]).to([1])
 
         tree = Sycamore::Tree[nil => 1]
-        expect { tree[nil] = 2      }.to change { tree[nil].node  }.from(1).to(2)
+        expect { tree[nil] = 2 }.to change { tree[nil].node }.from(1).to(2)
 
         tree = Sycamore::Tree[nil => {nil => 2}]
         expect { tree[nil, nil] = [3, 4] }.to change { tree[nil, nil].nodes }.from([2]).to([3,4])
