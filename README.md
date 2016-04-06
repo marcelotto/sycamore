@@ -48,6 +48,7 @@ With Sycamore this is a thing of the past.
 
 - MRI >= 2.1
 - JRuby
+- Rubinius
 
 
 ## Dependencies

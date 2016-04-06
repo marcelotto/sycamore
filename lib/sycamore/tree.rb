@@ -326,7 +326,7 @@ module Sycamore
     end
 
     private def delete_tree(tree)
-      tree.each do |node, child|
+      tree.each { |node, child| # using a {} block to circumvent this Rubinius issue: https://github.com/rubinius/rubinius-code/issues/7
         raise InvalidNode, "#{node} is not a valid tree node" if node.is_a? Enumerable
         next unless include? node
         if Nothing.like?(child) or (child.respond_to?(:empty?) and child.empty?)
@@ -337,7 +337,7 @@ module Sycamore
             delete_node(node) if this_child.empty?
           end
         end
-      end
+      }
 
       self
     end

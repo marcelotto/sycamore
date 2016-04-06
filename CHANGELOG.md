@@ -4,7 +4,12 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/) and
 [Keep a CHANGELOG](http://keepachangelog.com).
 
+
 ## [Unreleased]
+### Fixed
+
+- #2: Rubinius support
+
 
 ## [0.2.0] - 2016-04-05
 ### Added
@@ -13,6 +18,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 - `Tree#search` for searching the tree for one or multiple nodes or a tree
 - `Tree#node!` as a more strict variant of `Tree#node`, which raises an error 
   when no node present
+
 
 ## 0.1.0 - 2016-03-28
 
