@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ['marcelotto@gmx.de']
 
   spec.summary       = %q{An unordered tree data structure for Ruby.}
-  spec.description   = %q{Sycamore is an implementation of an unordered tree data structure of immutable values solely based on Ruby Hashes.}
+  spec.description   = %q{Sycamore is an unordered tree data structure.}
   spec.homepage      = 'https://github.com/marcelotto/sycamore'
   spec.license       = 'MIT'
 
