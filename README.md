@@ -450,17 +450,24 @@ tree[:foo] = []
 tree[:foo] = {}
 ```
 
-To remove a child tree entirely, you can assign `Nothing` to the parent node.
+To remove a child tree entirely, you can assign `Nothing` or `nil` to the parent node.
 
 ```ruby
 tree[:foo] = Nothing
+tree[:foo] = nil
 ```
 
-Note that these values are interpreted similarly inside tree structures, i.e. empty Enumerables become empty child trees, while `Nothing` or `nil` are used as place holders for the explicit negation of a child.
+If you really want to overwrite the current child nodes with a single `nil` node, you have to do it in the following way.
 
 ```ruby
-puts Tree[ a: { b: nil }, c: { d: []} ]
->Tree[:a=>:b, :c=>{:d=>[]}]
+tree[:foo] = [nil]
+```
+
+Note that all of these values are interpreted consistently inside input tree structures on creation, addition, deletion etc., i.e. empty Enumerables become empty child trees, `Nothing` or `nil` are used as place holders for the explicit negation of a child and `[nil]` is used for a child trees with a single `nil` node.
+
+```ruby
+puts Tree[ a: { b: nil }, c: { d: []}, d: [nil] ]
+>Tree[:a=>:b, :c=>{:d=>[]}, :d=>[nil]]
 ```
 
 Beside the deletion of all elements with the already mentioned `clear` method, single or multiple nodes and entire tree structures can be removed with `delete` or the `>>` operator.

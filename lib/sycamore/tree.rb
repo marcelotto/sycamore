@@ -380,8 +380,12 @@ module Sycamore
     # Note that even if you assign a {Sycamore::Tree} directly the given tree
     # will not become part of this tree by reference.
     #
-    # An exception is the assignment of the {Nothing} tree: it will delete the
-    # child tree at the given path entirely.
+    # An exception is the assignment of +nil+ or the {Nothing} tree: it will
+    # delete the child tree at the given path entirely. If you really want to
+    # overwrite the current child nodes with a single +nil+ node, you'll have to
+    # assign an array containing only +nil+.
+    #
+    #   tree[:foo] = [nil]
     #
     # @overload []=(*path, node)
     #   Replaces the contents of the child at the given path with a single node.
@@ -422,7 +426,7 @@ module Sycamore
       path, nodes_or_tree = args[0..-2], args[-1]
       raise ArgumentError, 'wrong number of arguments (given 1, expected 2)' if path.empty?
 
-      if nodes_or_tree.equal? Sycamore::Nothing
+      if Nothing.like? nodes_or_tree
         if path.size == 1
           clear_child_of_node(path.first)
         else

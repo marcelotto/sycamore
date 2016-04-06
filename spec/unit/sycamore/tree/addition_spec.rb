@@ -293,12 +293,43 @@ describe Sycamore::Tree do
       end
     end
 
+    context 'when assigning nil' do
+      context 'when the node at the given path is present' do
+        it 'does remove a child' do
+          tree = Sycamore::Tree[a: 1]
+          expect { tree[:a] = nil }
+            .to change { tree[:a].class }.from(Sycamore::Tree).to(Sycamore::Absence)
+          expect( tree ).to eql Sycamore::Tree[:a]
+
+          tree = Sycamore::Tree[a: {b: 1}]
+          expect { tree[:a, :b] = nil }
+            .to change { tree[:a, :b].class }.from(Sycamore::Tree).to(Sycamore::Absence)
+          expect( tree ).to eql Sycamore::Tree[a: :b]
+        end
+      end
+
+      context 'when the node at the given path is not present' do
+        it 'does create the tree' do
+          tree = Sycamore::Tree.new
+          expect { tree[:a] = nil }.to change { tree }.from(Sycamore::Tree[]).to(Sycamore::Tree[:a])
+          tree = Sycamore::Tree.new
+          expect { tree[:b, :c] = nil }.to change { tree }.from(Sycamore::Tree[]).to(Sycamore::Tree[b: :c])
+        end
+      end
+
+      it 'does assign a nil node, when assigning nil in an array' do
+        tree = Sycamore::Tree[foo: :bar]
+        tree[:foo] = [nil]
+        expect( tree[:foo].nodes ).to contain_exactly nil
+      end
+    end
+
     context 'edge cases' do
       it 'does raise an error, when the given path is empty' do
         expect { tree[] = 42 }.to raise_error ArgumentError
       end
 
-      it 'does treat nil like any other value' do
+      it 'does treat nil as part of the path like any other value' do
         expect { tree[nil] = 1      }.to change { tree[nil].nodes }.from([]).to([1])
         expect { tree[nil, nil] = 1 }.to change { tree[nil, nil].nodes }.from([]).to([1])
 
