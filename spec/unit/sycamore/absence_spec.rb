@@ -377,6 +377,10 @@ describe Sycamore::Absence do
         absent_tree.child_at(:something)
       end
     end
+
+    it 'does raise an ArgumentError, when given no arguments' do
+      expect { absent_tree.child_at() }.to raise_error ArgumentError
+    end
   end
 
   ############################################################################

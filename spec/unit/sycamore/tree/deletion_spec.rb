@@ -203,6 +203,12 @@ describe Sycamore::Tree do
   ############################################################################
 
   describe '#compact' do
+    it 'does not change a tree without empty child trees' do
+      tree = Sycamore::Tree[1, foo: :bar]
+      org_tree = tree.dup
+      expect(tree.compact).to eql org_tree
+    end
+
     it 'does delete all empty child trees' do
       expect( Sycamore::Tree[1=>[]].compact.child_of(1)).to be_absent
       expect( Sycamore::Tree[{1=>{},2=>{3=>{}}}].compact[1]).to be_absent
