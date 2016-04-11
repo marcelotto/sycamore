@@ -41,7 +41,7 @@ describe Sycamore::Tree do
   ############################################################################
 
   describe '#add' do
-    context 'when given an atomic value' do
+    context 'when given a single node' do
       it 'does add the value to the set of nodes' do
         expect( Sycamore::Tree.new.add 1 ).to include_node 1
       end
@@ -222,6 +222,58 @@ describe Sycamore::Tree do
             expect( Sycamore::Tree.new.add 1 => absent_tree ).to eql Sycamore::Tree[1 => 42]
           end
         end
+      end
+    end
+
+    context 'when given a single Path object' do
+      let(:path) { Sycamore::Path[:foo, :bar, :baz] }
+
+      it 'does add all nodes, when the path does not exist' do
+        expect( Sycamore::Tree.new.add(path) ).to include_path(path)
+      end
+
+      it 'does add the missing nodes, when the path exists partially' do
+        expect( Sycamore::Tree[foo: :bar].add(path) )
+          .to eql Sycamore::Tree[foo: {bar: :baz}]
+        expect( Sycamore::Tree[foo: :other].add(path) )
+          .to eql Sycamore::Tree[foo: {bar: :baz, other: nil}]
+      end
+
+      it 'does nothing, when the path already exists' do
+        expect( Sycamore::Tree[foo: {bar: :baz}].add(path) )
+          .to eql Sycamore::Tree[foo: {bar: :baz}]
+        expect( Sycamore::Tree[foo: {bar: {baz: :more}}].add(path) )
+          .to eql Sycamore::Tree[foo: {bar: {baz: :more}}]
+      end
+
+      it 'does not add an empty child at the path' do
+        expect( Sycamore::Tree.new.add(path).child_at(path) ).to be_absent
+        expect( Sycamore::Tree[foo: :bar].add(path).child_at(path) ).to be_absent
+        expect( Sycamore::Tree[foo: {bar: :baz}].add(path).child_at(path) ).to be_absent
+      end
+
+      context 'edge cases' do
+        it 'does nothing, when given an empty path' do
+          expect( Sycamore::Tree[foo: :bar].add(Sycamore::Path[]) )
+            .to eql Sycamore::Tree[foo: :bar]
+        end
+      end
+    end
+
+    context 'when given an Enumerable of Path objects' do
+      it 'does add all paths' do
+        expect( Sycamore::Tree.new.add(
+            [ Sycamore::Path[:foo, :bar, :baz], Sycamore::Path[1,2,3] ]) )
+          .to eql Sycamore::Tree[foo: {bar: :baz}, 1 => {2 => 3}]
+      end
+    end
+
+    context 'when given an Enumerable of mixed objects' do
+      it 'does add element appropriately' do
+        expect( Sycamore::Tree.new.add(
+          [ :foo, :bar, Sycamore::Path[:foo, :bar, :baz], {1=>2},
+            Sycamore::Tree[1=>{2=>3}]]) )
+          .to eql Sycamore::Tree[foo: {bar: :baz}, bar: nil, 1 => {2 => 3}]
       end
     end
   end

@@ -7,6 +7,10 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ## [Unreleased]
 
+### Added
+
+- `Tree#add` supports paths as input 
+
 
 
 ## [0.2.1] - 2016-04-07

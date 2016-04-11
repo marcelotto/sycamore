@@ -23,3 +23,13 @@ RSpec::Matchers.define :include_tree do |tree|
     expect(this_tree).to include_tree_part tree
   end
 end
+
+RSpec::Matchers.define :include_path do |path|
+  match do |this_tree|
+    tree = this_tree
+    path.each do |node|
+      expect(tree).to include_node node
+      tree = tree[node]
+    end
+  end
+end

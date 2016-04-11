@@ -177,6 +177,10 @@ module Sycamore
     #   adds a tree structure of nodes
     #   @param tree_structure [Hash, Tree]
     #
+    # @overload add(path)
+    #   adds a {Path} of nodes
+    #   @param path [Path]
+    #
     # @return +self+ as a proper command method
     #
     # @raise [InvalidNode] when given a nested node set
@@ -186,19 +190,19 @@ module Sycamore
     #   tree.add :foo
     #   tree.add [:bar, :baz]
     #   tree.add [:node, [:nested, :values]]  # => raise Sycamore::InvalidNode, "[:nested, :values] is not a valid tree node"
-    #   tree.add foo: 1, bar: {baz: 2}
+    #   tree.add foo: 1, bar: {qux: 2}
     #   tree.add foo: [:node, [:nested, :values]]  # => raise Sycamore::InvalidNode, "[:nested, :values] is not a valid tree node"
+    #   tree.add Sycamore::Path[1,2,3]
     #
     #   tree = Tree.new
     #   tree[:foo][:bar] << :baz
     #   tree[:foo] << { bar: 1, qux: 2 }
     #   tree.to_h  # => {:foo=>{:bar=>[:baz, 1], :qux=>2}}
     #
-    # @todo support Paths
-    #
     def add(nodes_or_tree)
       case
         when Tree.like?(nodes_or_tree)       then add_tree(nodes_or_tree)
+        when nodes_or_tree.is_a?(Path)       then add_path(nodes_or_tree)
         when nodes_or_tree.is_a?(Enumerable) then add_nodes(nodes_or_tree)
                                              else add_node(nodes_or_tree)
       end
@@ -208,9 +212,10 @@ module Sycamore
 
     alias << add
 
-    private def add_node(node)
+    protected def add_node(node)
       return self if node.equal? Nothing
       return add_tree(node) if Tree.like? node
+      return add_path(node) if node.is_a? Path
       raise InvalidNode, "#{node} is not a valid tree node" if node.is_a? Enumerable
 
       @data[node] ||= Nothing
@@ -259,6 +264,18 @@ module Sycamore
 
     private def add_tree(tree)
       tree.each { |node, child| add_child(node, child) }
+
+      self
+    end
+
+    private def add_path(path)
+      return self if path.root?
+
+      path.parent.inject(self) do |tree, node|
+        tree.add_node_with_empty_child(node)
+        tree[node]
+      end
+        .add_node path.node
 
       self
     end
