@@ -271,10 +271,10 @@ module Sycamore
     private def add_path(path)
       return self if path.root?
 
-      path.parent.inject(self) do |tree, node|
+      path.parent.inject(self) { |tree, node| # using a {} block to circumvent this Rubinius issue: https://github.com/rubinius/rubinius-code/issues/7
         tree.add_node_with_empty_child(node)
         tree[node]
-      end
+      }
         .add_node path.node
 
       self
