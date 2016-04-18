@@ -193,6 +193,7 @@ module Sycamore
     #   tree.add foo: 1, bar: {qux: 2}
     #   tree.add foo: [:node, [:nested, :values]]  # => raise Sycamore::InvalidNode, "[:nested, :values] is not a valid tree node"
     #   tree.add Sycamore::Path[1,2,3]
+    #   tree.to_h  # => {:foo=>1, :bar=>{:qux=>2}, :baz=>nil, 1=>{2=>3}}
     #
     #   tree = Tree.new
     #   tree[:foo][:bar] << :baz
@@ -201,10 +202,14 @@ module Sycamore
     #
     def add(nodes_or_tree)
       case
-        when Tree.like?(nodes_or_tree)       then add_tree(nodes_or_tree)
+        when nodes_or_tree.equal?(Nothing)   then # do nothing
+        when nodes_or_tree.is_a?(Tree)       then add_tree(nodes_or_tree)
+        when Tree.like?(nodes_or_tree)       then add_tree(valid_tree! nodes_or_tree)
         when nodes_or_tree.is_a?(Path)       then add_path(nodes_or_tree)
-        when nodes_or_tree.is_a?(Enumerable) then add_nodes(nodes_or_tree)
-                                             else add_node(nodes_or_tree)
+        when nodes_or_tree.is_a?(Enumerable)
+          nodes_or_tree.all? { |node| valid_node_element! node }
+          nodes_or_tree.each { |node| add(node) }
+        else add_node(nodes_or_tree)
       end
 
       self
@@ -213,31 +218,7 @@ module Sycamore
     alias << add
 
     protected def add_node(node)
-      return self if node.equal? Nothing
-      return add_tree(node) if Tree.like? node
-      return add_path(node) if node.is_a? Path
-      raise InvalidNode, "#{node} is not a valid tree node" if node.is_a? Enumerable
-
       @data[node] ||= Nothing
-
-      self
-    end
-
-    private def add_nodes(nodes)
-      nodes.each { |node| add_node(node) }
-
-      self
-    end
-
-    ##
-    # @api private
-    #
-    def add_node_with_empty_child(node)
-      raise InvalidNode, "#{node} is not a valid tree node" if node.is_a? Enumerable
-
-      if @data.fetch(node, Nothing).nothing?
-        @data[node] = new_child(node)
-      end
 
       self
     end
@@ -246,9 +227,20 @@ module Sycamore
     # @api private
     #
     def clear_child_of_node(node)
-      raise InvalidNode, "#{node} is not a valid tree node" if node.is_a? Enumerable
+      @data[valid_node! node] = Nothing
 
-      @data[node] = Nothing
+      self
+    end
+
+    ##
+    # @api private
+    #
+    def add_node_with_empty_child(node)
+      valid_node! node
+
+      if @data.fetch(node, Nothing).nothing?
+        @data[node] = new_child(node)
+      end
 
       self
     end
@@ -274,8 +266,7 @@ module Sycamore
       path.parent.inject(self) { |tree, node| # using a {} block to circumvent this Rubinius issue: https://github.com/rubinius/rubinius-code/issues/7
         tree.add_node_with_empty_child(node)
         tree[node]
-      }
-        .add_node path.node
+      }.add_node path.node
 
       self
     end
@@ -329,9 +320,8 @@ module Sycamore
 
     private def delete_node(node)
       return delete_tree(node) if Tree.like? node
-      raise InvalidNode, "#{node} is not a valid tree node" if node.is_a? Enumerable
 
-      @data.delete(node)
+      @data.delete(valid_node! node)
 
       self
     end
@@ -344,7 +334,7 @@ module Sycamore
 
     private def delete_tree(tree)
       tree.each { |node, child| # using a {} block to circumvent this Rubinius issue: https://github.com/rubinius/rubinius-code/issues/7
-        raise InvalidNode, "#{node} is not a valid tree node" if node.is_a? Enumerable
+        valid_node! node
         next unless include? node
         if Nothing.like?(child) or (child.respond_to?(:empty?) and child.empty?)
           delete_node node
@@ -579,7 +569,7 @@ module Sycamore
     # @todo Should we differentiate the case of a leaf and a not present node? How?
     #
     def child_of(node)
-      raise InvalidNode, "#{node} is not a valid tree node" if node.is_a? Enumerable
+      valid_node! node
 
       Nothing.like?(child = @data[node]) ? Absence.at(self, node) : child
     end
@@ -655,7 +645,7 @@ module Sycamore
     # @todo Should we differentiate the case of a leaf and a not present node? How?
     #
     def fetch(node, *default, &block)
-      raise InvalidNode, "#{node} is not a valid tree node" if node.is_a? Enumerable
+      valid_node! node
 
       child = @data.fetch(node, *default, &block)
       if child.equal? Nothing
@@ -1297,6 +1287,36 @@ module Sycamore
             to_h(sleaf_child_as: Sycamore::NothingTree::NestedString).inspect}>"
     end
 
+    # @api private
+    #
+    private def valid_tree!(tree)
+      tree.each { |node, child| # using a {} block to circumvent this Rubinius issue: https://github.com/rubinius/rubinius-code/issues/7
+        next if child.nil?
+        valid_node!(node)
+        valid_tree!(child) if Tree.like?(child)
+      }
+
+      tree
+    end
+
+    # @api private
+    #
+    private def valid_node_element!(node)
+      raise InvalidNode, "#{node} is not a valid tree node" if
+        node.is_a?(Enumerable) and not node.is_a?(Path) and not Tree.like?(node)
+
+      node
+    end
+
+
+    # @api private
+    #
+    private def valid_node!(node)
+      raise InvalidNode, "#{node} is not a valid tree node" if node.is_a? Enumerable
+
+      node
+    end
+
     ##
     # Checks if the given object can be converted into a Tree.
     #
@@ -1321,7 +1341,6 @@ module Sycamore
     class << self
       alias like? tree_like?
     end
-
 
     ########################################################################
     # @group Other standard Ruby methods

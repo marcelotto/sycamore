@@ -11,6 +11,10 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 - `Tree#add` supports paths as input 
 
+### Fixed
+
+- when given invalid input to `Tree#add` it fails without partial additions 
+
 
 
 ## [0.2.1] - 2016-04-07

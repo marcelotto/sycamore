@@ -100,6 +100,17 @@ describe Sycamore::Tree do
         end
       end
 
+      context 'when the array contains a nested enumerable that is not Tree-like' do
+        it 'raises an error' do
+          expect { Sycamore::Tree.new.add([1, [2, 3]]) }.to raise_error Sycamore::InvalidNode
+        end
+
+        it 'does not change the tree' do
+          expect { tree.add([1, [2, 3]]) }.to raise_error Sycamore::InvalidNode
+          expect( tree ).to be_empty
+        end
+      end
+
       context 'edge cases' do
         it 'does treat nil like any other value' do
           expect( Sycamore::Tree.new.add([1, nil]).nodes.to_set ).to eq [1, nil].to_set
@@ -108,10 +119,6 @@ describe Sycamore::Tree do
 
         it 'does nothing, when given an empty array' do
           expect( Sycamore::Tree.new.add [] ).to be_empty
-        end
-
-        it 'raises an error, when the nested enumerable is not Tree-like' do
-          expect { Sycamore::Tree.new.add([1, [2, 3]]) }.to raise_error Sycamore::InvalidNode
         end
       end
     end
@@ -147,6 +154,20 @@ describe Sycamore::Tree do
         end
       end
 
+      context 'when given a tree with an enumerable key' do
+        it 'raises an error' do
+          expect { Sycamore::Tree.new.add([1,2] => 3) }.to raise_error Sycamore::InvalidNode
+          expect { Sycamore::Tree.new.add({1 => 2} => 3) }.to raise_error Sycamore::InvalidNode
+          expect { Sycamore::Tree.new.add(Sycamore::Tree[1] => 42) }.to raise_error Sycamore::InvalidNode
+          expect { Sycamore::Tree.new.add(Sycamore::Nothing => 42) }.to raise_error Sycamore::InvalidNode
+        end
+
+        it 'does not change the tree' do
+          expect { tree.add([foo: :bar, [1,2] => 3]) }.to raise_error Sycamore::InvalidNode
+          expect( tree ).to be_empty
+        end
+      end
+
       context 'edge cases' do
         it 'does nothing, when given an empty hash' do
           expect( Sycamore::Tree.new << {} ).to be_empty
@@ -173,13 +194,6 @@ describe Sycamore::Tree do
         it 'does add a child with a nil node, when given an Array with nil as a child' do
           expect(Sycamore::Tree.new.add({1 => [nil]}).child_of(1)).not_to be_absent
           expect(Sycamore::Tree.new.add({1 => [nil], 2 => [nil]}).child_of(1)).to include_node nil
-        end
-
-        it 'does raise an error, when given a tree with an enumerable key' do
-          expect { Sycamore::Tree.new.add([1,2] => 3) }.to raise_error Sycamore::InvalidNode
-          expect { Sycamore::Tree.new.add({1 => 2} => 3) }.to raise_error Sycamore::InvalidNode
-          expect { Sycamore::Tree.new.add(Sycamore::Tree[1] => 42) }.to raise_error Sycamore::InvalidNode
-          expect { Sycamore::Tree.new.add(Sycamore::Nothing => 42) }.to raise_error Sycamore::InvalidNode
         end
       end
     end
