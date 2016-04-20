@@ -308,9 +308,13 @@ module Sycamore
     #
     def delete(nodes_or_tree)
       case
-        when Tree.like?(nodes_or_tree)       then delete_tree(nodes_or_tree)
-        when nodes_or_tree.is_a?(Enumerable) then delete_nodes(nodes_or_tree)
-                                             else delete_node(nodes_or_tree)
+        when nodes_or_tree.is_a?(Tree)       then delete_tree(nodes_or_tree)
+        when Tree.like?(nodes_or_tree)       then delete_tree(valid_tree! nodes_or_tree)
+        when nodes_or_tree.is_a?(Enumerable)
+          nodes_or_tree.all? { |node| valid_node_element! node }
+          nodes_or_tree.each { |node| delete node }
+        else
+          delete_node valid_node!(nodes_or_tree)
       end
 
       self
@@ -318,30 +322,30 @@ module Sycamore
 
     alias >> delete
 
-    private def delete_node(node)
-      return delete_tree(node) if Tree.like? node
-
-      @data.delete(valid_node! node)
+    protected def delete_node(node)
+      @data.delete(node)
 
       self
     end
 
-    private def delete_nodes(nodes)
-      nodes.each { |node| delete_node(node) }
-
-      self
-    end
-
-    private def delete_tree(tree)
-      tree.each { |node, child| # using a {} block to circumvent this Rubinius issue: https://github.com/rubinius/rubinius-code/issues/7
-        valid_node! node
-        next unless include? node
-        if Nothing.like?(child) or (child.respond_to?(:empty?) and child.empty?)
-          delete_node node
+    protected def delete_tree(tree)
+      tree.each { |node_to_delete, child_to_delete| # using a {} block to circumvent this Rubinius issue: https://github.com/rubinius/rubinius-code/issues/7
+        next unless include? node_to_delete
+        if Nothing.like?(child_to_delete) or
+            (child_to_delete.respond_to?(:empty?) and child_to_delete.empty?)
+          delete_node node_to_delete
         else
-          child_of(node).tap do |this_child|
-            this_child.delete child
-            delete_node(node) if this_child.empty?
+          fetch(node_to_delete, Nothing).tap do |child|
+            case
+              when child.empty? then next
+              when Tree.like?(child_to_delete)
+                child.delete_tree(child_to_delete)
+              when child_to_delete.is_a?(Enumerable)
+                child_to_delete.each { |node| child.delete_node node }
+              else
+                child.delete_node child_to_delete
+            end
+            delete_node(node_to_delete) if child.empty?
           end
         end
       }

@@ -47,9 +47,17 @@ describe Sycamore::Tree do
           expect( Sycamore::Tree[a: 1, b: 2     ].delete([:a, b: 2]) ).to be_empty
           expect( Sycamore::Tree[a: 1, b: [2, 3]].delete([:a, b: 2]) === {b: 3} ).to be true
         end
+      end
 
-        it 'raises an error, when the nested enumerable is not Tree-like' do
+      context 'when the array contains a nested enumerable that is not Tree-like' do
+        it 'raises an error' do
           expect { Sycamore::Tree.new.delete([1, [2, 3]]) }.to raise_error Sycamore::InvalidNode
+        end
+
+        it 'does not change the tree' do
+          tree = Sycamore::Tree[1,2]
+          expect { tree.delete([1, [2, 3]]) }.to raise_error Sycamore::InvalidNode
+          expect( tree.nodes ).to contain_exactly 1, 2
         end
       end
 
@@ -79,6 +87,7 @@ describe Sycamore::Tree do
       { before: {a: [1, 2]}      , delete: {a: [3]} },
       { before: {a: 1, b: [2,3]} , delete: {a:2, b:4} },
       { before: {a: [1, 2]}      , delete: {a: Sycamore::Tree[3]} },
+      { before: {a: 1}           , delete: {a: {1 => 2}} },
     ]
 
     PARTIAL_DELETE_TREE_EXAMPLES = [
@@ -108,6 +117,21 @@ describe Sycamore::Tree do
         end
       end
 
+      context 'when given a tree with an enumerable key' do
+        it 'raises an error' do
+          expect { Sycamore::Tree.new.delete([1,2] => 3) }.to raise_error Sycamore::InvalidNode
+          expect { Sycamore::Tree.new.delete({1 => 2} => 3) }.to raise_error Sycamore::InvalidNode
+          expect { Sycamore::Tree.new.delete(Sycamore::Tree[1] => 42) }.to raise_error Sycamore::InvalidNode
+          expect { Sycamore::Tree.new.delete(Sycamore::Nothing => 42) }.to raise_error Sycamore::InvalidNode
+        end
+
+        it 'does not change the tree' do
+          tree = Sycamore::Tree[:foo, 1]
+          expect { tree.delete([foo: :bar, [1,2] => 3]) }.to raise_error Sycamore::InvalidNode
+          expect( tree.nodes ).to contain_exactly :foo, 1
+        end
+      end
+
       context 'edge cases' do
         it 'does nothing, when given an empty hash' do
           expect( Sycamore::Tree.new >> {} ).to be_empty
@@ -133,13 +157,6 @@ describe Sycamore::Tree do
           expect(Sycamore::Tree[1 => 2].delete({1 => Sycamore::Nothing})).to be_empty
           expect(Sycamore::Tree[1 => 2].delete({1 => nil})).to be_empty
           expect(Sycamore::Tree[1 => nil].delete({1 => nil})).to be_empty
-        end
-
-        it 'does raise an error, when given a tree with an enumerable key' do
-          expect { Sycamore::Tree.new.delete([1,2] => 3) }.to raise_error Sycamore::InvalidNode
-          expect { Sycamore::Tree.new.delete({1 => 2} => 3) }.to raise_error Sycamore::InvalidNode
-          expect { Sycamore::Tree.new.delete(Sycamore::Tree[1] => 42) }.to raise_error Sycamore::InvalidNode
-          expect { Sycamore::Tree.new.delete(Sycamore::Nothing => 42) }.to raise_error Sycamore::InvalidNode
         end
       end
     end

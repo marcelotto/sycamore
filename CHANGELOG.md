@@ -13,7 +13,11 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ### Fixed
 
-- when given invalid input to `Tree#add` it fails without partial additions 
+- `Tree#add` or `Tree#delete` now fail without making any changes, when given 
+  invalid input. Previously these command methods performed their operations  
+  until the invalid input elements were encountered.
+- `Tree#delete` deleted paths, when they matched a given input path partially,
+  e.g. `Tree[a: 1] >> a: {1 => 2}` deleted successfully.
 
 
 
