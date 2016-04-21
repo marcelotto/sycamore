@@ -202,10 +202,10 @@ module Sycamore
     #
     def add(nodes_or_tree)
       case
-        when nodes_or_tree.equal?(Nothing)   then # do nothing
-        when nodes_or_tree.is_a?(Tree)       then add_tree(nodes_or_tree)
-        when Tree.like?(nodes_or_tree)       then add_tree(valid_tree! nodes_or_tree)
-        when nodes_or_tree.is_a?(Path)       then add_path(nodes_or_tree)
+        when nodes_or_tree.equal?(Nothing) then # do nothing
+        when nodes_or_tree.is_a?(Tree)     then add_tree(nodes_or_tree)
+        when Tree.like?(nodes_or_tree)     then add_tree(valid_tree! nodes_or_tree)
+        when nodes_or_tree.is_a?(Path)     then add_path(nodes_or_tree)
         when nodes_or_tree.is_a?(Enumerable)
           nodes_or_tree.all? { |node| valid_node_element! node }
           nodes_or_tree.each { |node| add(node) }
@@ -289,6 +289,10 @@ module Sycamore
     #   deletes a tree structure of nodes
     #   @param tree_structure [Hash, Tree]
     #
+    # @overload delete(path)
+    #   deletes a {Path} of nodes
+    #   @param path [Path]
+    #
     # @return +self+ as a proper command method
     #
     # @raise [InvalidNode] when given a nested node set
@@ -303,13 +307,15 @@ module Sycamore
     #   tree.to_h  # => {"d" => {foo: :baz}}
     #   tree.delete "d" => {foo: :baz}
     #   tree.to_h  # => {}
-    #
-    # @todo support Paths
+    #   tree = Tree[foo: {bar: :baz, qux: nil}]
+    #   tree.delete Sycamore::Path[:foo, :bar, :baz]
+    #   tree.to_h  # => {foo: :qux}
     #
     def delete(nodes_or_tree)
       case
-        when nodes_or_tree.is_a?(Tree)       then delete_tree(nodes_or_tree)
-        when Tree.like?(nodes_or_tree)       then delete_tree(valid_tree! nodes_or_tree)
+        when nodes_or_tree.is_a?(Tree) then delete_tree(nodes_or_tree)
+        when Tree.like?(nodes_or_tree) then delete_tree(valid_tree! nodes_or_tree)
+        when nodes_or_tree.is_a?(Path) then delete_path(nodes_or_tree)
         when nodes_or_tree.is_a?(Enumerable)
           nodes_or_tree.all? { |node| valid_node_element! node }
           nodes_or_tree.each { |node| delete node }
@@ -352,6 +358,18 @@ module Sycamore
 
       self
     end
+
+    protected def delete_path(path)
+      return delete_node(path.node) if path.length == 1
+
+      parent = child_at(path.parent)
+      return self if parent.absent?
+      parent.delete_node(path.node)
+      delete_path(path.parent) if parent.empty? and not path.parent.root?
+
+      self
+    end
+
 
     ##
     # Replaces the contents of this tree.

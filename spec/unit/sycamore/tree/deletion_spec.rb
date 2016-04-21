@@ -2,7 +2,7 @@ describe Sycamore::Tree do
 
   describe '#delete' do
 
-    context 'when given an atomic value' do
+    context 'when given a single node' do
       it 'does delete the value from the set of nodes' do
         expect( Sycamore::Tree[1] >> 1 ).to be_empty
         expect( Sycamore::Tree[1,2,3].delete(2).nodes.to_set ).to eql Set[1,3]
@@ -201,6 +201,46 @@ describe Sycamore::Tree do
       end
     end
 
+    context 'when given a single Path object' do
+      let(:path) { Sycamore::Path[:foo, :bar, :baz] }
+
+      it 'does delete the node at the given path and all other nodes on the path unless there are remaining children' do
+        expect( Sycamore::Tree[foo: { bar: [:baz, 42], qux: nil}].delete(path) )
+          .to eql Sycamore::Tree[foo: { bar: 42, qux: nil}]
+        expect( Sycamore::Tree[foo: { bar: :baz, qux: nil}].delete(path) )
+          .to eql Sycamore::Tree[foo: { qux: nil }]
+        expect( Sycamore::Tree[foo: { bar: :baz}].delete(path) ).to be_empty
+      end
+
+      it 'does nothing when the path does not exist on the tree' do
+        tree = Sycamore::Tree[1 => {2 => 3}]
+        expect( tree.delete(path) ).to eql tree
+      end
+
+      it 'does nothing, when given an empty path' do
+        tree = Sycamore::Tree[1 => {2 => 3}]
+        expect( tree.delete(Sycamore::Path[]) ).to eql tree
+      end
+    end
+
+    context 'when given multiple path objects' do
+      it 'does delete the nodes at all given paths and all other nodes on the paths unless there are remaining children' do
+        expect( Sycamore::Tree[foo: { bar: [:baz, 42], qux: nil}]
+                  .delete([Sycamore::Path[:foo, :bar, :baz],
+                          Sycamore::Path[:foo, :qux],
+                          Sycamore::Path[:missing]]) )
+          .to eql Sycamore::Tree[foo: { bar: 42}]
+      end
+    end
+
+    context 'when given an Enumerable of mixed objects' do
+      it 'does delete the elements appropriately' do
+        expect( Sycamore::Tree[foo: { bar: [:baz, 42], qux: [1,2]}, more: nil]
+                  .delete([:more, Sycamore::Path[:foo, :bar, 42],
+                           {foo: {qux: 1}}, Sycamore::Tree[foo: {qux: 2}] ]) )
+          .to eql Sycamore::Tree[foo: { bar: :baz}]
+      end
+    end
   end
 
   ############################################################################

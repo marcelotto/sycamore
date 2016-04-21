@@ -9,7 +9,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ### Added
 
-- `Tree#add` supports paths as input 
+- `Tree#add` and `Tree#delete` support `Path` objects as input 
 
 ### Fixed
 
