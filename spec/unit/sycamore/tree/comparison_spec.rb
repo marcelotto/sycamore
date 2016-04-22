@@ -519,6 +519,19 @@ describe Sycamore::Tree do
 
   ############################################################################
 
+  describe '#include_node?' do
+    it 'does return true when the given node is a node of this tree' do
+      expect( Sycamore::Tree[1,2,3].include_node?(1) ).to be true
+    end
+
+    it 'does return false when the given node is not a node of this tree' do
+      expect( Sycamore::Tree[].include_node?(1) ).to be false
+      expect( Sycamore::Tree[foo: :bar].include_node?(:bar) ).to be false
+    end
+  end
+
+  ############################################################################
+
   describe '#include_path?' do
     HAS_PATH_EXAMPLES = [
       # Path    , Tree
