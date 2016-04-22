@@ -386,6 +386,10 @@ module Sycamore
     #   Replaces the contents of this tree with a tree structure of nodes.
     #   @param tree_structure [Hash, Tree]
     #
+    # @overload replace(path)
+    #   Replaces the contents of this tree with a path of nodes.
+    #   @param path [Path]
+    #
     # @return +self+ as a proper command method
     #
     # @raise [InvalidNode] when given a nested node set
@@ -431,6 +435,11 @@ module Sycamore
     #   @param path [Array<Object>, Sycamore::Path] a path as a sequence of nodes or a {Path} object
     #   @param tree_structure [Hash, Tree]
     #
+    # @overload []=(*path, another_object)
+    #   Replaces the contents of the child at the given path with another path of nodes.
+    #   @param path [Array<Object>, Sycamore::Path] a path as a sequence of nodes or a {Path} object
+    #   @param path_object [Path]
+    #
     # @return the rvalue as for any Ruby assignment
     #
     # @raise [InvalidNode] when given a nested node set
@@ -448,8 +457,10 @@ module Sycamore
     #   tree.to_h  # => {:foo => :baz, 1 => :baz}
     #   tree[:foo] << :bar
     #   tree.to_h  # => {:foo => [:baz, :bar], 1 => :baz}
+    #   tree[1] = Sycamore::Path[2,3]
+    #   tree.to_h  # => {:foo => [:baz, :bar], 1 => {2 => 3}}
     #   tree[:foo] = Sycamore::Nothing
-    #   tree.to_h  # => {:foo => nil, 1 => :baz}
+    #   tree.to_h  # => {:foo => nil, 1 => {2 => 3}}
     #
     def []=(*args)
       path, nodes_or_tree = args[0..-2], args[-1]

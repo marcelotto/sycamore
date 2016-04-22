@@ -92,6 +92,28 @@ describe Sycamore::Tree do
       end
     end
 
+    context 'when given a single Path object' do
+      it 'does initialize the new tree with the given path' do
+        tree = Sycamore::Tree[Sycamore::Path[:foo, :bar]]
+        expect(tree).to eql Sycamore::Tree[foo: :bar]
+      end
+    end
+
+    context 'when given a multiple Path objects' do
+      it 'does initialize the new tree with the given paths' do
+        tree = Sycamore::Tree[Sycamore::Path[:foo, :bar], Sycamore::Path[1,2,3]]
+        expect(tree).to eql Sycamore::Tree[foo: :bar, 1=>{2=>3}]
+      end
+    end
+
+    context 'when given a mix of objects' do
+      it 'does add the elements appropriately' do
+        expect( Sycamore::Tree[:foo, :bar,
+              Sycamore::Path[:foo, :bar, :baz], {1=>2}, Sycamore::Tree[1=>{2=>3}]] )
+          .to eql Sycamore::Tree[foo: {bar: :baz}, bar: nil, 1 => {2 => 3}]
+      end
+    end
+
   end
 
   describe '#new_child' do

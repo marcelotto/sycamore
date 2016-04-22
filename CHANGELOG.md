@@ -9,7 +9,12 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ### Added
 
-- `Tree#add` and `Tree#delete` support `Path` objects as input 
+- The following `Tree` methods support `Path` objects as input now:
+  - `add` 
+  - `delete`
+  - `replace`
+  - `[]=`
+  - and the `Tree.[]` population constructor
 
 ### Fixed
 

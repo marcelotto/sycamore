@@ -283,7 +283,7 @@ describe Sycamore::Tree do
     end
 
     context 'when given an Enumerable of mixed objects' do
-      it 'does add element appropriately' do
+      it 'does add the elements appropriately' do
         expect( Sycamore::Tree.new.add(
           [ :foo, :bar, Sycamore::Path[:foo, :bar, :baz], {1=>2},
             Sycamore::Tree[1=>{2=>3}]]) )
@@ -300,6 +300,8 @@ describe Sycamore::Tree do
       expect( Sycamore::Tree[:foo].replace([:bar, :baz]).nodes ).to eql %i[bar baz]
       expect( Sycamore::Tree[a: 1].replace(a: 2) ).to     include_tree(a: 2)
       expect( Sycamore::Tree[a: 1].replace(a: 2) ).not_to include_tree(a: 1)
+      expect( Sycamore::Tree[a: 1].replace(Sycamore::Path[:foo, :bar]) )
+          .to eql Sycamore::Tree[foo: :bar]
     end
 
     context 'edge cases' do
@@ -324,6 +326,10 @@ describe Sycamore::Tree do
 
         tree = Sycamore::Tree[a: {b: 2}]
         expect { tree[:a, :b] = [3, 4] }.to change { tree[:a, :b].nodes }.from([2]).to([3,4])
+
+        tree = Sycamore::Tree[a: {b: 2}]
+        expect { tree[:a, :b] = Sycamore::Path[3, 4] }
+          .to change { tree }.to Sycamore::Tree[a: {b: {3=>4}}]
       end
     end
 
