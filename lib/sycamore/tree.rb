@@ -821,14 +821,17 @@ module Sycamore
     ##
     # Checks if a node exists in the {#nodes nodes} set of this tree.
     #
-    # @param node [Object]
+    # @param node [Object, Path]
     # @return [Boolean]
     #
     # @example
     #  Tree[1,2,3].include_node? 3   # => true
     #  Tree[1 => 2].include_node? 2  # => false
+    #  Tree[1 => 2].include_node? Sycamore::Path[1,2]  # => true
     #
     def include_node?(node)
+      return include_path?(node) if node.is_a? Path
+
       @data.include?(node)
     end
 
@@ -968,7 +971,7 @@ module Sycamore
     ##
     # Checks if the given node has no children.
     #
-    # @param node [Object]
+    # @param node [Object, Path]
     # @return [Boolean]
     #
     # @example
@@ -976,9 +979,10 @@ module Sycamore
     #   tree.leaf?(:x)  # => false
     #   tree.leaf?(:y)  # => true
     #   tree.leaf?(:z)  # => true
+    #   tree.leaf?(Sycamore::Path[:x, 1])  # => true
     #
     def leaf?(node)
-      include_node?(node) && child_of(node).empty?
+      include_node?(node) && child_at(node).empty?
     end
 
     ##
@@ -992,9 +996,10 @@ module Sycamore
     #   tree.strict_leaf?(:x)  # => false
     #   tree.strict_leaf?(:y)  # => false
     #   tree.strict_leaf?(:z)  # => true
+    #   tree.strict_leaf?(Sycamore::Path[:x, 1])  # => true
     #
     def strict_leaf?(node)
-      include_node?(node) && child_of(node).absent?
+      include_node?(node) && child_at(node).absent?
     end
 
     alias sleaf? strict_leaf?
@@ -1008,15 +1013,17 @@ module Sycamore
     #
     # @overload strict_leaves?(*nodes)
     #   Checks if all of the given nodes have no children, even not an empty child tree.
-    #   @param nodes [Array<Object>] splat of nodes
+    #   @param nodes [Array<Object, Path>] splat of nodes or Path objects
     #   @return [Boolean]
     #
     # @example
     #   Tree[1,2,3].strict_leaves?  # => true
-    #   tree = Tree[a: :foo, b: :bar, c: []]
+    #   tree = Tree[x: 1, y: [], z: nil]
     #   tree.strict_leaves?          # => false
     #   tree.strict_leaves?(:x, :y)  # => false
     #   tree.strict_leaves?(:y, :z)  # => false
+    #   tree.strict_leaves?(:y, :z)  # => false
+    #   tree.strict_leaves?(:z, Sycamore::Path[:x, 1])  # => true
     #
     def strict_leaves?(*nodes)
       nodes = self.nodes if nodes.empty?
@@ -1035,15 +1042,17 @@ module Sycamore
     #
     # @overload external?(*nodes)
     #   Checks if all of the given nodes have no children.
-    #   @param nodes [Array<Object>] splat of nodes
+    #   @param nodes [Array<Object, Path>] splat of nodes or Path objects
     #   @return [Boolean]
     #
     # @example
     #   Tree[1,2,3].leaves?  # => true
     #   tree = Tree[x: 1, y: [], z: nil]
-    #   tree.leaves?          # => false
-    #   tree.leaves?(:x, :y)  # => false
-    #   tree.leaves?(:y, :z)  # => true
+    #   tree.external?          # => false
+    #   tree.external?(:x, :y)  # => false
+    #   tree.external?(:y, :z)  # => true
+    #   tree.external?(:y, :z)  # => true
+    #   tree.external?(Sycamore::Path[:x, 1], :y)  # => true
     #
     def external?(*nodes)
       nodes = self.nodes if nodes.empty?
@@ -1063,7 +1072,7 @@ module Sycamore
     #
     # @overload internal?(*nodes)
     #   Checks if all of the given nodes have children.
-    #   @param nodes [Array<Object>] splat of nodes
+    #   @param nodes [Array<Object, Path>] splat of nodes or Path objects
     #   @return [Boolean]
     #
     # @example
@@ -1073,6 +1082,8 @@ module Sycamore
     #   tree.internal?(:x, :y)  # => false
     #   tree.internal?(:y, :z)  # => false
     #   tree.internal?(:x)      # => true
+    #   tree.internal?(:x)      # => true
+    #   tree.internal?(Sycamore::Path[:x, 1])  # => false
     #
     # @todo Does it make sense to support the no arguments variant here and with this semantics?
     #   One would expect it to be the negation of #external? without arguments.

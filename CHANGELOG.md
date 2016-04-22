@@ -9,12 +9,18 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ### Added
 
-- The following `Tree` methods support `Path` objects as input now:
+- support `Path` objects as input on the following `Tree` methods:
+  - the `Tree.[]` population constructor
   - `add` 
   - `delete`
   - `replace`
   - `[]=`
-  - and the `Tree.[]` population constructor
+  - `include_node?`
+  - `leaf?`
+  - `strict_leaf?`
+  - `strict_leaves?`
+  - `internal?`
+  - `external?`
 
 ### Fixed
 

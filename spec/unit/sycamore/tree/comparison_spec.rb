@@ -520,13 +520,30 @@ describe Sycamore::Tree do
   ############################################################################
 
   describe '#include_node?' do
-    it 'does return true when the given node is a node of this tree' do
-      expect( Sycamore::Tree[1,2,3].include_node?(1) ).to be true
+    context 'when given a node' do
+      it 'does return true when the given node is a node of this tree' do
+        expect( Sycamore::Tree[1,2,3].include_node?(1) ).to be true
+      end
+
+      it 'does return false when the given node is not a node of this tree' do
+        expect( Sycamore::Tree[].include_node?(1) ).to be false
+        expect( Sycamore::Tree[foo: :bar].include_node?(:bar) ).to be false
+      end
     end
 
-    it 'does return false when the given node is not a node of this tree' do
-      expect( Sycamore::Tree[].include_node?(1) ).to be false
-      expect( Sycamore::Tree[foo: :bar].include_node?(:bar) ).to be false
+    context 'when given a Path object' do
+      it 'does return true when the node at the given path exists in this tree' do
+        expect( Sycamore::Tree[1,2,3].include_node?(Sycamore::Path[1]) ).to be true
+        expect( Sycamore::Tree[foo: {bar: :baz}]
+                  .include_node?(Sycamore::Path[:foo, :bar, :baz]) ).to be true
+      end
+
+      it 'does return false when the node at the given path not exists in this tree' do
+        expect( Sycamore::Tree[]
+                  .include_node?(Sycamore::Path[:foo, :bar, :baz]) ).to be false
+        expect( Sycamore::Tree[foo: {bar: :baz}]
+                  .include_node?(Sycamore::Path[:foo, :bar, :qux]) ).to be false
+      end
     end
   end
 
