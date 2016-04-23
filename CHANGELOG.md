@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 [Keep a CHANGELOG](http://keepachangelog.com).
 
 
-## Unreleased
+## 0.3.0 - 2016-04-23
 
 ### Added
 
@@ -32,7 +32,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 - `Tree#delete` deleted paths, when they matched a given input path partially,
   e.g. `Tree[a: 1] >> a: {1 => 2}` deleted successfully.
 
-[Compare v0.2.1...Unreleased](https://github.com/marcelotto/sycamore/compare/v0.2.1...HEAD)
+[Compare v0.2.1...v0.3.0](https://github.com/marcelotto/sycamore/compare/v0.2.1...v0.3.0)
 
 
 
