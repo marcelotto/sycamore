@@ -4,6 +4,7 @@ gemspec
 
 group :development do
   gem 'guard-rspec'
+  gem 'listen', '< 3.1' # to circumvent the fail for Ruby 2.1 and Rubinius
   gem 'pry'
 end
 
