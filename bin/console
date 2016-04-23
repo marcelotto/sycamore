@@ -1,9 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'bundler/setup'
-require 'sycamore'
+require 'sycamore/extension'
 
 require 'pry'
 Pry.start
-
-include Sycamore
