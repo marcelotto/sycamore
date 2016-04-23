@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 [Keep a CHANGELOG](http://keepachangelog.com).
 
 
-## [Unreleased]
+## Unreleased
 
 ### Added
 
@@ -32,9 +32,11 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 - `Tree#delete` deleted paths, when they matched a given input path partially,
   e.g. `Tree[a: 1] >> a: {1 => 2}` deleted successfully.
 
+[Compare v0.2.1...Unreleased](https://github.com/marcelotto/sycamore/compare/v0.2.1...HEAD)
 
 
-## [0.2.1] - 2016-04-07
+
+## 0.2.1 - 2016-04-07
 
 ### Added
 
@@ -43,11 +45,13 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 ### Fixed
 
-- #2: Rubinius support
+- [#2](https://github.com/marcelotto/sycamore/issues/2): Rubinius support
+
+[Compare v0.2.0...v0.2.1](https://github.com/marcelotto/sycamore/compare/v0.2.0...v0.2.1)
 
 
 
-## [0.2.0] - 2016-04-05
+## 0.2.0 - 2016-04-05
 
 ### Added
 
@@ -56,13 +60,10 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 - `Tree#node!` as a more strict variant of `Tree#node`, which raises an error 
   when no node present
 
+[Compare v0.1.0...v0.2.0](https://github.com/marcelotto/sycamore/compare/v0.1.0...v0.2.0)
+
 
 
 ## 0.1.0 - 2016-03-28
 
 Initial release
-
-
-[Unreleased]: https://github.com/marcelotto/sycamore/compare/v0.2.1...HEAD
-[0.2.1]: https://github.com/marcelotto/sycamore/compare/v0.2.0...v0.2.1
-[0.2.0]: https://github.com/marcelotto/sycamore/compare/v0.1.0...v0.2.0
