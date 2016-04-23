@@ -543,6 +543,8 @@ If you search for multiple nodes, only the paths to child trees containing all o
 tree.search [:b, :c]  # => [#<Sycamore::Path[3]>]
 ```
 
+All `Tree` methods for which it makes sense accept path objects as input instead or in combination with nodes or tree structures. This allows it to apply the search results to any of these methods.
+
 
 ## Getting help
 
