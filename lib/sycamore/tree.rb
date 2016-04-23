@@ -360,16 +360,17 @@ module Sycamore
     end
 
     protected def delete_path(path)
-      return delete_node(path.node) if path.length == 1
+      case path.length
+        when 0 then return self
+        when 1 then return delete_node(path.node)
+      end
 
-      parent = child_at(path.parent)
-      return self if parent.absent?
+      parent = fetch_path(path.parent) { return self }
       parent.delete_node(path.node)
       delete_path(path.parent) if parent.empty? and not path.parent.root?
 
       self
     end
-
 
     ##
     # Replaces the contents of this tree.
@@ -836,17 +837,17 @@ module Sycamore
     #   tree.include_path? Sycamore::Path["c", :foo, :bar]  # => true
     #
     def include_path?(*args)
-      raise ArgumentError, 'wrong number of arguments (given 0, expected 1+)' if args.count == 0
-      first = args.first
-      if first.is_a? Enumerable
-        return include_path?(*first) if args.count == 1
-        raise InvalidNode, "#{first} is not a valid tree node"
+      case args.count
+        when 0 then raise ArgumentError, 'wrong number of arguments (given 0, expected 1+)'
+        when 1 then path = args.first
+               else return include_path?(args)
       end
+      path = [path] unless path.is_a? Enumerable
 
-      if args.count == 1
-        include? first
+      if path.is_a? Path
+        fetch_path(path.parent) { return false }.include? path.node
       else
-        include?(first) and child_of(first).include_path?(args[1..-1])
+        fetch_path(path[0..-2]) { return false }.include? path.last
       end
     end
 
