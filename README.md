@@ -198,6 +198,15 @@ tree.fetch(:z) { :default }  # => :default
 
 Fetching the child of a leaf behaves almost the same as fetching the child of a non-existing node, i.e. the default value is returned or a `KeyError` gets raised. In order to differentiate these cases, a `Sycamore::ChildError` as a subclass of `KeyError` is raised when accessing the child of a leaf.
 
+`fetch_path` allows a `dig` similar access with `fetch` semantics, except it requires the path of nodes to be given as an Enumerable.
+
+```ruby
+tree.fetch_path([:y, 2]).node  # => "a"
+tree.fetch_path([:y, 3])               # => KeyError: key not found: 3
+tree.fetch_path([:y, 3], :default)     # => :default
+tree.fetch_path([:y, 3]) { :default }  # => :default
+```
+
 The number of nodes of a tree can be determined with `size`. This will only count direct nodes.
 
 ```ruby

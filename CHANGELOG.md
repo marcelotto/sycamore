@@ -21,6 +21,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
   - `strict_leaves?`
   - `internal?`
   - `external?`
+- `Tree#fetch_path` for fetching a child by path 
 
 ### Fixed
 

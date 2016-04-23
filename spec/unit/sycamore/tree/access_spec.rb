@@ -351,6 +351,62 @@ describe Sycamore::Tree do
 
   ############################################################################
 
+  describe '#fetch_path' do
+    let(:example_tree) { Sycamore::Tree[foo: {bar: :baz}] }
+
+
+    context 'when given a nodes path as an enumerable of nodes' do
+      it 'does return the child tree of the node at the given given path, when present' do
+        expect( example_tree.fetch_path [:foo]       ).to eql Sycamore::Tree[bar: :baz]
+        expect( example_tree.fetch_path [:foo, :bar] ).to eql Sycamore::Tree[:baz]
+      end
+
+      it 'does behave like fetch, when no child tree at the given path present' do
+        expect { example_tree.fetch_path [:missing, :foo]       }.to raise_error KeyError, 'key not found: :missing'
+        expect { example_tree.fetch_path [:foo, :missing, :baz] }.to raise_error KeyError, 'key not found: :missing'
+        expect { example_tree.fetch_path [:foo, :bar, :missing] }.to raise_error KeyError, 'key not found: :missing'
+        expect { example_tree.fetch_path [:foo, :bar, :baz]     }.to raise_error Sycamore::ChildError, 'node :baz has no child tree'
+
+        expect( example_tree.fetch_path([:missing, :foo      ], :default)    ).to be :default
+        expect( example_tree.fetch_path([:foo, :missing, :baz]) { :default } ).to be :default
+        expect( example_tree.fetch_path([:foo, :bar, :missing], :default)    ).to be :default
+        expect( example_tree.fetch_path([:foo, :bar, :baz]) { :default }     ).to be :default
+      end
+    end
+
+    context 'when given a nodes path as a Sycamore::Path' do
+      it 'does return the child tree of the node at the given given path, when present' do
+        expect( example_tree.fetch_path Sycamore::Path[:foo]       ).to eql Sycamore::Tree[bar: :baz]
+        expect( example_tree.fetch_path Sycamore::Path[:foo, :bar] ).to eql Sycamore::Tree[:baz]
+      end
+
+      it 'does behave like fetch, when no child tree at the given path present' do
+        expect { example_tree.fetch_path Sycamore::Path[:missing, :foo]       }.to raise_error KeyError, 'key not found: :missing'
+        expect { example_tree.fetch_path Sycamore::Path[:foo, :missing, :baz] }.to raise_error KeyError, 'key not found: :missing'
+        expect { example_tree.fetch_path Sycamore::Path[:foo, :bar, :missing] }.to raise_error KeyError, 'key not found: :missing'
+        expect { example_tree.fetch_path Sycamore::Path[:foo, :bar, :baz]     }.to raise_error Sycamore::ChildError, 'node :baz has no child tree'
+
+        expect( example_tree.fetch_path(Sycamore::Path[:missing, :foo      ], :default)    ).to be :default
+        expect( example_tree.fetch_path(Sycamore::Path[:foo, :missing, :baz]) { :default } ).to be :default
+        expect( example_tree.fetch_path(Sycamore::Path[:foo, :bar, :missing], :default)    ).to be :default
+        expect( example_tree.fetch_path(Sycamore::Path[:foo, :bar, :baz]) { :default }     ).to be :default
+      end
+    end
+
+    context 'edge cases' do
+      it 'raises an error, when given no arguments' do
+        expect { example_tree.fetch_path }.to raise_error ArgumentError
+      end
+
+      it 'does return the tree itself, when the given path is empty' do
+        expect( example_tree.fetch_path [] ).to be example_tree
+        expect( example_tree.fetch_path Sycamore::Path[] ).to be example_tree
+      end
+    end
+  end
+
+  ############################################################################
+
   describe '#search' do
     context 'when given a single node' do
       it 'does return an empty array, when the given node is not present in the tree or any of its child trees' do

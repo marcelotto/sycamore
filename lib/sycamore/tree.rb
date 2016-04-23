@@ -46,7 +46,7 @@ module Sycamore
     # the names of all methods, which side-effect-freeze return only a value
     QUERY_METHODS = PREDICATE_METHODS +
       %i[new_child dup hash to_native_object to_h to_s inspect
-         node node! nodes keys child_of child_at dig fetch search
+         node node! nodes keys child_of child_at dig fetch fetch_path search
          size total_size tsize height
          each each_path paths each_node each_key each_pair] << :[]
 
@@ -669,7 +669,7 @@ module Sycamore
     # @example
     #   tree = Tree[x: 1, y: nil]
     #   tree.fetch(:x)               # #<Sycamore::Tree:0x3fc798a63854(1)>
-    #   tree.fetch(:y)               # => raise Sycamore::ChildError, "node y has no child tree"
+    #   tree.fetch(:y)               # => raise Sycamore::ChildError, "node :y has no child tree"
     #   tree.fetch(:z)               # => raise KeyError, "key not found: :z"
     #   tree.fetch(:z, :default)     # => :default
     #   tree.fetch(:y, :default)     # => :default
@@ -685,11 +685,45 @@ module Sycamore
         child = case
           when block_given?    then yield
           when !default.empty? then default.first
-          else raise ChildError, "node #{node} has no child tree"
+          else raise ChildError, "node #{node.inspect} has no child tree"
         end
       end
 
       child
+    end
+
+    ##
+    # The child tree of a node at a path.
+    #
+    # If the node at the given path can’t be found or has no child tree, it
+    # behaves like {#fetch}.
+    #
+    # @param path [Array<Object>, Path]
+    # @param default [Object] optional
+    # @return [Tree, default]
+    #
+    # @raise [InvalidNode] when given an +Enumerable+ as node
+    # @raise [KeyError] when the given +node+ can't be found
+    # @raise [ChildError] when no child for the given +node+ present
+    #
+    # @example
+    #   tree = Tree[foo: {bar: :baz}]
+    #   tree.fetch_path([:foo, :bar]).nodes  # => [:baz]
+    #   tree.fetch_path [:foo, :bar, :baz]   # => raise Sycamore::ChildError, "node :baz has no child tree"
+    #   tree.fetch_path [:foo, :qux]         # => raise KeyError, "key not found: :qux"
+    #   tree.fetch_path([:a, :b], :default)            # => :default
+    #   tree.fetch_path([:a, :b]) { :default }         # => :default
+    #   tree.fetch_path([:foo, :bar, :baz], :default)  # => :default
+    #
+    def fetch_path(path, *default, &block)
+      default_case = block_given? || !default.empty?
+      path.inject(self) do |tree, node|
+        if default_case
+          tree.fetch(node) { return block_given? ? yield : default.first }
+        else
+          tree.fetch(node)
+        end
+      end
     end
 
     ##
