@@ -327,9 +327,9 @@ describe Sycamore::Tree do
       end
 
       it 'does behave like fetch, when no child tree at the given path present' do
-        expect { example_tree.fetch Sycamore::Path[:missing, :foo]       }.to raise_error KeyError, 'key not found: :missing'
-        expect { example_tree.fetch Sycamore::Path[:foo, :missing, :baz] }.to raise_error KeyError, 'key not found: :missing'
-        expect { example_tree.fetch Sycamore::Path[:foo, :bar, :missing] }.to raise_error KeyError, 'key not found: :missing'
+        expect { example_tree.fetch Sycamore::Path[:missing_node, :foo]       }.to raise_error KeyError, /missing_node/
+        expect { example_tree.fetch Sycamore::Path[:foo, :missing_node, :baz] }.to raise_error KeyError, /missing_node/
+        expect { example_tree.fetch Sycamore::Path[:foo, :bar, :missing_node] }.to raise_error KeyError, /missing_node/
         expect { example_tree.fetch Sycamore::Path[:foo, :bar, :baz]     }.to raise_error Sycamore::ChildError, 'node :baz has no child tree'
 
         expect( example_tree.fetch(Sycamore::Path[:missing, :foo      ], :default)    ).to be :default
@@ -381,9 +381,9 @@ describe Sycamore::Tree do
       end
 
       it 'does behave like fetch, when no child tree at the given path present' do
-        expect { example_tree.fetch_path [:missing, :foo]       }.to raise_error KeyError, 'key not found: :missing'
-        expect { example_tree.fetch_path [:foo, :missing, :baz] }.to raise_error KeyError, 'key not found: :missing'
-        expect { example_tree.fetch_path [:foo, :bar, :missing] }.to raise_error KeyError, 'key not found: :missing'
+        expect { example_tree.fetch_path [:missing_node, :foo]       }.to raise_error KeyError, /missing_node/
+        expect { example_tree.fetch_path [:foo, :missing_node, :baz] }.to raise_error KeyError, /missing_node/
+        expect { example_tree.fetch_path [:foo, :bar, :missing_node] }.to raise_error KeyError, /missing_node/
         expect { example_tree.fetch_path [:foo, :bar, :baz]     }.to raise_error Sycamore::ChildError, 'node :baz has no child tree'
 
         expect( example_tree.fetch_path([:missing, :foo      ], :default)    ).to be :default
@@ -400,9 +400,9 @@ describe Sycamore::Tree do
       end
 
       it 'does behave like fetch, when no child tree at the given path present' do
-        expect { example_tree.fetch_path Sycamore::Path[:missing, :foo]       }.to raise_error KeyError, 'key not found: :missing'
-        expect { example_tree.fetch_path Sycamore::Path[:foo, :missing, :baz] }.to raise_error KeyError, 'key not found: :missing'
-        expect { example_tree.fetch_path Sycamore::Path[:foo, :bar, :missing] }.to raise_error KeyError, 'key not found: :missing'
+        expect { example_tree.fetch_path Sycamore::Path[:missing_node, :foo]       }.to raise_error KeyError, /missing_node/
+        expect { example_tree.fetch_path Sycamore::Path[:foo, :missing_node, :baz] }.to raise_error KeyError, /missing_node/
+        expect { example_tree.fetch_path Sycamore::Path[:foo, :bar, :missing_node] }.to raise_error KeyError, /missing_node/
         expect { example_tree.fetch_path Sycamore::Path[:foo, :bar, :baz]     }.to raise_error Sycamore::ChildError, 'node :baz has no child tree'
 
         expect( example_tree.fetch_path(Sycamore::Path[:missing, :foo      ], :default)    ).to be :default
