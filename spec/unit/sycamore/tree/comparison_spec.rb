@@ -634,10 +634,6 @@ describe Sycamore::Tree do
       it 'raises an error, when given multiple collections' do
         expect { Sycamore::Tree.new.path?([1,2], [3,4]) }.to raise_error Sycamore::InvalidNode
       end
-
-      it 'raises an error, when given multiple paths' do
-        expect { Sycamore::Tree.new.path?(Sycamore::Path[1,2], Sycamore::Path[3,4]) }.to raise_error Sycamore::InvalidNode
-      end
     end
   end
 

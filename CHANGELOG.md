@@ -11,6 +11,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 - support `Path` objects as input on the following `Tree` methods:
   - the `Tree.[]` population constructor
+  - `fetch`
   - `add` 
   - `delete`
   - `replace`

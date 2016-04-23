@@ -659,7 +659,7 @@ module Sycamore
     # - if +default+ is given, then that will be returned;
     # - if the optional code block is specified, then that will be run and its result returned.
     #
-    # @param node [Object]
+    # @param node [Object, Path]
     # @param default [Object] optional
     # @return [Tree, default]
     #
@@ -668,17 +668,20 @@ module Sycamore
     # @raise [ChildError] when no child for the given +node+ present
     #
     # @example
-    #   tree = Tree[x: 1, y: nil]
+    #   tree = Tree[x: 1, y: nil, foo: {bar: :baz}]
     #   tree.fetch(:x)               # #<Sycamore::Tree:0x3fc798a63854(1)>
     #   tree.fetch(:y)               # => raise Sycamore::ChildError, "node :y has no child tree"
     #   tree.fetch(:z)               # => raise KeyError, "key not found: :z"
     #   tree.fetch(:z, :default)     # => :default
     #   tree.fetch(:y, :default)     # => :default
     #   tree.fetch(:z) { :default }  # => :default
+    #   tree.fetch(Sycamore::Path[:foo, :bar]).nodes          # => [:baz]
+    #   tree.fetch(Sycamore::Path[:foo, :missing], :default)  # => :default
     #
     # @todo Should we differentiate the case of a leaf and a not present node? How?
     #
     def fetch(node, *default, &block)
+      return fetch_path(node, *default, &block) if node.is_a? Path
       valid_node! node
 
       child = @data.fetch(node, *default, &block)

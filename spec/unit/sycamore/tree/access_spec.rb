@@ -320,6 +320,25 @@ describe Sycamore::Tree do
       end
     end
 
+    context 'when given a path object' do
+      it 'does return the child tree of the node at the given given path, when present' do
+        expect( example_tree.fetch Sycamore::Path[:foo]       ).to eql Sycamore::Tree[bar: :baz]
+        expect( example_tree.fetch Sycamore::Path[:foo, :bar] ).to eql Sycamore::Tree[:baz]
+      end
+
+      it 'does behave like fetch, when no child tree at the given path present' do
+        expect { example_tree.fetch Sycamore::Path[:missing, :foo]       }.to raise_error KeyError, 'key not found: :missing'
+        expect { example_tree.fetch Sycamore::Path[:foo, :missing, :baz] }.to raise_error KeyError, 'key not found: :missing'
+        expect { example_tree.fetch Sycamore::Path[:foo, :bar, :missing] }.to raise_error KeyError, 'key not found: :missing'
+        expect { example_tree.fetch Sycamore::Path[:foo, :bar, :baz]     }.to raise_error Sycamore::ChildError, 'node :baz has no child tree'
+
+        expect( example_tree.fetch(Sycamore::Path[:missing, :foo      ], :default)    ).to be :default
+        expect( example_tree.fetch(Sycamore::Path[:foo, :missing, :baz]) { :default } ).to be :default
+        expect( example_tree.fetch(Sycamore::Path[:foo, :bar, :missing], :default)    ).to be :default
+        expect( example_tree.fetch(Sycamore::Path[:foo, :bar, :baz]) { :default }     ).to be :default
+      end
+    end
+
     context 'edge cases' do
       it 'does treat nil like any other value' do
         expect { Sycamore::Tree.new.fetch(nil) }.to raise_error KeyError
