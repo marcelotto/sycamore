@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/) and
 [Keep a CHANGELOG](http://keepachangelog.com).
 
+## Unreleased
+
+### Added
+
+- array-access operator and `fetch` on `Path` for random access
+
+[Compare v0.3.0...Unreleased](https://github.com/marcelotto/sycamore/compare/v0.3.0...HEAD)
+
 
 ## 0.3.0 - 2016-04-23
 

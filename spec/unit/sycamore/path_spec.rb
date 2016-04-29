@@ -167,6 +167,32 @@ describe Sycamore::Path do
 
   ############################################################################
 
+  describe '#[]' do
+    it 'does return the node at the given index position if present' do
+      expect( example_path[0] ).to be :foo
+      expect( example_path[1] ).to be :bar
+    end
+
+    it 'does return nil if the given index is out of range' do
+      expect( example_path[2] ).to be_nil
+    end
+  end
+
+  ############################################################################
+
+  describe '#fetch' do
+    it 'does return the node at the given index position if present' do
+      expect( example_path.fetch(0) ).to be :foo
+      expect( example_path.fetch(1) ).to be :bar
+    end
+
+    it 'does raise an error if the given index is out of range' do
+      expect { example_path.fetch(2) }.to raise_error IndexError
+    end
+  end
+
+  ############################################################################
+
   describe '#root?' do
     specify { expect( example_path.root? ).to be false }
   end

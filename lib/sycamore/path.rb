@@ -1,3 +1,5 @@
+require 'forwardable'
+
 module Sycamore
 
   ##
@@ -21,6 +23,7 @@ module Sycamore
   #
   class Path
     include Enumerable
+    extend Forwardable
 
     attr_reader :node, :parent
 
@@ -74,6 +77,8 @@ module Sycamore
     ########################################################################
     # @group Elements
     ########################################################################
+
+    def_delegators :to_a, :[], :fetch
 
     ##
     # Returns a new path based on this path, but with the given nodes extended.
