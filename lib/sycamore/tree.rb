@@ -65,7 +65,14 @@ module Sycamore
     # Creates a new empty Tree.
     #
     def initialize
-      @data = Hash.new
+    end
+
+    protected def data
+      @data ||= Hash.new
+    end
+
+    protected def clear_data
+      @data = nil
     end
 
     ##
@@ -218,7 +225,7 @@ module Sycamore
     alias << add
 
     protected def add_node(node)
-      @data[node] ||= Nothing
+      data[node] ||= Nothing
 
       self
     end
@@ -227,7 +234,7 @@ module Sycamore
     # @api private
     #
     def clear_child_of_node(node)
-      @data[valid_node! node] = Nothing
+      data[valid_node! node] = Nothing
 
       self
     end
@@ -238,8 +245,8 @@ module Sycamore
     def add_node_with_empty_child(node)
       valid_node! node
 
-      if @data.fetch(node, Nothing).nothing?
-        @data[node] = new_child(node)
+      if data.fetch(node, Nothing).nothing?
+        data[node] = new_child(node)
       end
 
       self
@@ -249,7 +256,7 @@ module Sycamore
       return add_node(node) if Nothing.like?(children)
 
       add_node_with_empty_child(node)
-      @data[node] << children
+      data[node] << children
 
       self
     end
@@ -329,7 +336,7 @@ module Sycamore
     alias >> delete
 
     protected def delete_node(node)
-      @data.delete(node)
+      data.delete(node)
 
       self
     end
@@ -491,7 +498,7 @@ module Sycamore
     #   tree.size  # => 0
     #
     def clear
-      @data.clear
+      data.clear
 
       self
     end
@@ -509,7 +516,7 @@ module Sycamore
     #   tree.to_h  # => {foo: :bar}
     #
     def compact
-      @data.each do |node, child| case
+      data.each do |node, child| case
           when child.nothing? then next
           when child.empty?   then clear_child_of_node(node)
           else child.compact
@@ -535,7 +542,7 @@ module Sycamore
     #   tree[:foo].nodes  # => [:bar, :baz]
     #
     def nodes
-      @data.keys
+      data.keys
     end
 
     alias keys nodes  # Hash compatibility
@@ -605,7 +612,7 @@ module Sycamore
     def child_of(node)
       valid_node! node
 
-      Nothing.like?(child = @data[node]) ? Absence.at(self, node) : child
+      Nothing.like?(child = data[node]) ? Absence.at(self, node) : child
     end
 
     ##
@@ -684,7 +691,7 @@ module Sycamore
       return fetch_path(node, *default, &block) if node.is_a? Path
       valid_node! node
 
-      child = @data.fetch(node, *default, &block)
+      child = data.fetch(node, *default, &block)
       if child.equal? Nothing
         child = case
           when block_given?    then yield
@@ -754,7 +761,7 @@ module Sycamore
     def each_node(&block)
       return enum_for(__callee__) unless block_given?
 
-      @data.each_key(&block)
+      data.each_key(&block)
 
       self
     end
@@ -783,7 +790,7 @@ module Sycamore
     def each_pair(&block)
       return enum_for(__callee__) unless block_given?
 
-      @data.each_pair(&block)
+      data.each_pair(&block)
 
       self
     end
@@ -870,7 +877,7 @@ module Sycamore
     def include_node?(node)
       return include_path?(node) if node.is_a? Path
 
-      @data.include?(node)
+      data.include?(node)
     end
 
     alias member?  include_node?  # Hash compatibility
@@ -954,7 +961,7 @@ module Sycamore
     #   tree["e"].size  # => 2
     #
     def size
-      @data.size
+      data.size
     end
 
     ##
@@ -971,7 +978,7 @@ module Sycamore
     #
     def total_size
       total = size
-      @data.each { |_, child| total += child.total_size }
+      data.each { |_, child| total += child.total_size }
       total
     end
 
@@ -1001,7 +1008,7 @@ module Sycamore
     #   Tree[a: 1].empty?  # => false
     #
     def empty?
-      @data.empty?
+      data.empty?
     end
 
     alias blank? empty?
@@ -1146,7 +1153,7 @@ module Sycamore
     # @return [Fixnum]
     #
     def hash
-      @data.hash ^ self.class.hash
+      data.hash ^ self.class.hash
     end
 
     ##
@@ -1165,7 +1172,7 @@ module Sycamore
     #   tree1.eql? tree4  # => false
     #
     def eql?(other)
-      (other.instance_of?(self.class) and @data.eql?(other.data)) or
+      (other.instance_of?(self.class) and data.eql?(other.data)) or
         (other.instance_of?(Absence) and other.eql?(self))
     end
 
@@ -1339,7 +1346,7 @@ module Sycamore
       # not the nicest, but fastest way to inject on hashes, as noted here:
       # http://stackoverflow.com/questions/3230863/ruby-rails-inject-on-hashes-good-style
       hash = {}
-      @data.each do |node, child|
+      data.each do |node, child|
         hash[node] = child.to_native_object(*args)
       end
 
@@ -1444,7 +1451,7 @@ module Sycamore
     #
     def initialize_clone(other)
       super
-      @data = Hash.new
+      clear_data
       add other
     end
 
@@ -1454,7 +1461,7 @@ module Sycamore
     # @see http://ruby-doc.org/core/Object.html#method-i-freeze
     #
     def freeze
-      @data.freeze
+      data.freeze
       each { |_, child| child.freeze }
       super
     end

@@ -10,6 +10,11 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 - array-access operator and `fetch` on `Path` for random access
 
+### Changed
+
+- Lazy initialization of the internal hash. This improves extensibility, eg. by  
+  not requiring a `super` call in the constructors of `Tree` subclasses.
+
 [Compare v0.3.0...Unreleased](https://github.com/marcelotto/sycamore/compare/v0.3.0...HEAD)
 
 
