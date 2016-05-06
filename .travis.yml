@@ -1,8 +1,9 @@
 language: ruby
+bundler_args: --without development
 rvm:
   - 2.2.4
   - 2.3.1
-  - jruby-9.0.4.0
+  - jruby-9.0.5.0
   - rbx
 cache: bundler
 before_install:
