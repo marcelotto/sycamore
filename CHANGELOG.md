@@ -4,7 +4,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/) and
 [Keep a CHANGELOG](http://keepachangelog.com).
 
-## Unreleased
+
+## 0.3.1 - 2016-05-07
 
 ### Added
 
@@ -15,7 +16,9 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 - Lazy initialization of the internal hash. This improves extensibility, eg. by  
   not requiring a `super` call in the constructors of `Tree` subclasses.
 
-[Compare v0.3.0...Unreleased](https://github.com/marcelotto/sycamore/compare/v0.3.0...HEAD)
+
+[Compare v0.3.0...v0.3.1](https://github.com/marcelotto/sycamore/compare/v0.3.0...v0.3.1)
+
 
 
 ## 0.3.0 - 2016-04-23
@@ -45,6 +48,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 - `Tree#delete` deleted paths, when they matched a given input path partially,
   e.g. `Tree[a: 1] >> a: {1 => 2}` deleted successfully.
 
+
 [Compare v0.2.1...v0.3.0](https://github.com/marcelotto/sycamore/compare/v0.2.1...v0.3.0)
 
 
@@ -60,6 +64,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 
 - [#2](https://github.com/marcelotto/sycamore/issues/2): Rubinius support
 
+
 [Compare v0.2.0...v0.2.1](https://github.com/marcelotto/sycamore/compare/v0.2.0...v0.2.1)
 
 
@@ -72,6 +77,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and
 - `Tree#search` for searching the tree for one or multiple nodes or a tree
 - `Tree#node!` as a more strict variant of `Tree#node`, which raises an error 
   when no node present
+
 
 [Compare v0.1.0...v0.2.0](https://github.com/marcelotto/sycamore/compare/v0.1.0...v0.2.0)
 
