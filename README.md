@@ -568,4 +568,4 @@ see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ## License and Copyright
 
-(c) 2015-2016 Marcel Otto. MIT Licensed, see [LICENSE](LICENSE.TXT) for details.
+(c) 2015-2016 Marcel Otto. MIT Licensed, see [LICENSE](LICENSE.txt) for details.
