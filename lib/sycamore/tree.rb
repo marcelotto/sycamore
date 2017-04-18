@@ -48,7 +48,7 @@ module Sycamore
       %i[new_child dup hash to_native_object to_h to_s inspect
          node node! nodes keys child_of child_at dig fetch fetch_path search
          size total_size tsize height
-         each each_path paths each_node each_key each_pair] << :[]
+         each each_path paths each_node each_key each_pair search] << :[]
 
     %i[COMMAND_METHODS QUERY_METHODS PREDICATE_METHODS
        ADDITIVE_COMMAND_METHODS DESTRUCTIVE_COMMAND_METHODS
@@ -1141,6 +1141,25 @@ module Sycamore
     end
 
     alias nested? internal?
+
+    ##
+    # Search all nodes for a given string.
+    # Returns array of paths for nodes containing the string.
+    #
+    # @example
+    #   tree = Tree.new
+    #   tree[:name, "Dewayne"] << {skill: "Ruby"}
+    #   tree[:name, "Dewayne"] << {skill: "Ada"}
+    #   tree[:name, "Marcel"] << {skill: "Ruby"}
+    #   tree[:name, "Marcel"] << {author_of: "sycamore"}
+    #   tree.search("Ruby") 
+    #     #=> [#<Sycamore::Path[:name,"Dewayne",:skill,"Ruby"]>, 
+    #          #<Sycamore::Path[:name,"Marcel",:skill,"Ruby"]>]
+    #
+    #
+    def search(a_string)
+      self.each_path.select{|a_path| a_path.join('/').downcase.include?(a_string.downcase)}
+    end
 
 
     ########################################################################
