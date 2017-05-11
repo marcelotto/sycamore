@@ -4,10 +4,12 @@ rvm:
   - 2.2.4
   - 2.3.1
   - 2.4.1
-  - jruby-9.0.5.0
-  - rbx
+  - ruby-head
+  - jruby-head
+  - rbx-3
 cache: bundler
 before_install:
   - gem update bundler
 before_script:
   - support/travis.sh
+dist: trusty
