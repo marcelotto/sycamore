@@ -25,5 +25,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake', '~> 11.0'
   spec.add_development_dependency 'rspec', '~> 3.4'
   spec.add_development_dependency 'yard', '~> 0.8'
-  spec.add_development_dependency 'yard-doctest'
+  spec.add_development_dependency 'yard-doctest', '0.1.7'
 end
