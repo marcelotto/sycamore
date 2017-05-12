@@ -270,10 +270,10 @@ module Sycamore
     private def add_path(path)
       return self if path.root?
 
-      path.parent.inject(self) { |tree, node| # using a {} block to circumvent this Rubinius issue: https://github.com/rubinius/rubinius-code/issues/7
+      path.parent.inject(self) do |tree, node|
         tree.add_node_with_empty_child(node)
         tree[node]
-      }.add_node path.node
+      end.add_node path.node
 
       self
     end
@@ -342,7 +342,7 @@ module Sycamore
     end
 
     protected def delete_tree(tree)
-      tree.each { |node_to_delete, child_to_delete| # using a {} block to circumvent this Rubinius issue: https://github.com/rubinius/rubinius-code/issues/7
+      tree.each do |node_to_delete, child_to_delete|
         next unless include? node_to_delete
         if Nothing.like?(child_to_delete) or
             (child_to_delete.respond_to?(:empty?) and child_to_delete.empty?)
@@ -361,7 +361,7 @@ module Sycamore
             delete_node(node_to_delete) if child.empty?
           end
         end
-      }
+      end
 
       self
     end
@@ -1379,11 +1379,11 @@ module Sycamore
     # @api private
     #
     private def valid_tree!(tree)
-      tree.each { |node, child| # using a {} block to circumvent this Rubinius issue: https://github.com/rubinius/rubinius-code/issues/7
+      tree.each do |node, child|
         next if child.nil?
         valid_node!(node)
         valid_tree!(child) if Tree.like?(child)
-      }
+      end
 
       tree
     end
