@@ -28,4 +28,9 @@ rescue LoadError
   puts "Couldn't find yard-doctest"
 end
 
-task :default => [:spec, 'yard:doctest']
+task :default =>
+  if defined?(RUBY_ENGINE) && RUBY_ENGINE == 'jruby'
+    [:spec]
+  else
+    [:spec, 'yard:doctest']
+  end
